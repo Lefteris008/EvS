@@ -5,6 +5,7 @@
  */
 package testtwitterlefteris;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import twitter4j.GeoLocation;
 import twitter4j.Query;
@@ -21,13 +22,14 @@ import twitter4j.conf.ConfigurationBuilder;
  */
 public class TestTwitterLefteris {
 
-    void setup() {
+    void setup() throws IOException {
 
         ConfigurationBuilder cb = new ConfigurationBuilder();
-        cb.setOAuthConsumerKey(Config.getConsumerKey());
-        cb.setOAuthConsumerSecret(Config.getConsumerSecret());
-        cb.setOAuthAccessToken(Config.getAccessToken());
-        cb.setOAuthAccessTokenSecret(Config.getAccessTokenSecret());
+        Config conf = new Config();
+        cb.setOAuthConsumerKey(conf.getConsumerKey());
+        cb.setOAuthConsumerSecret(conf.getConsumerSecret());
+        cb.setOAuthAccessToken(conf.getAccessToken());
+        cb.setOAuthAccessTokenSecret(conf.getAccessTokenSecret());
 
         Twitter twitter = new TwitterFactory(cb.build()).getInstance();
         Query query = new Query("#peace");
@@ -74,7 +76,7 @@ public class TestTwitterLefteris {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // TODO code application logic here
         new TestTwitterLefteris().setup();
     }
