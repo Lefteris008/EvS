@@ -102,6 +102,12 @@ public class TweetsRetriever {
         }
     }
     
+    /**
+     * Method that handles the Twitter streaming API
+     * @param tweetBoundary The number of tweets retrieved until the process is terminated
+     * @return A list containing the retrieved tweets, along with their other data (user, location etc)
+     * @throws InterruptedException 
+     */
     public List<Status> retrieveTweetsWithStreamingAPI(int tweetBoundary) throws InterruptedException {
         
         List<Status> statuses = new ArrayList<>();
@@ -110,7 +116,6 @@ public class TweetsRetriever {
         ConfigurationBuilder cb = getAuthorization();  
         
         TwitterStream twitterStream = new TwitterStreamFactory(cb.build()).getInstance();
-        //twitterStream.
         StatusListener listener = new StatusListener() {
         
             @Override
@@ -120,7 +125,7 @@ public class TweetsRetriever {
                     synchronized (lock) {
                         lock.notify();
                     }
-                    System.out.println("\nStreamer exceeded boundary (" + tweetBoundary + "), terminating thread...\n");
+                    System.out.println("\nStreaming exceeded boundary (" + tweetBoundary + "), terminating thread...\n");
                 }
             }
 
@@ -177,7 +182,7 @@ public class TweetsRetriever {
      */
     public static void main(String[] args) throws IOException, InterruptedException {
         // TODO code application logic here
-        //new TweetsRetriever().retrieveTweetsWithQuery();
+        //new TestTwitterLefteris().retrieveTweetsWithQuery();
         List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(10);
         
         statuses.stream().forEach((status) -> {
