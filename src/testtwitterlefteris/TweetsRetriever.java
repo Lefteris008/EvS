@@ -27,7 +27,7 @@ import twitter4j.conf.ConfigurationBuilder;
  * 
  * @author Lefteris Paraskevas
  */
-public class TestTwitterLefteris {
+public class TweetsRetriever {
 
     /**
      * Method to get authorization from Twitter API
@@ -177,8 +177,8 @@ public class TestTwitterLefteris {
      */
     public static void main(String[] args) throws IOException, InterruptedException {
         // TODO code application logic here
-        //new TestTwitterLefteris().retrieveTweetsWithQuery();
-        List<Status> statuses = new TestTwitterLefteris().retrieveTweetsWithStreamingAPI(10);
+        //new TweetsRetriever().retrieveTweetsWithQuery();
+        List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(10);
         
         statuses.stream().forEach((status) -> {
             System.out.println( "@" + status.getUser().getName() + " : " + status.getText() +
