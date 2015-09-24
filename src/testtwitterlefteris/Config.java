@@ -1,19 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package testtwitterlefteris;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.Properties;
 
 /**
  *
- * @author Lefteris
+ * @author  Lefteris Paraskevas
+ * @version 2015.09.24_1751_wave1
  */
 public class Config {
     private static String consumerKey;
@@ -51,18 +46,34 @@ public class Config {
         }
     }
     
+    /**
+     * Returns the Consumer Key to the application
+     * @return A string consisting of 25 characters 
+     */
     public String getConsumerKey() {
         return consumerKey;
     }
     
+    /**
+     * Returns the Consumer Secret Key to the application
+     * @return A string consisting of 50 characters
+     */
     public String getConsumerSecret() {
         return consumerSecret;
     }
     
+    /**
+     * Returns the Access Token to the application
+     * @return A string consisting of 50 characters
+     */
     public String getAccessToken() {
         return accessToken;
     }
     
+    /**
+     * Returns the Secret Access Token to the application
+     * @return A string consisting of 45 characters
+     */
     public String getAccessTokenSecret() {
         return accessTokenSecret;
     }
