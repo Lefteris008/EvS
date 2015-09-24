@@ -22,7 +22,7 @@ import twitter4j.conf.ConfigurationBuilder;
  */
 public class TestTwitterLefteris {
 
-    void setup() throws IOException {
+    void retrieveTweetsWithQuery() throws IOException {
 
         ConfigurationBuilder cb = new ConfigurationBuilder();
         Config conf = new Config();
@@ -63,7 +63,6 @@ public class TestTwitterLefteris {
 
             String user = t.getUser().getScreenName();
             String msg = t.getText();
-            String time = "";
             if (loc!=null) {
                 Double lat = t.getGeoLocation().getLatitude();
                 Double lon = t.getGeoLocation().getLongitude();
@@ -75,10 +74,11 @@ public class TestTwitterLefteris {
     
     /**
      * @param args the command line arguments
+     * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException {
         // TODO code application logic here
-        new TestTwitterLefteris().setup();
+        new TestTwitterLefteris().retrieveTweetsWithQuery();
     }
     
 }
