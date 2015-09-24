@@ -120,7 +120,7 @@ public class TestTwitterLefteris {
                     synchronized (lock) {
                         lock.notify();
                     }
-                    System.out.println("\nStreaming exceeded boundary (" + tweetBoundary + "), terminating thread...\n");
+                    System.out.println("\nStreamer exceeded boundary (" + tweetBoundary + "), terminating thread...\n");
                 }
             }
 
