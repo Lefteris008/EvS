@@ -21,7 +21,7 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version %Id%
+ * @version "$Id$"
  */
 public class TweetsRetriever {
 
