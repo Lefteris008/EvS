@@ -1,8 +1,10 @@
 package preprocessingmodule;
 
+import com.sun.media.sound.DLSModulator;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import twitter4j.FilterQuery;
 import twitter4j.GeoLocation;
 import twitter4j.Query;
@@ -102,63 +104,66 @@ public class TweetsRetriever {
     /**
      * Method that handles the Twitter streaming API
      * @param terminationTime Time in milliseconds for which the thread will continue to be executed
-     * @param startTime Time in milliseconds that the thread started executing
+     * @param keywords The keywords for which the streamer searches for tweets
      * @return A list containing the retrieved tweets, along with their other data (user, location etc)
      * @throws InterruptedException 
      */
-    public List<Status> retrieveTweetsWithStreamingAPI(long terminationTime, long startTime) throws InterruptedException {
+    public final List<Status> retrieveTweetsWithStreamingAPI(long terminationTime, String[] keywords) throws InterruptedException {
         
         List<Status> statuses = new ArrayList<>();
         
         final Object lock = new Object();
+        
         ConfigurationBuilder cb = getAuthorization();  
         
         TwitterStream twitterStream = new TwitterStreamFactory(cb.build()).getInstance();
-        StatusListener listener = new StatusListener() {
         
+        final StatusListener listener;
+        listener = new StatusListener() {
+            
             @Override
-            public void onStatus(Status status) {
+            public final void onStatus(Status status) {
                 statuses.add(status);
-                if(startTime + terminationTime <= System.currentTimeMillis()) {
+                
+                //If the stream execution exceeds the terminationTime
+                //it is shut down and the retrieved tweets are returned
+                if(terminationTime <= System.currentTimeMillis()) {
                     synchronized (lock) {
                         lock.notify();
                     }
-                    System.out.println("\nStreaming exceeded time boundary (" + terminationTime + "), terminating thread...\n");
+                    System.out.println("\nStreaming exceeded time boundary, terminating thread...\n");
                 }
             }
 
             @Override
-            public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
+            public final void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
                 System.out.println("Got a status deletion notice id:" + statusDeletionNotice.getStatusId());
             }
 
             @Override
-            public void onTrackLimitationNotice(int numberOfLimitedStatuses) {
+            public final void onTrackLimitationNotice(int numberOfLimitedStatuses) {
                 System.out.println("Got track limitation notice:" + numberOfLimitedStatuses);
             }
 
             @Override
-            public void onScrubGeo(long userId, long upToStatusId) {
+            public final void onScrubGeo(long userId, long upToStatusId) {
                 System.out.println("Got scrub_geo event userId:" + userId + " upToStatusId:" + upToStatusId);
             }
 
             @Override
-            public void onStallWarning(StallWarning warning) {
+            public final void onStallWarning(StallWarning warning) {
                 System.out.println("Got stall warning:" + warning);
             }
             
             @Override
-            public void onException(Exception ex) {
+            public final void onException(Exception ex) {
                 ex.printStackTrace(System.out);
             }
         };
         
         FilterQuery fq = new FilterQuery();
-        String keywords[] = {"Germany"};
-
-        
         fq.track(keywords);
-        
+                
         twitterStream.addListener(listener);
         twitterStream.filter(fq);
         
@@ -166,10 +171,8 @@ public class TweetsRetriever {
             synchronized (lock) {
                 lock.wait();
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         } finally {
-            twitterStream.shutdown();
+            twitterStream.cleanUp();
         }
         return statuses;
     }
@@ -182,12 +185,20 @@ public class TweetsRetriever {
     public static void main(String[] args) throws IOException, InterruptedException {
         
         long startTime = System.currentTimeMillis();
-        List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(100, startTime);
+        long terminationTime = startTime + 6000; //Milliseconds
+        String[] keywords = {"#Germany", "#VW", "#love", "#peace", "#iPhone6s", "Microsoft"};
         
-        statuses.stream().forEach((status) -> {
-            System.out.println( "@" + status.getUser().getName() + " : " + status.getText() +
-                    " Date : " + status.getCreatedAt() + " Location : " + status.getGeoLocation());
-        });
+        List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(terminationTime, keywords);
+        
+        System.out.println("Retrieved " + statuses.size() + " tweets\n");
+        System.out.println("Should I print them?");
+        Scanner keyboard = new Scanner(System.in);
+        if(keyboard.nextInt() == 1) {
+            statuses.stream().forEach((status) -> {
+                System.out.println( "@" + status.getUser().getName() + " : " + status.getText() +
+                        " Date : " + status.getCreatedAt() + " Location : " + status.getGeoLocation());
+            });
+        }
     }
     
 }
