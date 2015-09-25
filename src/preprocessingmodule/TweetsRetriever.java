@@ -1,6 +1,5 @@
 package preprocessingmodule;
 
-import com.sun.media.sound.DLSModulator;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +22,12 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.09.25_1415_wave1
+ * @version 2015.09.25_1919_wave1
  */
 public class TweetsRetriever {
 
+    private final static int MAXIMUM_TWEETS = 100; //Maximum tweets retrieved until the thread will be terminated
+    
     /**
      * Method to get authorization from Twitter API
      * @return A ConfigurationBuilder object
@@ -103,12 +104,11 @@ public class TweetsRetriever {
     
     /**
      * Method that handles the Twitter streaming API
-     * @param terminationTime Time in milliseconds for which the thread will continue to be executed
      * @param keywords The keywords for which the streamer searches for tweets
      * @return A list containing the retrieved tweets, along with their other data (user, location etc)
      * @throws InterruptedException 
      */
-    public final List<Status> retrieveTweetsWithStreamingAPI(long terminationTime, String[] keywords) throws InterruptedException {
+    public final List<Status> retrieveTweetsWithStreamingAPI(String[] keywords) throws InterruptedException {
         
         List<Status> statuses = new ArrayList<>();
         
@@ -125,9 +125,9 @@ public class TweetsRetriever {
             public final void onStatus(Status status) {
                 statuses.add(status);
                 
-                //If the stream execution exceeds the terminationTime
+                //If the stream execution exceeds the tweets boundary
                 //it is shut down and the retrieved tweets are returned
-                if(terminationTime <= System.currentTimeMillis()) {
+                if(statuses.size() >= MAXIMUM_TWEETS) {
                     synchronized (lock) {
                         lock.notify();
                     }
@@ -184,13 +184,14 @@ public class TweetsRetriever {
      */
     public static void main(String[] args) throws IOException, InterruptedException {
         
-        long startTime = System.currentTimeMillis();
-        long terminationTime = startTime + 6000; //Milliseconds
         String[] keywords = {"#Germany", "#VW", "#love", "#peace", "#iPhone6s", "Microsoft"};
         
-        List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(terminationTime, keywords);
+        long startTime = System.currentTimeMillis();
+        List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords);
+        long stopTime = System.currentTimeMillis();
         
-        System.out.println("Retrieved " + statuses.size() + " tweets\n");
+        System.out.println("Streamer run for " + (stopTime - startTime)/1000 + " seconds");
+        System.out.println("Retrieved " + MAXIMUM_TWEETS + " tweets\n");
         System.out.println("Should I print them?");
         Scanner keyboard = new Scanner(System.in);
         if(keyboard.nextInt() == 1) {
