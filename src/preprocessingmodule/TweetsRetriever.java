@@ -48,9 +48,9 @@ public class TweetsRetriever {
     }
     
     /**
+     * @deprecated
      * Simple method to retrieve tweets by querying the API
      * @throws IOException 
-     * @deprecated Since wave1
      */
     void retrieveTweetsWithQuery() throws IOException {
 
@@ -101,11 +101,12 @@ public class TweetsRetriever {
     
     /**
      * Method that handles the Twitter streaming API
-     * @param tweetBoundary The number of tweets retrieved until the process is terminated
+     * @param terminationTime Time in milliseconds for which the thread will continue to be executed
+     * @param startTime Time in milliseconds that the thread started executing
      * @return A list containing the retrieved tweets, along with their other data (user, location etc)
      * @throws InterruptedException 
      */
-    public List<Status> retrieveTweetsWithStreamingAPI(int tweetBoundary) throws InterruptedException {
+    public List<Status> retrieveTweetsWithStreamingAPI(long terminationTime, long startTime) throws InterruptedException {
         
         List<Status> statuses = new ArrayList<>();
         
@@ -118,11 +119,11 @@ public class TweetsRetriever {
             @Override
             public void onStatus(Status status) {
                 statuses.add(status);
-                if(tweetBoundary == statuses.size()) {
+                if(startTime + terminationTime <= System.currentTimeMillis()) {
                     synchronized (lock) {
                         lock.notify();
                     }
-                    System.out.println("\nStreaming exceeded boundary (" + tweetBoundary + "), terminating thread...\n");
+                    System.out.println("\nStreaming exceeded time boundary (" + terminationTime + "), terminating thread...\n");
                 }
             }
 
@@ -166,10 +167,10 @@ public class TweetsRetriever {
                 lock.wait();
             }
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
+        } finally {
+            twitterStream.shutdown();
         }
-        twitterStream.shutdown();
         return statuses;
     }
     
@@ -179,9 +180,9 @@ public class TweetsRetriever {
      * @throws java.lang.InterruptedException
      */
     public static void main(String[] args) throws IOException, InterruptedException {
-        // TODO code application logic here
-        //new TestTwitterLefteris().retrieveTweetsWithQuery();
-        List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(10);
+        
+        long startTime = System.currentTimeMillis();
+        List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(100, startTime);
         
         statuses.stream().forEach((status) -> {
             System.out.println( "@" + status.getUser().getName() + " : " + status.getText() +
