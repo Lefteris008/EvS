@@ -21,7 +21,7 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version "$Id$"
+ * @version 2015.09.25_1415_wave1
  */
 public class TweetsRetriever {
 
@@ -50,6 +50,7 @@ public class TweetsRetriever {
     /**
      * Simple method to retrieve tweets by querying the API
      * @throws IOException 
+     * @deprecated Since wave1
      */
     void retrieveTweetsWithQuery() throws IOException {
 
