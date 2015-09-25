@@ -1,4 +1,4 @@
-package testtwitterlefteris;
+package preprocessingmodule;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.09.24_1752_wave1
+ * @version %I%, %G%
  */
 public class TweetsRetriever {
 
