@@ -1,5 +1,7 @@
 package preprocessingmodule;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -184,7 +186,19 @@ public class TweetsRetriever {
      */
     public static void main(String[] args) throws IOException, InterruptedException {
         
-        String[] keywords = {"#Germany", "#VW", "#love", "#peace", "#iPhone6s", "Microsoft"};
+        String line;
+        String[] keywords;
+        ArrayList<String> terms = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(Config.searchTermsFile))) {
+            while ((line = br.readLine()) != null) {
+                terms.add(line);
+            }
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        keywords = terms.toArray(new String[terms.size()]);
         
         long startTime = System.currentTimeMillis();
         List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords);

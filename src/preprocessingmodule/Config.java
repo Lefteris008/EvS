@@ -15,9 +15,9 @@ public class Config {
     private static String consumerSecret;
     private static String accessToken;
     private static String accessTokenSecret;
+    public final static String searchTermsFile = "search_terms.txt";
     
     public Config() throws IOException {
-        
         
         InputStream inputStream = null;
         try {
@@ -38,6 +38,7 @@ public class Config {
             accessToken = prop.getProperty("AccessToken");
             accessTokenSecret = prop.getProperty("AccessTokenSecret");
             inputStream.close();
+            
         } catch (Exception e) {
             if(inputStream != null) {
                 inputStream.close();
