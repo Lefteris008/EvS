@@ -8,7 +8,7 @@ import java.util.Properties;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.09.24_1751_wave1
+ * @version 2015.09.27_0203_wave1
  */
 public class Config {
     private static String consumerKey;
@@ -16,6 +16,10 @@ public class Config {
     private static String accessToken;
     private static String accessTokenSecret;
     public final static String searchTermsFile = "search_terms.txt";
+    public final static String serverName = "localhost";
+    public final static int serverPort = 27017;
+    public final static String dbName = "testTwitter";
+    public final static String rawTweetsCollectionName = "raw_tweets";
     
     public Config() throws IOException {
         

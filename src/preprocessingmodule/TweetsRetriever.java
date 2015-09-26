@@ -24,11 +24,11 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.09.26_2320_wave1
+ * @version 2015.09.27_0203_wave1
  */
 public class TweetsRetriever {
 
-    private final static int MAXIMUM_TWEETS = 1000; //Maximum tweets retrieved until the thread will be terminated
+    private final static int MAXIMUM_TWEETS = 100; //Maximum tweets retrieved until the thread will be terminated
     
     /**
      * Method to get authorization from Twitter API
@@ -107,10 +107,11 @@ public class TweetsRetriever {
     /**
      * Method that handles the Twitter streaming API
      * @param keywords The keywords for which the streamer searches for tweets
+     * @param mongoDB
      * @return A list containing the retrieved tweets, along with their other data (user, location etc)
      * @throws InterruptedException 
      */
-    public final List<Status> retrieveTweetsWithStreamingAPI(String[] keywords) throws InterruptedException {
+    public final List<Status> retrieveTweetsWithStreamingAPI(String[] keywords, MongoHandler mongoDB) throws InterruptedException {
         
         List<Status> statuses = new ArrayList<>();
         
@@ -126,6 +127,8 @@ public class TweetsRetriever {
             @Override
             public final void onStatus(Status status) {
                 statuses.add(status);
+                
+                mongoDB.insertTweetToMongoDB(status);
                 
                 //If the stream execution exceeds the tweets boundary
                 //it is shut down and the retrieved tweets are returned
@@ -223,11 +226,17 @@ public class TweetsRetriever {
         
         keywords = terms.toArray(new String[terms.size()]);
         
+        MongoHandler mongoDB = new MongoHandler();
+        mongoDB.getMongoConnection(); //Get MongoDB connection
+        
         long startTime = System.currentTimeMillis();
-        List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords); //Run the streamer
+        List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords, mongoDB); //Run the streamer
         long stopTime = System.currentTimeMillis();
         
+        mongoDB.closeMongoConnection();
         printStatistics(statuses, startTime, stopTime); //Print tweets
+        
+        
     }
     
 }
