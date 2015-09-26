@@ -28,7 +28,7 @@ import twitter4j.conf.ConfigurationBuilder;
  */
 public class TweetsRetriever {
 
-    private final static int MAXIMUM_TWEETS = 100; //Maximum tweets retrieved until the thread will be terminated
+    private final static int MAXIMUM_TWEETS = 1000; //Maximum tweets retrieved until the thread will be terminated
     
     /**
      * Method to get authorization from Twitter API
@@ -133,7 +133,7 @@ public class TweetsRetriever {
                     synchronized (lock) {
                         lock.notify();
                     }
-                    System.out.println("\nStreaming exceeded time boundary, terminating thread...\n");
+                    System.out.println("\nStreaming exceeded tweets boundary, terminating thread...\n");
                 }
             }
 
@@ -164,21 +164,42 @@ public class TweetsRetriever {
         };
         
         FilterQuery fq = new FilterQuery();
-        fq.track(keywords);
+        fq.language("en"); //Set language of tweets to "English"
+        fq.track(keywords); //Load the search terms
                 
-        twitterStream.addListener(listener);
-        twitterStream.filter(fq);
+        twitterStream.addListener(listener); //Start listening to the stream
+        twitterStream.filter(fq); //Apply the search filters
         
         try {
             synchronized (lock) {
-                lock.wait();
+                lock.wait(); //Wait until the limit of tweets is reached
             }
+        } catch (InterruptedException e) {
+            System.out.println("Thread broke synchronization, re-run project");
         } finally {
-            twitterStream.cleanUp();
+            twitterStream.cleanUp(); //Stop the stream
         }
         return statuses;
     }
     
+    /**
+     * Method to print tweets and statistics
+     * @param statuses The retrieved tweets
+     * @param startTime Time the project started (in milliseconds)
+     * @param stopTime  Time the project finished (in milliseconds)
+     */
+    public static final void printStatistics(List<Status> statuses, long startTime, long stopTime) {
+        System.out.println("Streamer run for " + (stopTime - startTime)/1000 + " seconds");
+        System.out.println("Retrieved " + MAXIMUM_TWEETS + " tweets\n");
+        System.out.println("Would you like to print them?");
+        Scanner keyboard = new Scanner(System.in);
+        if(keyboard.nextInt() == 1) {
+            statuses.stream().forEach((status) -> {
+                System.out.println( "@" + status.getUser().getName() + " : " + status.getText() +
+                        " Date : " + status.getCreatedAt() + " Location : " + status.getGeoLocation());
+            });
+        }
+    }
     /**
      * @param args the command line arguments
      * @throws java.io.IOException
@@ -189,31 +210,24 @@ public class TweetsRetriever {
         String line;
         String[] keywords;
         ArrayList<String> terms = new ArrayList<>();
+        
         try (BufferedReader br = new BufferedReader(new FileReader(Config.searchTermsFile))) {
             while ((line = br.readLine()) != null) {
-                terms.add(line);
+                terms.add(line); //Open the search terms file and read them
             }
             br.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("The file '" + Config.searchTermsFile + "' is missing.\nPlace a correct file in classpath and re-run the project");
+            System.exit(1);
         }
         
         keywords = terms.toArray(new String[terms.size()]);
         
         long startTime = System.currentTimeMillis();
-        List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords);
+        List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords); //Run the streamer
         long stopTime = System.currentTimeMillis();
         
-        System.out.println("Streamer run for " + (stopTime - startTime)/1000 + " seconds");
-        System.out.println("Retrieved " + MAXIMUM_TWEETS + " tweets\n");
-        System.out.println("Should I print them?");
-        Scanner keyboard = new Scanner(System.in);
-        if(keyboard.nextInt() == 1) {
-            statuses.stream().forEach((status) -> {
-                System.out.println( "@" + status.getUser().getName() + " : " + status.getText() +
-                        " Date : " + status.getCreatedAt() + " Location : " + status.getGeoLocation());
-            });
-        }
+        printStatistics(statuses, startTime, stopTime); //Print tweets
     }
     
 }
