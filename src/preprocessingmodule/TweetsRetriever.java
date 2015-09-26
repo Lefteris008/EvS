@@ -24,7 +24,7 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.09.25_1919_wave1
+ * @version 2015.09.26_2320_wave1
  */
 public class TweetsRetriever {
 
