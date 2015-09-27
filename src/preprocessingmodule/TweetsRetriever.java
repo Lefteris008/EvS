@@ -24,12 +24,10 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.09.27_0203_wave1
+ * @version 2015.09.27_1752_wave1
  */
 public class TweetsRetriever {
 
-    private final static int MAXIMUM_TWEETS = 100; //Maximum tweets retrieved until the thread will be terminated
-    
     /**
      * Method to get authorization from Twitter API
      * @return A ConfigurationBuilder object
@@ -107,11 +105,12 @@ public class TweetsRetriever {
     /**
      * Method that handles the Twitter streaming API
      * @param keywords The keywords for which the streamer searches for tweets
-     * @param mongoDB
+     * @param mongoDB A handler for the MongoDB database
+     * @param config A configuration object
      * @return A list containing the retrieved tweets, along with their other data (user, location etc)
      * @throws InterruptedException 
      */
-    public final List<Status> retrieveTweetsWithStreamingAPI(String[] keywords, MongoHandler mongoDB) throws InterruptedException {
+    public final List<Status> retrieveTweetsWithStreamingAPI(String[] keywords, MongoHandler mongoDB, Config config) throws InterruptedException {
         
         List<Status> statuses = new ArrayList<>();
         
@@ -128,11 +127,11 @@ public class TweetsRetriever {
             public final void onStatus(Status status) {
                 statuses.add(status);
                 
-                mongoDB.insertTweetToMongoDB(status);
+                mongoDB.insertTweetToMongoDB(status, config);
                 
                 //If the stream execution exceeds the tweets boundary
                 //it is shut down and the retrieved tweets are returned
-                if(statuses.size() >= MAXIMUM_TWEETS) {
+                if(statuses.size() >= config.getMaximumTweetsNumber()) {
                     synchronized (lock) {
                         lock.notify();
                     }
@@ -189,11 +188,12 @@ public class TweetsRetriever {
      * Method to print tweets and statistics
      * @param statuses The retrieved tweets
      * @param startTime Time the project started (in milliseconds)
-     * @param stopTime  Time the project finished (in milliseconds)
+     * @param stopTime Time the project finished (in milliseconds)
+     * @param config A configuration object
      */
-    public static final void printStatistics(List<Status> statuses, long startTime, long stopTime) {
+    public static final void printStatistics(List<Status> statuses, long startTime, long stopTime, Config config) {
         System.out.println("Streamer run for " + (stopTime - startTime)/1000 + " seconds");
-        System.out.println("Retrieved " + MAXIMUM_TWEETS + " tweets\n");
+        System.out.println("Retrieved " + config.getMaximumTweetsNumber() + " tweets\n");
         System.out.println("Would you like to print them?");
         Scanner keyboard = new Scanner(System.in);
         if(keyboard.nextInt() == 1) {
@@ -214,27 +214,29 @@ public class TweetsRetriever {
         String[] keywords;
         ArrayList<String> terms = new ArrayList<>();
         
-        try (BufferedReader br = new BufferedReader(new FileReader(Config.searchTermsFile))) {
+        Config config = new Config(); //Create the configuration object
+        
+        try (BufferedReader br = new BufferedReader(new FileReader(config.getSearchTermsFile()))) {
             while ((line = br.readLine()) != null) {
                 terms.add(line); //Open the search terms file and read them
             }
             br.close();
         } catch (IOException e) {
-            System.out.println("The file '" + Config.searchTermsFile + "' is missing.\nPlace a correct file in classpath and re-run the project");
+            System.out.println("The file '" + config.getSearchTermsFile() + "' is missing.\nPlace a correct file in classpath and re-run the project");
             System.exit(1);
         }
         
         keywords = terms.toArray(new String[terms.size()]);
         
-        MongoHandler mongoDB = new MongoHandler();
-        mongoDB.getMongoConnection(); //Get MongoDB connection
+        MongoHandler mongoDB = new MongoHandler(config);
+        mongoDB.getMongoConnection(config); //Get MongoDB connection
         
         long startTime = System.currentTimeMillis();
-        List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords, mongoDB); //Run the streamer
+        List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords, mongoDB, config); //Run the streamer
         long stopTime = System.currentTimeMillis();
         
-        mongoDB.closeMongoConnection();
-        printStatistics(statuses, startTime, stopTime); //Print tweets
+        mongoDB.closeMongoConnection(config);
+        printStatistics(statuses, startTime, stopTime, config); //Print tweets
         
         
     }

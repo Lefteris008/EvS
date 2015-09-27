@@ -8,18 +8,19 @@ import java.util.Properties;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.09.27_0203_wave1
+ * @version 2015.09.27_1758_wave1
  */
 public class Config {
     private static String consumerKey;
     private static String consumerSecret;
     private static String accessToken;
     private static String accessTokenSecret;
-    public final static String searchTermsFile = "search_terms.txt";
-    public final static String serverName = "localhost";
-    public final static int serverPort = 27017;
-    public final static String dbName = "testTwitter";
-    public final static String rawTweetsCollectionName = "raw_tweets";
+    private static String searchTermsFile;
+    private static String serverName;
+    private static int serverPort;
+    private static String dbName;
+    private static String rawTweetsCollectionName;
+    private static int maximumTweetsRetrieved;
     
     public Config() throws IOException {
         
@@ -41,9 +42,16 @@ public class Config {
             consumerSecret = prop.getProperty("ConsumerSecret");
             accessToken = prop.getProperty("AccessToken");
             accessTokenSecret = prop.getProperty("AccessTokenSecret");
+            searchTermsFile = prop.getProperty("SearchTermsFile");
+            serverName = prop.getProperty("ServerName");
+            serverPort = Integer.parseInt(prop.getProperty("ServerPort"));
+            dbName = prop.getProperty("DBName");
+            rawTweetsCollectionName = prop.getProperty("RawTweetsCollection");
+            maximumTweetsRetrieved = Integer.parseInt(prop.getProperty("MaximumTweetsRetrieved"));
+            
             inputStream.close();
             
-        } catch (Exception e) {
+        } catch (IOException | NumberFormatException e) {
             if(inputStream != null) {
                 inputStream.close();
             }
@@ -81,5 +89,53 @@ public class Config {
      */
     public String getAccessTokenSecret() {
         return accessTokenSecret;
+    }
+    
+    /**
+     * Returns a String with the search terms file name. You have to have a relevant txt file in the classpath.
+     * @return The filename of the search terms file, usually in the form 'search_terms.txt'
+     */
+    public String getSearchTermsFile() {
+        return searchTermsFile;
+    }
+    
+    /**
+     * Returns the name of the server the MongoDB instance is running.
+     * @return A string containing the name of the server, usually 'localhost'
+     */
+    public String getServerName() {
+        return serverName;
+    }
+    
+    /**
+     * Returns the port of the server the MongoDB instance is running into.
+     * @return An integer containing the server port number, usually 27017
+     */
+    public int getServerPort() {
+        return serverPort;
+    }
+    
+    /**
+     * Returns the name of the MongoDB database raw tweets are going to be stored to.
+     * @return A string containing the name of the MongoDB database name
+     */
+    public String getDBName() {
+        return dbName;
+    }
+    
+    /**
+     * Returns the name of the collection of the raw tweets.
+     * @return A string containing the name of the collection
+     */
+    public String getRawTweetsCollectionName() {
+        return rawTweetsCollectionName;
+    }
+    
+    /**
+     * Returns the number of the tweets that the streamer is going to retrieve before it will be shut down.
+     * @return An integer containing the number of the tweets that are going to be retrieved
+     */
+    public int getMaximumTweetsNumber() {
+        return maximumTweetsRetrieved;
     }
 }

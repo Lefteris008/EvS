@@ -10,16 +10,20 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.09.27_0202_wave1
+ * @version 2015.09.27_1800_wave1
  */
 public class MongoHandler {
     
     public static MongoClient client;
     public static MongoDatabase db;
     
-    public MongoHandler() {
+    /**
+     * Constructor, creates a connection with the MongoDB instance
+     * @param config A configuration object
+     */
+    public MongoHandler(Config config) {
         try {
-        client = new MongoClient(Config.serverName, Config.serverPort);
+        client = new MongoClient(config.getServerName(), config.getServerPort());
         } catch (MongoClientException e) {
             System.out.println("Error connecting to client");
             client = null;
@@ -28,12 +32,13 @@ public class MongoHandler {
     
     /**
      * Create a connection to the MongoDB database
+     * @param config A configuration object
      */
-    public final void getMongoConnection() {
+    public final void getMongoConnection(Config config) {
         
         try {
             
-            db = client.getDatabase(Config.dbName);
+            db = client.getDatabase(config.getDBName());
             System.out.println("Succesfully connected to '" + db.getName() + "'");
         } catch (Exception e) {
             System.out.println("There was a problem connecting to MongoDB client.");
@@ -42,12 +47,13 @@ public class MongoHandler {
     
     /**
      * Closes an open connection with the MongoDB client
+     * @param config A configuration object
      */
-    public final void closeMongoConnection() {
+    public final void closeMongoConnection(Config config) {
         
         try {
             client.close();
-            System.out.println("Database '" + Config.dbName + "' closed!");
+            System.out.println("Database '" + config.getDBName() + "' closed!");
         } catch (Exception e) {
             System.out.println("Problem closing the database");
         }
@@ -56,24 +62,19 @@ public class MongoHandler {
     /**
      * Method to store a newly retrieved tweet into the MongoDB store
      * @param status The tweet along with its additional information (location, date etc)
+     * @param config A configuration object
      * @return True if the process succeeds, false otherwise
      */
-    public final boolean insertTweetToMongoDB(Status status) {
+    public final boolean insertTweetToMongoDB(Status status, Config config) {
         
         try {
-//            System.out.println(status.getUser().getName());
-//            System.out.println(status.getText());
-//            System.out.println(status.getCreatedAt());
-//            System.out.println(status.getPlace().toString());
-//            System.out.println(status.isRetweet());
-            db.getCollection(Config.rawTweetsCollectionName).insertOne(
+            db.getCollection(config.getRawTweetsCollectionName()).insertOne(
                 new Document("tweet",
                         new Document()
-                                .append("user", status.getUser().getName())
-                                .append("text", status.getText())
-                                .append("date", status.getCreatedAt())
-//                                .append("place", status.getPlace().toString())
-                                .append("is_retweet", status.isRetweet())
+                                .append("user", status.getUser().getName()) //Username
+                                .append("text", status.getText()) //Actual tweet
+                                .append("date", status.getCreatedAt()) //Date published
+                                .append("is_retweet", status.isRetweet()) //True if the tweet is a retweet, false otherwise
                 )
             );
         return true;
