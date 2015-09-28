@@ -10,7 +10,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.09.27_1800_wave1
+ * @version 2015.09.28_1646_wave1
  */
 public class MongoHandler {
     
@@ -80,6 +80,36 @@ public class MongoHandler {
         return true;
         } catch(MongoException e) {
             System.out.println("There was a problem inserting the tweet.");
+            return false;
+        }
+    }
+    
+    /**
+     * Method to delete a collection.
+     * @param collectionName The collection to be deleted from the DB
+     * @return True if the process succeeds, false otherwise
+     */
+    public final boolean dropCollection(String collectionName) {
+        
+        try {
+            db.getCollection(collectionName).drop();
+            return false;
+        } catch (MongoException e) {
+            System.out.println("There was a problem deleting collection '" + collectionName + "'");
+            return false;
+        }
+    }
+    
+    /**
+     * This method drops the MongoDB database that is opened.
+     * @return True if the process succeeds, false otherwise
+     */
+    public final boolean dropDB() {
+        try {
+            db.drop();
+            return true;
+        } catch (MongoException e) {
+            System.out.println("There was a problem deleting database '" + db.getName() + "'");
             return false;
         }
     }
