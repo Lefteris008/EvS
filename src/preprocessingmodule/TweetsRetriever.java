@@ -138,5 +138,4 @@ public class TweetsRetriever {
         
         mongoDB.closeMongoConnection(config); //Close DB
     }
-    
 }
