@@ -1,7 +1,7 @@
 #Version of commit (daily branch -hours should be omitted)
 2015.09.29_wave1
 
-#Signed by (pick one, delete the other)
+#Signed off by (pick one, delete the other)
 Lefteris Paraskevas
 Despina Chantzakou
 
