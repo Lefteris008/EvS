@@ -10,7 +10,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.09.28_1646_wave1
+ * @version 2015.09.29_1608_wave2
  */
 public class MongoHandler {
     

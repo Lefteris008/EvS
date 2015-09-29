@@ -8,7 +8,7 @@ import java.util.Properties;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.09.27_1758_wave1
+ * @version 2015.09.29_1608_wave2
  */
 public class Config {
     private static String consumerKey;
