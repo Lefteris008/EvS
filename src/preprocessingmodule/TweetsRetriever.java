@@ -24,7 +24,7 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.09.27_1752_wave1
+ * @version 2015.09.29_1537_wave1
  */
 public class TweetsRetriever {
 
@@ -51,70 +51,14 @@ public class TweetsRetriever {
     }
     
     /**
-     * @deprecated
-     * Simple method to retrieve tweets by querying the API
-     * @throws IOException 
-     */
-    void retrieveTweetsWithQuery() throws IOException {
-
-        ConfigurationBuilder cb = getAuthorization();
-        
-        if(cb != null) {
-            Twitter twitter = new TwitterFactory(cb.build()).getInstance();
-            Query query = new Query("#peace");
-            int numberOfTweets = 512;
-            long lastID = Long.MAX_VALUE;
-            ArrayList<Status> tweets = new ArrayList<>();
-            while (tweets.size () < numberOfTweets) {
-                if (numberOfTweets - tweets.size() > 100) {
-                    query.setCount(100);
-                } else { 
-                    query.setCount(numberOfTweets - tweets.size());
-                }
-                try {
-                    QueryResult result = twitter.search(query);
-                    tweets.addAll(result.getTweets());
-                    System.out.println("Gathered " + tweets.size() + " tweets");
-                    for (Status t: tweets) 
-                        if(t.getId() < lastID) {
-                            lastID = t.getId();
-                        }
-                } catch (TwitterException te) {
-                    System.out.println("Couldn't connect: " + te);
-                } 
-                query.setMaxId(lastID-1);
-            }
-
-            for (int i = 0; i < tweets.size(); i++) {
-                Status t = (Status) tweets.get(i);
-
-                GeoLocation loc = t.getGeoLocation();
-
-                String user = t.getUser().getScreenName();
-                String msg = t.getText();
-                if (loc!=null) {
-                    Double lat = t.getGeoLocation().getLatitude();
-                    Double lon = t.getGeoLocation().getLongitude();
-                    System.out.println(i + " USER: " + user + " wrote: " + msg + " located at " + lat + ", " + lon);
-                } else 
-                    System.out.println(i + " USER: " + user + " wrote: " + msg);
-            }
-        }
-    }
-    
-    /**
-     * Method that handles the Twitter streaming API
+     * Method that handles the Twitter streaming API. WARNING: Method does not terminate by itself, due to
+     * the fact that the streamer runs in a different thread.
      * @param keywords The keywords for which the streamer searches for tweets
      * @param mongoDB A handler for the MongoDB database
      * @param config A configuration object
-     * @return A list containing the retrieved tweets, along with their other data (user, location etc)
      * @throws InterruptedException 
      */
-    public final List<Status> retrieveTweetsWithStreamingAPI(String[] keywords, MongoHandler mongoDB, Config config) throws InterruptedException {
-        
-        List<Status> statuses = new ArrayList<>();
-        
-        final Object lock = new Object();
+    public final void retrieveTweetsWithStreamingAPI(String[] keywords, MongoHandler mongoDB, Config config) throws InterruptedException {
         
         ConfigurationBuilder cb = getAuthorization();  
         
@@ -125,18 +69,7 @@ public class TweetsRetriever {
             
             @Override
             public final void onStatus(Status status) {
-                statuses.add(status);
-                
-                mongoDB.insertTweetToMongoDB(status, config);
-                
-                //If the stream execution exceeds the tweets boundary
-                //it is shut down and the retrieved tweets are returned
-                if(statuses.size() >= config.getMaximumTweetsNumber()) {
-                    synchronized (lock) {
-                        lock.notify();
-                    }
-                    System.out.println("\nStreaming exceeded tweets boundary, terminating thread...\n");
-                }
+                mongoDB.insertTweetToMongoDB(status, config); //Insert tweet to MongoDB
             }
 
             @Override
@@ -171,38 +104,8 @@ public class TweetsRetriever {
                 
         twitterStream.addListener(listener); //Start listening to the stream
         twitterStream.filter(fq); //Apply the search filters
-        
-        try {
-            synchronized (lock) {
-                lock.wait(); //Wait until the limit of tweets is reached
-            }
-        } catch (InterruptedException e) {
-            System.out.println("Thread broke synchronization, re-run project");
-        } finally {
-            twitterStream.cleanUp(); //Stop the stream
-        }
-        return statuses;
     }
     
-    /**
-     * Method to print tweets and statistics
-     * @param statuses The retrieved tweets
-     * @param startTime Time the project started (in milliseconds)
-     * @param stopTime Time the project finished (in milliseconds)
-     * @param config A configuration object
-     */
-    public static final void printStatistics(List<Status> statuses, long startTime, long stopTime, Config config) {
-        System.out.println("Streamer run for " + (stopTime - startTime)/1000 + " seconds");
-        System.out.println("Retrieved " + config.getMaximumTweetsNumber() + " tweets\n");
-        System.out.println("Would you like to print them?");
-        Scanner keyboard = new Scanner(System.in);
-        if(keyboard.nextInt() == 1) {
-            statuses.stream().forEach((status) -> {
-                System.out.println( "@" + status.getUser().getName() + " : " + status.getText() +
-                        " Date : " + status.getCreatedAt() + " Location : " + status.getGeoLocation());
-            });
-        }
-    }
     /**
      * @param args the command line arguments
      * @throws java.io.IOException
@@ -230,15 +133,10 @@ public class TweetsRetriever {
         
         MongoHandler mongoDB = new MongoHandler(config);
         mongoDB.getMongoConnection(config); //Get MongoDB connection
+
+        new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords, mongoDB, config); //Run the streamer
         
-        long startTime = System.currentTimeMillis();
-        List<Status> statuses = new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords, mongoDB, config); //Run the streamer
-        long stopTime = System.currentTimeMillis();
-        
-        mongoDB.closeMongoConnection(config);
-        printStatistics(statuses, startTime, stopTime, config); //Print tweets
-        
-        
+        mongoDB.closeMongoConnection(config); //Close DB
     }
     
 }
