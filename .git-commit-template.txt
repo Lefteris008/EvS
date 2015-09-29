@@ -1,0 +1,16 @@
+#Version of commit (daily branch -hours should be omitted)
+2015.09.29_wave1
+
+#Signed by (pick one, delete the other)
+Lefteris Paraskevas
+Despina Chantzakou
+
+#Add, Fix, Change, Removed, Refactoring, Readability
+[ADD]: New function to rule the world.
+[FIX]: RUL-42 or #42 Starvation need to be initialised before Energy to avoid the nullpointer in People.
+[CNG]: Add women factor in Domination.ruleTheWorld().
+[REM]: freeSpeech is not used anymore.
+[REF]: Extract empathy stuff to an abstract class.
+[REA]: Removed old TODO and extra space in header.
+--------------------------------------------------
+#All comments must be removed prior to commit
