@@ -24,16 +24,15 @@ import java.util.ArrayList;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.09.30_1443_wave2
+ * @version 2015.09.30_1450_wave2
  */
 public class Main {
     
     /**
      * @param args the command line arguments
      * @throws java.io.IOException
-     * @throws java.lang.InterruptedException
      */
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException {
         
         String line;
         String[] keywords;

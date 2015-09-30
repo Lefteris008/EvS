@@ -29,7 +29,7 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.09.30_1443_wave2
+ * @version 2015.09.30_1450_wave2
  */
 public class TweetsRetriever {
 
@@ -61,9 +61,8 @@ public class TweetsRetriever {
      * @param keywords The keywords for which the streamer searches for tweets
      * @param mongoDB A handler for the MongoDB database
      * @param config A configuration object
-     * @throws InterruptedException 
      */
-    public final void retrieveTweetsWithStreamingAPI(String[] keywords, MongoHandler mongoDB, Config config) throws InterruptedException {
+    public final void retrieveTweetsWithStreamingAPI(String[] keywords, MongoHandler mongoDB, Config config) {
         
         ConfigurationBuilder cb = getAuthorization();  
         
