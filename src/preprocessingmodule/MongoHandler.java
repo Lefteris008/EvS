@@ -20,13 +20,15 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientException;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoDatabase;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bson.Document;
 import twitter4j.Status;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.09.30_1443_wave2
+ * @version 2015.10.03_1843_wave2
  */
 public class MongoHandler {
     
@@ -43,6 +45,7 @@ public class MongoHandler {
         } catch (MongoClientException e) {
             System.out.println("Error connecting to client");
             client = null;
+            Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
         }
     }
     
@@ -58,6 +61,7 @@ public class MongoHandler {
             System.out.println("Succesfully connected to '" + db.getName() + "'");
         } catch (Exception e) {
             System.out.println("There was a problem connecting to MongoDB client.");
+            Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
         }
     }
     
@@ -72,6 +76,7 @@ public class MongoHandler {
             System.out.println("Database '" + config.getDBName() + "' closed!");
         } catch (Exception e) {
             System.out.println("Problem closing the database");
+            Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
         }
     }
     
@@ -96,6 +101,7 @@ public class MongoHandler {
         return true;
         } catch(MongoException e) {
             System.out.println("There was a problem inserting the tweet.");
+            Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
     }
@@ -112,6 +118,7 @@ public class MongoHandler {
             return false;
         } catch (MongoException e) {
             System.out.println("There was a problem deleting collection '" + collectionName + "'");
+            Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
     }
@@ -126,6 +133,7 @@ public class MongoHandler {
             return true;
         } catch (MongoException e) {
             System.out.println("There was a problem deleting database '" + db.getName() + "'");
+            Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
     }

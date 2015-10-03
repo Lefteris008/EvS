@@ -20,11 +20,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.09.30_1443_wave2
+ * @version 2015.10.03_1844_wave2
  */
 public class Config {
     private static String consumerKey;
@@ -71,7 +73,7 @@ public class Config {
             if(inputStream != null) {
                 inputStream.close();
             }
-            System.out.println("Exception: " + e);
+            Logger.getLogger(Config.class.getName()).log(Level.SEVERE, null, e);
         }
     }
     

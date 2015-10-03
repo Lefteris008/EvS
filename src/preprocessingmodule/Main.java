@@ -20,11 +20,13 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.09.30_1450_wave2
+ * @version 2015.10.03_1843_wave2
  */
 public class Main {
     
@@ -47,6 +49,7 @@ public class Main {
             br.close();
         } catch (IOException e) {
             System.out.println("The file '" + config.getSearchTermsFile() + "' is missing.\nPlace a correct file in classpath and re-run the project");
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, e);
             System.exit(1);
         }
         

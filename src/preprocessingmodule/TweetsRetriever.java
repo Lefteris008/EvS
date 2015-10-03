@@ -17,6 +17,8 @@
 package preprocessingmodule;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import twitter4j.FilterQuery;
 import twitter4j.StallWarning;
 import twitter4j.Status;
@@ -29,7 +31,7 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.09.30_1450_wave2
+ * @version 2015.10.03_1843_wave2
  */
 public class TweetsRetriever {
 
@@ -44,6 +46,7 @@ public class TweetsRetriever {
         try {
             conf = new Config();
         } catch(IOException e) {
+            Logger.getLogger(TweetsRetriever.class.getName()).log(Level.SEVERE, null, e);
             return null;
         }
         
