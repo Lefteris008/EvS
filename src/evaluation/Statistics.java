@@ -1,0 +1,82 @@
+/*
+ * Copyright (C) 2015 Lefteris Paraskevas
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package evaluation;
+
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import preprocessingmodule.Config;
+
+/**
+ *
+ * @author  Lefteris Paraskevas
+ * @version 2015.10.12_1928_wave2
+ */
+public class Statistics {
+    
+    /**
+     * Calculates the summary of all elements in an integer list.
+     * @param list The list with the elements to be summed
+     * @return The summary of the elements
+     */
+    public static int sum(List<Integer> list) {
+
+        int sum = 0;
+        for (Integer list1 : list) {
+            sum = sum + list1;
+        }
+        
+        return sum;
+    }
+
+    /**
+     * Calculates the average of the elements of an integer list.
+     * @param list The list for which the average value will be computed
+     * @return The average value of the elements of the list
+     */
+    public static double average(List<Integer> list) {
+        
+        double average;
+        try {
+            average = sum(list) / list.size();
+        } catch(ArithmeticException e) {
+            Logger.getLogger(Config.class.getName()).log(Level.SEVERE, null, e);
+            return -1.0;
+        }
+        
+        return average;
+    }
+
+    /**
+     * Calculates the variance of the elements of an integer list.
+     * @param list The list for which the variance of its elements will be computed
+     * @return The variance of the elements of the list
+     */
+    public static double variance(List<Integer> list) {
+        
+        double sumMinusAverage = sum(list) - average(list);
+        double variance;
+        try {
+            variance = sumMinusAverage * sumMinusAverage / (list.size()-1);
+        } catch(ArithmeticException e) {
+            Logger.getLogger(Config.class.getName()).log(Level.SEVERE, null, e);
+            return -1.0;
+        }
+        return variance;
+    }
+
+}

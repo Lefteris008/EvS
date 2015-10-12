@@ -50,7 +50,7 @@ public class Evaluator {
             case 1: {
                 OfflinePeakFinding eval = new OfflinePeakFinding();
                 eval.createBins();
-                eval.findPeakWindow();
+                //eval.findPeakWindow();
                 break;
             }
             default: {
