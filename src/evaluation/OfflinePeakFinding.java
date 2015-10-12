@@ -25,11 +25,15 @@ package evaluation;
  */
 public class OfflinePeakFinding {
     
-    public static void findPeakWindow() {
+    public void findPeakWindow() {
         
     }
     
-    public static void update() {
+    public void update() {
+        
+    }
+    
+    public void createBins() {
         
     }
     
