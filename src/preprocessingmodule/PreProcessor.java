@@ -26,9 +26,9 @@ import java.util.logging.Logger;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.03_1843_wave2
+ * @version 2015.10.13_1539_wave2
  */
-public class PreProccessor {
+public class PreProcessor {
     
     /**
      * @param args the command line arguments
@@ -49,7 +49,7 @@ public class PreProccessor {
             br.close();
         } catch (IOException e) {
             System.out.println("The file '" + config.getSearchTermsFile() + "' is missing.\nPlace a correct file in classpath and re-run the project");
-            Logger.getLogger(PreProccessor.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
             System.exit(1);
         }
         

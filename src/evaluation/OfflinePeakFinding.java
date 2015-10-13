@@ -22,7 +22,7 @@ import java.util.List;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.13_1533_wave2
+ * @version 2015.10.12_2017_wave2
  * 
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing Microblogs for Event Exploration", CHI 2011.
  */
