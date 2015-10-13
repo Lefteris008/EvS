@@ -22,7 +22,7 @@ import java.util.List;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.12_2017_wave2
+ * @version 2015.10.13_1533_wave2
  * 
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing Microblogs for Event Exploration", CHI 2011.
  */
@@ -36,7 +36,7 @@ public class OfflinePeakFinding {
      * @param a Threshold 'a'
      * @return A list containing the calculated windows
      */
-    public List<Window<Integer, Integer>> findPeakWindow(List<Integer> bins, int t, int r, int a) {
+    public static List<Window<Integer, Integer>> findPeakWindow(List<Integer> bins, int t, int r, int a) {
         List<Window<Integer, Integer>> windows = new ArrayList<>();
         double mean = bins.get(0); //Set the first element as mean
         double meanDev = Statistics.variance(bins);
@@ -79,7 +79,7 @@ public class OfflinePeakFinding {
      * @param a Threshold 'a'
      * @return The updated mean value
      */
-    public double updateMean(double oldMean, int bin, int a) {
+    public static double updateMean(double oldMean, int bin, int a) {
         return a * bin + (1-a) * oldMean;
     }
     
@@ -91,15 +91,16 @@ public class OfflinePeakFinding {
      * @param a Threshold 'a'
      * @return The updated mean deviance value
      */
-    public double updateMeanDev(double oldMean, double oldMeanDev, int bin, int a) {
+    public static double updateMeanDev(double oldMean, double oldMeanDev, int bin, int a) {
         double diff = Math.abs((oldMean - bin));
         return a * diff + (1-a) * oldMeanDev;
     }
     
     /**
      * Secondary method to create the bins
+     * @return The created bins
      */
-    public void createBins() {
+    public static List<Integer> createBins() {
         throw(new UnsupportedOperationException());
     }
     

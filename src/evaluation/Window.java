@@ -19,7 +19,7 @@ package evaluation;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.12_2008_wave2
+ * @version 2015.10.13_1532_wave2
  * @param <Start>
  * @param <End>
  */
@@ -38,19 +38,11 @@ public class Window<Start,End> {
         this.end = end;
     }
     
-    public Start getStart() { 
-        return start;
-    }
+    public Start getStart() { return start; }
     
-    public End getEnd() {
-        return end;
-    }
+    public End getEnd() { return end; }
     
-    public void setStart(Start start) {
-        this.start = start;
-    }
+    public void setStart(Start start) { this.start = start; }
     
-    public void setEnd(End end) {
-        this.end = end;
-    }
+    public void setEnd(End end) { this.end = end; }
 }

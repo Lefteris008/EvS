@@ -16,12 +16,13 @@
  */
 package evaluation;
 
+import java.util.List;
 import java.util.Scanner;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.12_1906_wave2
+ * @version 2015.10.13_1533_wave2
  * From this class, every single evaluator will run
  */
 public class Evaluator {
@@ -48,9 +49,9 @@ public class Evaluator {
         
         switch(choice) {
             case 1: {
-                OfflinePeakFinding eval = new OfflinePeakFinding();
-                eval.createBins();
-                //eval.findPeakWindow();
+                List<Integer> bins;
+                bins = OfflinePeakFinding.createBins();
+                OfflinePeakFinding.findPeakWindow(bins, 0, 0, 0);
                 break;
             }
             default: {
