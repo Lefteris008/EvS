@@ -19,8 +19,15 @@ package edmodule.edcow;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.26_1542_wave2
+ * @version 2015.10.26_1553_wave2
  */
-public class EDCoWMain {
+public class EDCoW {
+    
+    /**
+     * Method that runs the EDCoW algorithm
+     */
+    public void run() {
+        ///
+    }
     
 }

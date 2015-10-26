@@ -16,11 +16,42 @@
  */
 package edmodule;
 
+import edmodule.edcow.EDCoW;
+import edmodule.lsh.LSH;
+import java.util.Scanner;
+
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.26_1541_wave2
+ * @version 2015.10.26_1553_wave2
  */
 public class EDMethodPicker {
     
+    /**
+     * Main method to pick your desired method of Event Detection
+     * @param args 
+     */
+    public static void main(String args[]) {
+        System.out.println("Pick a method for Event Detection");
+        System.out.println("1. EDCoW");
+        System.out.println("2. LSH");
+        System.out.println("Your choice: ");
+        
+        Scanner keyboard = new Scanner(System.in);
+        int choice = keyboard.nextInt();
+        
+        if(choice == 1) {
+            System.out.println("Selected method: EDCoW");
+            EDCoW edcow = new EDCoW();
+            edcow.run();
+        } else if (choice == 2) {
+            System.out.println("Selected method: LSH");
+            LSH lsh = new LSH();
+            lsh.run();
+        }else {
+            System.out.println("Exiting...");
+            System.exit(0);
+        }
+        
+    }
 }
