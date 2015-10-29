@@ -24,7 +24,7 @@ import preprocessingmodule.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.12_1928_wave2
+ * @version 2015.10.12_1928_planet1
  */
 public class Statistics {
     

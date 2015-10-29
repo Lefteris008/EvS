@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.03_1844_wave2
+ * @version 2015.10.03_1844_planet1
  */
 public class Config {
     private static String consumerKey;

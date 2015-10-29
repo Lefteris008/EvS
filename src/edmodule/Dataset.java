@@ -14,19 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edmodule.lsh;
+package edmodule;
+
+import java.util.ArrayList;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.26_1553_planet1
+ * @version 2015.10.29_1931_planet1
  */
-public class LSH {
+public class Dataset {
     
-    /**
-     * Method that runs LSH algorithm
-     */
-    public void run() {
-        ///
+    public int corpusSize;
+    public ArrayList<String> dataset = new ArrayList<>();
+    public ArrayList<String> stopWords = new ArrayList<>();
+    
+    public Short[] getTermFrequency(int term) {
+        return null;
+    }
+    
+    public Integer[] getNumberOfDocuments() {
+        return null;
     }
 }

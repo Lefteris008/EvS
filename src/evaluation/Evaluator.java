@@ -22,7 +22,7 @@ import java.util.Scanner;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.13_1533_wave2
+ * @version 2015.10.13_1533_planet1
  * From this class, every single evaluator will run
  */
 public class Evaluator {
