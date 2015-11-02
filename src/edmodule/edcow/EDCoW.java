@@ -17,7 +17,7 @@
 package edmodule.edcow;
 
 import ch.epfl.lis.jmod.modularity.community.Community;
-import edmodule.Dataset;
+import edmodule.utils.Dataset;
 import java.io.IOException;
 import java.util.*;
 
@@ -72,8 +72,8 @@ public class EDCoW {
         eventList = new LinkedList<>();
         for(int i = 0; i < corpus.corpusSize; i++){
             String term = corpus.dataset.get(i);
-            if(term.length()>1 && !corpus.stopWords.contains(term)){
-                Short[] frequency = corpus.getTermFrequency(i);
+            if(term.length()>1 && !corpus.stopWords.contains(term)) {
+                Short[] frequency = corpus.getDocumentsTermFrequency(i);
                 int cf = 0;
                 for(short freq : frequency){
                     cf += freq;

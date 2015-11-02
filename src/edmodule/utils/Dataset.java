@@ -14,9 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edmodule;
+package edmodule.utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -28,8 +29,16 @@ public class Dataset {
     public int corpusSize;
     public ArrayList<String> dataset = new ArrayList<>();
     public ArrayList<String> stopWords = new ArrayList<>();
+    public HashMap<String, Integer> termFrequencies = new HashMap<>();
     
-    public Short[] getTermFrequency(int term) {
+    /**
+     * 
+     */
+    public void updateTermFrequenciy() {
+        ///
+    }
+    
+    public Short[] getDocumentsTermFrequency(int term) {
         return null;
     }
     

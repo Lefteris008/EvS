@@ -16,6 +16,7 @@
  */
 package edmodule;
 
+import edmodule.utils.Dataset;
 import edmodule.edcow.EDCoW;
 import edmodule.lsh.LSH;
 import java.util.Scanner;
