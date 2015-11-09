@@ -28,7 +28,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.09_1858_planet1
+ * @version 2015.11.09_1903_planet1
  */
 public class MongoHandler {
     
@@ -90,8 +90,6 @@ public class MongoHandler {
     public final boolean insertTweetToMongoDB(Status status, Config config, String event) {
         
         try {
-            //status.
-            //String lat = String.valueOf(status.getGeoLocation().getLatitude()) != null ? String.valueOf(status.getGeoLocation().getLatitude()) : "NULL";
             db.getCollection(config.getRawTweetsCollectionName()).insertOne(
                 new Document("tweet",
                         new Document()
