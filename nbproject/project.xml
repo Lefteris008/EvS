@@ -13,10 +13,13 @@
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>al</word>
+            <word>datasets'</word>
             <word>Lemmatizes</word>
+            <word>metadata</word>
             <word>Microblogs</word>
             <word>tokenized</word>
             <word>Tokenizes</word>
+            <word>tweets</word>
         </spellchecker-wordlist>
     </configuration>
 </project>

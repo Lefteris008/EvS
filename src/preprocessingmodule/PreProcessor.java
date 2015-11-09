@@ -19,14 +19,17 @@ package preprocessingmodule;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.13_1539_planet1
+ * @version 2015.11.09_1858_planet1
  */
 public class PreProcessor {
     
@@ -58,8 +61,41 @@ public class PreProcessor {
         MongoHandler mongoDB = new MongoHandler(config);
         mongoDB.getMongoConnection(config); //Get MongoDB connection
 
-        new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords, mongoDB, config); //Run the streamer
+        //new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords, mongoDB, config); //Run the streamer
+        
+        List<String> event1List = extractTweetIDsFromFile(config, "fa_cup");
+        List<String> event2List = extractTweetIDsFromFile(config, "super_tuesday");
+        List<String> event3List = extractTweetIDsFromFile(config, "us_elections");
+
+        new TweetsRetriever().retrieveTweetsById(event1List, mongoDB, config, "FA Cup");
+        new TweetsRetriever().retrieveTweetsById(event2List, mongoDB, config, "Super Tuesday");
+        new TweetsRetriever().retrieveTweetsById(event3List, mongoDB, config, "US Elections");
         
         mongoDB.closeMongoConnection(config); //Close DB
+    }
+    
+    public static List<String> extractTweetIDsFromFile(Config config, String filename) {
+        
+        List<String> list = new ArrayList<>();
+        
+        String path = config.getDatasetLocation() + filename + "\\";
+        
+        try {
+            Files.walk(Paths.get(path)).forEach(filePath -> { //For all files in the current folder
+                if (Files.isRegularFile(filePath)) { //Open every single file
+                    try (BufferedReader br = new BufferedReader(new FileReader(filePath.toString()))) {
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                           list.add(line); //Store the id to the list
+                        }
+                    } catch(IOException e) {
+                        Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
+                    }
+                }
+            });     
+        } catch (IOException e) {
+            Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
+        }
+        return list;
     }
 }

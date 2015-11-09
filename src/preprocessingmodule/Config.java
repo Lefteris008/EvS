@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.03_1844_planet1
+ * @version 2015.11.09_1552_planet1
  */
 public class Config {
     private static String consumerKey;
@@ -39,6 +39,7 @@ public class Config {
     private static String dbName;
     private static String rawTweetsCollectionName;
     private static int maximumTweetsRetrieved;
+    private static String datasetLocation;
     
     public Config() throws IOException {
         
@@ -66,6 +67,7 @@ public class Config {
             dbName = prop.getProperty("DBName");
             rawTweetsCollectionName = prop.getProperty("RawTweetsCollection");
             maximumTweetsRetrieved = Integer.parseInt(prop.getProperty("MaximumTweetsRetrieved"));
+            datasetLocation = prop.getProperty("DatasetLocation");
             
             inputStream.close();
             
@@ -81,79 +83,65 @@ public class Config {
      * Returns the Consumer Key to the application
      * @return A string consisting of 25 characters 
      */
-    public String getConsumerKey() {
-        return consumerKey;
-    }
+    public String getConsumerKey() { return consumerKey; }
     
     /**
      * Returns the Consumer Secret Key to the application
      * @return A string consisting of 50 characters
      */
-    public String getConsumerSecret() {
-        return consumerSecret;
-    }
+    public String getConsumerSecret() { return consumerSecret; }
     
     /**
      * Returns the Access Token to the application
      * @return A string consisting of 50 characters
      */
-    public String getAccessToken() {
-        return accessToken;
-    }
+    public String getAccessToken() { return accessToken; }
     
     /**
      * Returns the Secret Access Token to the application
      * @return A string consisting of 45 characters
      */
-    public String getAccessTokenSecret() {
-        return accessTokenSecret;
-    }
+    public String getAccessTokenSecret() { return accessTokenSecret; }
     
     /**
      * Returns a String with the search terms file name. You have to have a relevant txt file in the classpath.
      * @return The filename of the search terms file, usually in the form 'search_terms.txt'
      */
-    public String getSearchTermsFile() {
-        return searchTermsFile;
-    }
+    public String getSearchTermsFile() { return searchTermsFile; }
     
     /**
      * Returns the name of the server the MongoDB instance is running.
      * @return A string containing the name of the server, usually 'localhost'
      */
-    public String getServerName() {
-        return serverName;
-    }
+    public String getServerName() { return serverName; }
     
     /**
      * Returns the port of the server the MongoDB instance is running into.
      * @return An integer containing the server port number, usually 27017
      */
-    public int getServerPort() {
-        return serverPort;
-    }
+    public int getServerPort() { return serverPort; }
     
     /**
      * Returns the name of the MongoDB database raw tweets are going to be stored to.
      * @return A string containing the name of the MongoDB database name
      */
-    public String getDBName() {
-        return dbName;
-    }
+    public String getDBName() { return dbName; }
     
     /**
      * Returns the name of the collection of the raw tweets.
      * @return A string containing the name of the collection
      */
-    public String getRawTweetsCollectionName() {
-        return rawTweetsCollectionName;
-    }
+    public String getRawTweetsCollectionName() { return rawTweetsCollectionName; }
     
     /**
      * Returns the number of the tweets that the streamer is going to retrieve before it will be shut down.
      * @return An integer containing the number of the tweets that are going to be retrieved
      */
-    public int getMaximumTweetsNumber() {
-        return maximumTweetsRetrieved;
-    }
+    public int getMaximumTweetsNumber() { return maximumTweetsRetrieved; }
+    
+    /**
+     * Returns the directory in which the datasets are stored
+     * @return A string containing the file path of the datasets' location
+     */
+    public String getDatasetLocation() { return datasetLocation; }
 }

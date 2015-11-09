@@ -28,7 +28,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.03_1843_planet1
+ * @version 2015.11.09_1858_planet1
  */
 public class MongoHandler {
     
@@ -81,21 +81,33 @@ public class MongoHandler {
     }
     
     /**
-     * Method to store a newly retrieved tweet into the MongoDB store
+     * Method to store a newly retrieved tweet and its metadata into the MongoDB store
      * @param status The tweet along with its additional information (location, date etc)
      * @param config A configuration object
+     * @param event The ground truth event, for which the tweet is actually referring to
      * @return True if the process succeeds, false otherwise
      */
-    public final boolean insertTweetToMongoDB(Status status, Config config) {
+    public final boolean insertTweetToMongoDB(Status status, Config config, String event) {
         
         try {
+            //status.
+            //String lat = String.valueOf(status.getGeoLocation().getLatitude()) != null ? String.valueOf(status.getGeoLocation().getLatitude()) : "NULL";
             db.getCollection(config.getRawTweetsCollectionName()).insertOne(
                 new Document("tweet",
                         new Document()
+                                .append("id", status.getId()) //Tweet ID
                                 .append("user", status.getUser().getName()) //Username
                                 .append("text", status.getText()) //Actual tweet
                                 .append("date", status.getCreatedAt()) //Date published
+                                .append("latitude", status.getGeoLocation() != null ? String.valueOf(status.getGeoLocation().getLatitude()) : "NULL") //Latitude
+                                .append("longitude", status.getGeoLocation() != null ? String.valueOf(status.getGeoLocation().getLongitude()) : "NULL") //Longitude
+                                .append("number_of_retweets", status.getRetweetCount()) //Retweet count
+                                .append("number_of_favorites", status.getFavoriteCount()) //Favorite count
                                 .append("is_retweet", status.isRetweet()) //True if the tweet is a retweet, false otherwise
+                                .append("is_favorited", status.isFavorited()) //True if the tweet is favorited, false otherwise
+                                .append("is_retweeted", status.isRetweeted()) //True if the tweet is retweeted, false otherwise
+                                .append("language", status.getLang()) //Language of text
+                                .append("groundTruthEvent", event)
                 )
             );
         return true;

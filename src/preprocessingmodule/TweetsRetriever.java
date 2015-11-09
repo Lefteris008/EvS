@@ -17,6 +17,7 @@
 package preprocessingmodule;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import twitter4j.FilterQuery;
@@ -24,6 +25,9 @@ import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
 import twitter4j.conf.ConfigurationBuilder;
@@ -31,7 +35,7 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.10.03_1843_planet1
+ * @version 2015.11.09_1858_planet1
  */
 public class TweetsRetriever {
 
@@ -58,6 +62,25 @@ public class TweetsRetriever {
         return cb;
     }
     
+    public final void retrieveTweetsById(List<String> tweetIDs, MongoHandler mongoDB, Config config, String event) {
+        
+        ConfigurationBuilder cb  = getAuthorization();
+        
+        Twitter twitter = new TwitterFactory(cb.build()).getInstance();
+        
+        tweetIDs.stream().forEach((item) -> {
+            try {
+                
+                Status status = twitter.showStatus(Long.parseLong(item)); //Get tweet and all its metadata
+                
+                mongoDB.insertTweetToMongoDB(status, config, event); //Store it
+            } catch(TwitterException e) {
+                System.out.println("Failed to retrieve tweet with ID: " + item);
+                Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
+            }
+        });
+    }
+    
     /**
      * Method that handles the Twitter streaming API. WARNING: Method does not terminate by itself, due to
      * the fact that the streamer runs in a different thread.
@@ -76,7 +99,7 @@ public class TweetsRetriever {
             
             @Override
             public final void onStatus(Status status) {
-                mongoDB.insertTweetToMongoDB(status, config); //Insert tweet to MongoDB
+                //mongoDB.insertTweetToMongoDB(status, config); //Insert tweet to MongoDB
             }
 
             @Override
