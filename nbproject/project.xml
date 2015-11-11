@@ -14,11 +14,16 @@
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>al</word>
             <word>datasets'</word>
+            <word>favorited</word>
             <word>Lemmatizes</word>
             <word>metadata</word>
             <word>Microblogs</word>
+            <word>retweet</word>
+            <word>retweeted</word>
+            <word>retweets</word>
             <word>tokenized</word>
             <word>Tokenizes</word>
+            <word>tweet's</word>
             <word>tweets</word>
             <word>txt</word>
         </spellchecker-wordlist>

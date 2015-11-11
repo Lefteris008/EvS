@@ -19,7 +19,7 @@ package preprocessingmodule;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.11_1752_planet1
+ * @version 2015.11.11_2029_planet1
  */
 public class Tweet {
     
@@ -57,40 +57,96 @@ public class Tweet {
         this.groundTruthEvent = groundTruthEventh;
     }
     
+    /**
+     * Returns the ID of the tweet.
+     * @return A long containing the ID
+     */
     public long getID() { return id; }
     
+    /**
+     * Returns the username of the creator of the tweet.
+     * @return A String containing the username
+     */
     public String getUsername() { return username; }
     
+    /**
+     * Returns the actual text of the tweet.
+     * @return A String containing the text of the tweet
+     */
     public String getText() { return text; }
     
+    /**
+     * Returns the date the tweet was created at.
+     * @return A String containing the date
+     */
     public String getDate() { return date; }
     
+    /**
+     * Returns the latitude of the location where the tweet was created.
+     * @return A long containing the tweet's latitude or '-1' in case there's no location information
+     */
     public long getLatitude() { return latitude; }
             
+    /**
+     * Returns the longitude of the location where the tweet was created.
+     * @return A long containing the tweet's longitude or '-1' in case there's no location information
+     */
     public long getLongitude() { return longitude; }
     
+    /**
+     * Returns the number of times the tweet was retweeted.
+     * @return An integer containing the number of the tweet's retweets.
+     */
     public int getNumberOfRetweets() { return numberOfRetweets; }
     
+    /**
+     * Returns the number of times the tweet was favorited.
+     * @return An integer containing the number of the tweet's favorites.
+     */
     public int getNumberOfFavorites() { return numberOfFavorites; }
     
+    /**
+     * Informs whether the tweet was actually a retweet itself.
+     * @return True if the tweet is a retweet, false otherwise.
+     */
     public boolean isRetweet() { return retweet; }
     
+    /**
+     * Informs whether the tweet was favorited at all.
+     * @return True if the tweet is favorited at least once, false otherwise.
+     */
     public boolean isFavorited() { return favorited; }
     
+    /**
+     * Informs whether the tweet was retweeted at all.
+     * @return True if the tweet is retweeted at least once, false otherwise.
+     */
     public boolean isRetweeted() { return retweeted; }
     
+    /**
+     * Returns the language the tweet was written in.
+     * @return A String containing the abbreviation of the tweet's language.
+     */
     public String getLanguage() { return language; }
     
+    /**
+     * Returns the ground truth event the tweet is referring to.
+     * @return A String containing the event's name.
+     */
     public String getGroundTruthEvent() { return groundTruthEvent; }
     
+    /**
+     * Prints the tweet metadata along with its text.
+     */
     public void printTweetData() {
         System.out.println("Tweet with ID '" + id + "'");
         System.out.println("--------------------------------------------\n");
-        System.out.println("Username: @" + username);
-        System.out.println("Text: " + (retweet ? "RT" : "") + text);
+        System.out.println("@" + username);
+        System.out.println((retweet ? "RT " : "") + text);
         System.out.println("Created at: " + date);
-        System.out.println("Latitude: " + latitude);
-        System.out.println("Longitude: " + longitude);
+        System.out.println("Location");
+        System.out.println("\tLatitude: " + latitude);
+        System.out.println("]tLongitude: " + longitude);
         if(retweeted) {
             System.out.println("Retweeted " + numberOfRetweets + " times");
         }
