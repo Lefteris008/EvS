@@ -20,6 +20,7 @@
             <word>tokenized</word>
             <word>Tokenizes</word>
             <word>tweets</word>
+            <word>txt</word>
         </spellchecker-wordlist>
     </configuration>
 </project>

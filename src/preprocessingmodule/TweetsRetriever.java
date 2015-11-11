@@ -35,7 +35,7 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.11.09_1858_planet1
+ * @version 2015.11.11_1452_planet1
  */
 public class TweetsRetriever {
 
@@ -62,6 +62,13 @@ public class TweetsRetriever {
         return cb;
     }
     
+    /**
+     * Method to retrieve and store historical tweets by collecting them with their ID.
+     * @param tweetIDs The IDs of the tweets that are going to be collected
+     * @param mongoDB A MongoHandler object
+     * @param config A configuration object
+     * @param event The ground truth event for which the tweets that are going to be collected, are referring to
+     */
     public final void retrieveTweetsById(List<String> tweetIDs, MongoHandler mongoDB, Config config, String event) {
         
         ConfigurationBuilder cb  = getAuthorization();
@@ -73,7 +80,7 @@ public class TweetsRetriever {
                 
                 Status status = twitter.showStatus(Long.parseLong(item)); //Get tweet and all its metadata
                 
-                mongoDB.insertTweetToMongoDB(status, config, event); //Store it
+                mongoDB.insertTweetIntoMongoDB(status, config, event); //Store it
             } catch(TwitterException e) {
                 System.out.println("Failed to retrieve tweet with ID: " + item);
                 Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
@@ -99,7 +106,7 @@ public class TweetsRetriever {
             
             @Override
             public final void onStatus(Status status) {
-                //mongoDB.insertTweetToMongoDB(status, config); //Insert tweet to MongoDB
+                //mongoDB.insertTweetIntoMongoDB(status, config); //Insert tweet to MongoDB
             }
 
             @Override

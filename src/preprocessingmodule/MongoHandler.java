@@ -28,7 +28,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.09_1903_planet1
+ * @version 2015.11.11_1420_planet1
  */
 public class MongoHandler {
     
@@ -56,7 +56,6 @@ public class MongoHandler {
     public final void getMongoConnection(Config config) {
         
         try {
-            
             db = client.getDatabase(config.getDBName());
             System.out.println("Succesfully connected to '" + db.getName() + "'");
         } catch (Exception e) {
@@ -87,7 +86,7 @@ public class MongoHandler {
      * @param event The ground truth event, for which the tweet is actually referring to
      * @return True if the process succeeds, false otherwise
      */
-    public final boolean insertTweetToMongoDB(Status status, Config config, String event) {
+    public final boolean insertTweetIntoMongoDB(Status status, Config config, String event) {
         
         try {
             db.getCollection(config.getRawTweetsCollectionName()).insertOne(
@@ -125,7 +124,7 @@ public class MongoHandler {
         
         try {
             db.getCollection(collectionName).drop();
-            return false;
+            return true;
         } catch (MongoException e) {
             System.out.println("There was a problem deleting collection '" + collectionName + "'");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
