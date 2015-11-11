@@ -40,9 +40,10 @@ public class PreProcessor {
         int choice;
         Config config = new Config(); //Create the configuration object
         
-        System.out.println("Select a method to create your dataset.");
-        System.out.println("1. By Streaming API (Collect real-time data)");
-        System.out.println("2. By ID (Collect historical data)");
+        System.out.println("Pick one");
+        System.out.println("1. Collect dataset by Streaming API (Collect real-time data)");
+        System.out.println("2. Collect dataset by ID (Collect historical data)");
+        System.out.println("3. Get a specific tweet from MongoDB store");
         System.out.print("Your choice: ");
         
         Scanner keyboard = new Scanner(System.in);
@@ -63,6 +64,9 @@ public class PreProcessor {
                     System.out.println("Direct call by ID");
                     System.out.println("Collect historical data and store them in MongoDB.");
                     retrieveByID(config, mongoDB); //Retrieve tweets
+                } case 3: {
+                    Tweet tweet = mongoDB.retrieveTweetFromMongoDBStore(config, "198774046878474240");
+                    tweet.printTweetData();
                 } default : {
                     System.out.println("Wrong choice. Exiting now...");
                 }

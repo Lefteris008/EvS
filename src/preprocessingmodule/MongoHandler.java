@@ -16,9 +16,12 @@
  */
 package preprocessingmodule;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientException;
 import com.mongodb.MongoException;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,7 +31,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.11_1420_planet1
+ * @version 2015.11.11_1908_planet1
  */
 public class MongoHandler {
     
@@ -90,7 +93,7 @@ public class MongoHandler {
         
         try {
             db.getCollection(config.getRawTweetsCollectionName()).insertOne(
-                new Document("tweet",
+                new Document(String.valueOf(status.getId()),
                         new Document()
                                 .append("id", status.getId()) //Tweet ID
                                 .append("user", status.getUser().getName()) //Username
@@ -112,6 +115,57 @@ public class MongoHandler {
             System.out.println("There was a problem inserting the tweet.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
+        }
+    }
+    
+    /**
+     * This method parses the MongoDB store and returns the tweet that matches the String 'id'.
+     * @param config A configuration object
+     * @param id The id of the document to be retrieved
+     * @return A Tweet object containing all the information found in the document that matched the String 'id'
+     */
+    public final Tweet retrieveTweetFromMongoDBStore(Config config, String id) {
+        
+        MongoCollection<Document> coll = db.getCollection(config.getRawTweetsCollectionName());
+        
+        try {
+            FindIterable<Document> document = coll.find();
+            Document doc = document.first();
+
+            String user = (String) doc.get("user");
+            String text = (String) doc.get("text");
+            String date = (String) doc.get("date");
+            long latitude;
+            try {
+                latitude = (long) doc.get("latitude");
+            } catch(NumberFormatException e) { //Tweet has no location information
+                Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
+                latitude = -1;
+            }
+            long longitude; 
+            try {
+                longitude = (long) doc.get("longitude");
+            } catch(NumberFormatException e) { //Tweet has no location information
+                Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
+                longitude = -1;
+            }
+            int numberOfRetweets = (int) doc.get("number_of_retweets");
+            int numberOfFavorites = (int) doc.get("number_of_favorites");
+            boolean isRetweet = doc.get("is_retweet").equals("true");
+            boolean isFavorited = doc.get("is_favorited").equals("true");
+            boolean isRetweeted = doc.get("is_retweeted").equals("true");
+            String language = (String) doc.get("language");
+            String groundTruthEvent = (String) doc.get("groundTruthEvent");
+
+            Tweet tweet = new Tweet(Long.parseLong(id), user, text, date, latitude, 
+                    longitude, numberOfRetweets, numberOfFavorites, isRetweet, isFavorited, 
+                    isRetweeted, language, groundTruthEvent);
+
+            return tweet;
+        } catch(MongoException e) {
+            System.out.println("No document with id '" + id + "' was found in the collection.");
+            Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
+            return null;
         }
     }
     
