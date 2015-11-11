@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.11_1450_planet1
+ * @version 2015.11.11_1506_planet1
  */
 public class PreProcessor {
     
@@ -76,9 +76,9 @@ public class PreProcessor {
     }
     
     /**
-     * 
-     * @param config
-     * @param mongoDB 
+     * Method to extract the ground truth events and then retrieve historical tweets by their IDs.
+     * @param config A configuration object
+     * @param mongoDB A MongoDB object
      */
     public final static void retrieveByID(Config config, MongoHandler mongoDB) {
         List<String> event1List = Utils.extractTweetIDsFromFile(config, "fa_cup");
@@ -91,10 +91,10 @@ public class PreProcessor {
     }
     
     /**
-     * 
-     * @param config
-     * @param mongoDB
-     * @param keywords 
+     * Method that retrieves real-time tweets by querying the API with specific search terms.
+     * @param config A configuration object
+     * @param mongoDB A mongoDB object
+     * @param keywords A String array with the search terms
      */
     public final static void retrieveByStreamingAPI(Config config, MongoHandler mongoDB, String[] keywords) {
         new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords, mongoDB, config); //Run the streamer

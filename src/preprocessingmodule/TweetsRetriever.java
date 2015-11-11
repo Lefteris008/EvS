@@ -35,7 +35,7 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.11.11_1452_planet1
+ * @version 2015.11.11_1506_planet1
  */
 public class TweetsRetriever {
 
@@ -77,9 +77,7 @@ public class TweetsRetriever {
         
         tweetIDs.stream().forEach((item) -> {
             try {
-                
                 Status status = twitter.showStatus(Long.parseLong(item)); //Get tweet and all its metadata
-                
                 mongoDB.insertTweetIntoMongoDB(status, config, event); //Store it
             } catch(TwitterException e) {
                 System.out.println("Failed to retrieve tweet with ID: " + item);
@@ -106,7 +104,7 @@ public class TweetsRetriever {
             
             @Override
             public final void onStatus(Status status) {
-                //mongoDB.insertTweetIntoMongoDB(status, config); //Insert tweet to MongoDB
+                mongoDB.insertTweetIntoMongoDB(status, config, "NULL"); //Insert tweet to MongoDB
             }
 
             @Override
