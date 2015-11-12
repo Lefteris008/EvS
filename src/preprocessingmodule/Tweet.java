@@ -12,14 +12,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * aString with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package preprocessingmodule;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.11_2029_planet1
+ * @version 2015.11.12_1737_planet1
  */
 public class Tweet {
     
@@ -37,29 +37,29 @@ public class Tweet {
     private final String language;
     private final String groundTruthEvent;
     
-    public Tweet(long id, String username, String text, String date, 
-            long latitude, long longitude, int numberOfRetweets, 
-            int numberOfFavorites, boolean retweet, boolean favorited, 
-            boolean retweeted, String language, String groundTruthEventh) {
+    public Tweet(String id, String username, String text, String date, 
+            String latitude, String longitude, String numberOfRetweets, 
+            String numberOfFavorites, String retweet, String favorited, 
+            String retweeted, String language, String groundTruthEventh) {
         
-        this.id = id;
+        this.id = Long.parseLong(id);
         this.username = username;
         this.text = text;
         this.date = date;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.numberOfRetweets = numberOfRetweets;
-        this.numberOfFavorites = numberOfFavorites;
-        this.retweet = retweet;
-        this.favorited = favorited;
-        this.retweeted = retweeted;
+        this.latitude = Long.parseLong(latitude);
+        this.longitude = Long.parseLong(longitude);
+        this.numberOfRetweets = Integer.parseInt(numberOfRetweets);
+        this.numberOfFavorites = Integer.parseInt(numberOfFavorites);
+        this.retweet = retweet.equals("true");
+        this.favorited = favorited.equals("true");
+        this.retweeted = retweeted.equals("true");
         this.language = language;
         this.groundTruthEvent = groundTruthEventh;
     }
     
     /**
      * Returns the ID of the tweet.
-     * @return A long containing the ID
+     * @return A String containing the ID
      */
     public long getID() { return id; }
     
@@ -83,7 +83,7 @@ public class Tweet {
     
     /**
      * Returns the latitude of the location where the tweet was created.
-     * @return A long containing the tweet's latitude or '-1' in case there's no location information
+     * @return A String containing the tweet's latitude or '-1' in case there's no location information
      */
     public long getLatitude() { return latitude; }
             
@@ -145,8 +145,12 @@ public class Tweet {
         System.out.println((retweet ? "RT " : "") + text);
         System.out.println("Created at: " + date);
         System.out.println("Location");
-        System.out.println("\tLatitude: " + latitude);
-        System.out.println("]tLongitude: " + longitude);
+        if(latitude == -1) {
+            System.out.println("\tNo location info provided.");
+        } else {
+            System.out.println("\tLatitude: " + latitude);
+            System.out.println("\tLongitude: " + longitude);
+        }
         if(retweeted) {
             System.out.println("Retweeted " + numberOfRetweets + " times");
         }

@@ -16,7 +16,6 @@
  */
 package preprocessingmodule;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientException;
 import com.mongodb.MongoException;
@@ -31,7 +30,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.11_1908_planet1
+ * @version 2015.11.12_1737_planet1
  */
 public class MongoHandler {
     
@@ -56,7 +55,7 @@ public class MongoHandler {
      * Create a connection to the MongoDB database
      * @param config A configuration object
      */
-    public final void getMongoConnection(Config config) {
+    public final void connectToMongoDB(Config config) {
         
         try {
             db = client.getDatabase(config.getDBName());
@@ -93,21 +92,21 @@ public class MongoHandler {
         
         try {
             db.getCollection(config.getRawTweetsCollectionName()).insertOne(
-                new Document(String.valueOf(status.getId()),
+                new Document("tweet",
                         new Document()
-                                .append("id", status.getId()) //Tweet ID
+                                .append("id", String.valueOf(status.getId())) //Tweet ID
                                 .append("user", status.getUser().getName()) //Username
                                 .append("text", status.getText()) //Actual tweet
-                                .append("date", status.getCreatedAt()) //Date published
+                                .append("date", String.valueOf(status.getCreatedAt())) //Date published
                                 .append("latitude", status.getGeoLocation() != null ? String.valueOf(status.getGeoLocation().getLatitude()) : "NULL") //Latitude
                                 .append("longitude", status.getGeoLocation() != null ? String.valueOf(status.getGeoLocation().getLongitude()) : "NULL") //Longitude
-                                .append("number_of_retweets", status.getRetweetCount()) //Retweet count
-                                .append("number_of_favorites", status.getFavoriteCount()) //Favorite count
-                                .append("is_retweet", status.isRetweet()) //True if the tweet is a retweet, false otherwise
-                                .append("is_favorited", status.isFavorited()) //True if the tweet is favorited, false otherwise
-                                .append("is_retweeted", status.isRetweeted()) //True if the tweet is retweeted, false otherwise
+                                .append("number_of_retweets", String.valueOf(status.getRetweetCount())) //Retweet count
+                                .append("number_of_favorites", String.valueOf(status.getFavoriteCount())) //Favorite count
+                                .append("is_retweet", status.isRetweet() ? "true" : "false") //True if the tweet is a retweet, false otherwise
+                                .append("is_favorited", status.isFavorited() ? "true" : "false") //True if the tweet is favorited, false otherwise
+                                .append("is_retweeted", status.isRetweeted() ? "true" : "false") //True if the tweet is retweeted, false otherwise
                                 .append("language", status.getLang()) //Language of text
-                                .append("groundTruthEvent", event)
+                                .append("groundTruthEvent", event) //Ground truth event
                 )
             );
         return true;
@@ -129,35 +128,32 @@ public class MongoHandler {
         MongoCollection<Document> coll = db.getCollection(config.getRawTweetsCollectionName());
         
         try {
-            FindIterable<Document> document = coll.find();
-            Document doc = document.first();
-
-            String user = (String) doc.get("user");
-            String text = (String) doc.get("text");
-            String date = (String) doc.get("date");
-            long latitude;
-            try {
-                latitude = (long) doc.get("latitude");
-            } catch(NumberFormatException e) { //Tweet has no location information
-                Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
-                latitude = -1;
+            FindIterable<Document> iterable = coll.find(new Document("tweet.id", id));
+            
+            Document document = iterable.first();
+            Document doc = document.get("tweet", Document.class); //Get the embedded document
+            
+            //Get the tweet properties
+            String user = doc.get("user", String.class);
+            String text = doc.get("text", String.class);
+            String date = doc.get("date", String.class);
+            String latitude = doc.get("latitude", String.class);
+            if(latitude.equals("NULL")) {
+                latitude = "-1";
             }
-            long longitude; 
-            try {
-                longitude = (long) doc.get("longitude");
-            } catch(NumberFormatException e) { //Tweet has no location information
-                Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
-                longitude = -1;
+            String longitude = doc.get("longitude", String.class);
+            if(longitude.equals("NULL")) {
+                longitude = "-1";
             }
-            int numberOfRetweets = (int) doc.get("number_of_retweets");
-            int numberOfFavorites = (int) doc.get("number_of_favorites");
-            boolean isRetweet = doc.get("is_retweet").equals("true");
-            boolean isFavorited = doc.get("is_favorited").equals("true");
-            boolean isRetweeted = doc.get("is_retweeted").equals("true");
-            String language = (String) doc.get("language");
-            String groundTruthEvent = (String) doc.get("groundTruthEvent");
+            String numberOfRetweets = doc.get("number_of_retweets", String.class);
+            String numberOfFavorites = doc.get("number_of_favorites", String.class);
+            String isRetweet = doc.get("is_retweet", String.class);
+            String isFavorited = doc.get("is_favorited", String.class);
+            String isRetweeted = doc.get("is_retweeted", String.class);
+            String language = doc.get("language", String.class);
+            String groundTruthEvent = doc.get("groundTruthEvent", String.class);
 
-            Tweet tweet = new Tweet(Long.parseLong(id), user, text, date, latitude, 
+            Tweet tweet = new Tweet(id, user, text, date, latitude, 
                     longitude, numberOfRetweets, numberOfFavorites, isRetweet, isFavorited, 
                     isRetweeted, language, groundTruthEvent);
 

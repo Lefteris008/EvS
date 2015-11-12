@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.11_1506_planet1
+ * @version 2015.11.12_1737_planet1
  */
 public class PreProcessor {
     
@@ -52,7 +52,7 @@ public class PreProcessor {
         MongoHandler mongoDB = new MongoHandler(config);
         
         try {
-            mongoDB.getMongoConnection(config); //Get MongoDB connection
+            mongoDB.connectToMongoDB(config); //Get MongoDB connection
 
             switch(choice) {
                 case 1: {
@@ -60,13 +60,19 @@ public class PreProcessor {
                     System.out.println("Collect real-time data and store them in MongoDB.");
                     keywords = Utils.extractTermsFromFile(config); //Get the keywords
                     retrieveByStreamingAPI(config, mongoDB, keywords); //Retrieve tweets
+                    break;
                 } case 2: {
                     System.out.println("Direct call by ID");
                     System.out.println("Collect historical data and store them in MongoDB.");
                     retrieveByID(config, mongoDB); //Retrieve tweets
+                    break;
                 } case 3: {
-                    Tweet tweet = mongoDB.retrieveTweetFromMongoDBStore(config, "198774046878474240");
+                    System.out.print("Type in the ID you want to search for: ");
+                    String id = keyboard.next();
+                    System.out.println("Test search for tweet with ID: '"+ id + "'");
+                    Tweet tweet = mongoDB.retrieveTweetFromMongoDBStore(config, id);
                     tweet.printTweetData();
+                    break;
                 } default : {
                     System.out.println("Wrong choice. Exiting now...");
                 }
