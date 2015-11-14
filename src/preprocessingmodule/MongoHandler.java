@@ -30,7 +30,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.12_1737_planet1
+ * @version 2015.11.14_1705_planet1
  */
 public class MongoHandler {
     
@@ -103,8 +103,8 @@ public class MongoHandler {
                                 .append("number_of_retweets", String.valueOf(status.getRetweetCount())) //Retweet count
                                 .append("number_of_favorites", String.valueOf(status.getFavoriteCount())) //Favorite count
                                 .append("is_retweet", status.isRetweet() ? "true" : "false") //True if the tweet is a retweet, false otherwise
-                                .append("is_favorited", status.isFavorited() ? "true" : "false") //True if the tweet is favorited, false otherwise
-                                .append("is_retweeted", status.isRetweeted() ? "true" : "false") //True if the tweet is retweeted, false otherwise
+                                .append("is_favorited", status.getFavoriteCount() > 0 ? "true" : "false") //True if the tweet is favorited, false otherwise
+                                .append("is_retweeted", status.getRetweetCount() > 0 ? "true" : "false") //True if the tweet is retweeted, false otherwise
                                 .append("language", status.getLang()) //Language of text
                                 .append("groundTruthEvent", event) //Ground truth event
                 )
@@ -125,10 +125,10 @@ public class MongoHandler {
      */
     public final Tweet retrieveTweetFromMongoDBStore(Config config, String id) {
         
-        MongoCollection<Document> coll = db.getCollection(config.getRawTweetsCollectionName());
+        MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
         
         try {
-            FindIterable<Document> iterable = coll.find(new Document("tweet.id", id));
+            FindIterable<Document> iterable = collection.find(new Document("tweet.id", id));
             
             Document document = iterable.first();
             Document doc = document.get("tweet", Document.class); //Get the embedded document

@@ -19,7 +19,7 @@ package preprocessingmodule;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.12_1737_planet1
+ * @version 2015.11.14_1705_planet1
  */
 public class Tweet {
     
@@ -27,8 +27,8 @@ public class Tweet {
     private final String username;
     private final String text;
     private final String date;
-    private final long latitude;
-    private final long longitude;
+    private final double latitude;
+    private final double longitude;
     private final int numberOfRetweets;
     private final int numberOfFavorites;
     private final boolean retweet;
@@ -46,8 +46,8 @@ public class Tweet {
         this.username = username;
         this.text = text;
         this.date = date;
-        this.latitude = Long.parseLong(latitude);
-        this.longitude = Long.parseLong(longitude);
+        this.latitude = Double.parseDouble(latitude);
+        this.longitude = Double.parseDouble(longitude);
         this.numberOfRetweets = Integer.parseInt(numberOfRetweets);
         this.numberOfFavorites = Integer.parseInt(numberOfFavorites);
         this.retweet = retweet.equals("true");
@@ -85,13 +85,13 @@ public class Tweet {
      * Returns the latitude of the location where the tweet was created.
      * @return A String containing the tweet's latitude or '-1' in case there's no location information
      */
-    public long getLatitude() { return latitude; }
+    public double getLatitude() { return latitude; }
             
     /**
      * Returns the longitude of the location where the tweet was created.
      * @return A long containing the tweet's longitude or '-1' in case there's no location information
      */
-    public long getLongitude() { return longitude; }
+    public double getLongitude() { return longitude; }
     
     /**
      * Returns the number of times the tweet was retweeted.
@@ -140,9 +140,9 @@ public class Tweet {
      */
     public void printTweetData() {
         System.out.println("Tweet with ID '" + id + "'");
-        System.out.println("--------------------------------------------\n");
+        System.out.println("--------------------------------------------");
         System.out.println("@" + username);
-        System.out.println((retweet ? "RT " : "") + text);
+        System.out.println(text);
         System.out.println("Created at: " + date);
         System.out.println("Location");
         if(latitude == -1) {
