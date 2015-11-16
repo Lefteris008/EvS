@@ -24,7 +24,7 @@ import preprocessingmodule.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.16_1902_planet1
+ * @version 2015.11.16_1925_planet1
  */
 public class Statistics {
     
@@ -43,16 +43,7 @@ public class Statistics {
      * @return The average value of the elements of the list
      */
     public static double average(List<Integer> list) {
-        
-        double average;
-        try {
-            average = sum(list) / list.size();
-        } catch(ArithmeticException e) {
-            Logger.getLogger(Config.class.getName()).log(Level.SEVERE, null, e);
-            return -1.0;
-        }
-        
-        return average;
+        return list.stream().mapToInt(Integer::intValue).average().getAsDouble();
     }
 
     /**
