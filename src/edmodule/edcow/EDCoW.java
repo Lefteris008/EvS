@@ -42,6 +42,7 @@ public class EDCoW {
     private final int timeSliceB;
     private final int countCorpus;
     private final Dataset corpus;
+    public Events events;
     
     public EDCoW(int timeSliceA, int timeSliceB, int countCorpus, Dataset corpus){
         this.timeSliceA = timeSliceA;
@@ -87,6 +88,11 @@ public class EDCoW {
             processWindow(i);
         }
         Collections.sort(eventList);
+        events = new Events();
+        eventList.stream().forEach((event) -> {
+            //events.list.add(new Event(event.getKeywordsAsString(),AppParameters.dataset.corpus.convertTimeSliceToDay((int)event.startSlice)+","+AppParameters.dataset.corpus.convertTimeSliceToDay((int)event.endSlice)));
+        });
+        events.setFullList();
     }
     
     public void processWindow(int window){
