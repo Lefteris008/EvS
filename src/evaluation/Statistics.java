@@ -24,7 +24,7 @@ import preprocessingmodule.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.12_1928_planet1
+ * @version 2015.11.16_1902_planet1
  */
 public class Statistics {
     
@@ -34,13 +34,7 @@ public class Statistics {
      * @return The summary of the elements
      */
     public static int sum(List<Integer> list) {
-
-        int sum = 0;
-        for (Integer list1 : list) {
-            sum = sum + list1;
-        }
-        
-        return sum;
+        return list.stream().mapToInt(Integer::intValue).sum();
     }
 
     /**
