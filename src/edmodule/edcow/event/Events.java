@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edmodule.event;
+package edmodule.edcow.event;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -58,9 +58,7 @@ public class Events implements Serializable {
                     indexes.add(i);
                 }
             }
-            for (int j : indexes) {
-                observableList.remove(j);
-            }
+            indexes.stream().forEach(observableList::remove);
         } else {
             setFullList();
         }
