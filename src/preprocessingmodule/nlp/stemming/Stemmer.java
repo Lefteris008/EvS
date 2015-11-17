@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 Adrien Guille <adrien.guille@univ-lyon2.fr>, Lefteris Paraskevas
+/* 
+ * Copyright (C) 2015 Lefteris Paraskevas
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,30 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule.nlp;
-
-import org.tartarus.snowball.ext.FrenchStemmer;
+package preprocessingmodule.nlp.stemming;
 
 /**
- *
- * @author  Adrien GUILLE, Laboratoire ERIC, Université Lumière Lyon 2
+ * 
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1553_planet1
+ * @version 2015.11.17_1545_planet1
  */
-public class FrenchStemming implements Stemmer {
-    FrenchStemmer frStemmer;
-    
-    public FrenchStemming(){
-        frStemmer = new FrenchStemmer();
-    }
-    
-    @Override
-    public String stem(String word) {
-        frStemmer.setCurrent(word);
-        if(frStemmer.stem()){
-            return frStemmer.getCurrent();
-        }else{
-            return word;
-        }
-    }
+public interface Stemmer {
+    public String stem(String word);
 }

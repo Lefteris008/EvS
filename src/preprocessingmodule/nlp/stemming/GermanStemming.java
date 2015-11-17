@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Adrien Guille <adrien.guille@univ-lyon2.fr>, Lefteris Paraskevas
+ * Copyright (C) 2015 Lefteris Paraskevas
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,28 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule.nlp;
+package preprocessingmodule.nlp.stemming;
 
-import org.apache.lucene.analysis.fa.PersianNormalizer;
+import org.tartarus.snowball.ext.GermanStemmer;
 
 /**
  *
- * @author  Farrokh GHAMSARY, Techlimed
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1551_planet1
+ * @version 2015.11.17_1557_planet1
  */
-public class PersianStemming implements Stemmer {
-    
-    PersianNormalizer persianStemmer;
+public class GermanStemming implements Stemmer {
+    GermanStemmer deStemmer;
 
-	public PersianStemming() {
-		this.persianStemmer = new PersianNormalizer();
-	}
-
-	@Override
-	public String stem(String word) {
-		char[] wordArray = word.toCharArray();
-		return new String(wordArray, 0, persianStemmer.normalize(wordArray, wordArray.length));
-	}
+    public GermanStemming() {
+        deStemmer = new GermanStemmer();
+    }
     
+    @Override
+    public String stem(String word) {
+        deStemmer.setCurrent(word);
+        if(deStemmer.stem()){
+            return deStemmer.getCurrent();
+        }else{
+            return word;
+        }
+    }
 }

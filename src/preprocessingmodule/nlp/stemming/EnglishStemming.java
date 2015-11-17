@@ -14,25 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule.nlp;
+package preprocessingmodule.nlp.stemming;
 
-import org.apache.lucene.analysis.el.GreekStemmer;
+import org.tartarus.snowball.ext.EnglishStemmer;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1548_planet1
+ * @version 2015.11.17_1524_planet1
  */
-public class GreekStemming implements Stemmer {
-    GreekStemmer grStemmer;
+public class EnglishStemming implements Stemmer {
+    
+    EnglishStemmer engStemmer;
 
-    public GreekStemming() {
-        this.grStemmer = new GreekStemmer();
+    public EnglishStemming() {
+        engStemmer = new EnglishStemmer();
     }
-
+    
     @Override
     public String stem(String word) {
-        char[] wordArray = word.toCharArray();
-        return new String(wordArray, 0, grStemmer.stem(wordArray, wordArray.length));
+        engStemmer.setCurrent(word);
+        if(engStemmer.stem()){
+            return engStemmer.getCurrent();
+        }else{
+            return word;
+        }
     }
+    
 }

@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.11_1449_planet1
+ * @version 2015.11.17_1854_planet1
  */
 public class Utils {
     
@@ -67,7 +67,7 @@ public class Utils {
         
         List<String> list = new ArrayList<>();
         
-        String path = config.getDatasetLocation() + filename + "\\";
+        String path = config.getDatasetPath() + filename + "\\";
         
         try {
             Files.walk(Paths.get(path)).forEach(filePath -> { //For all files in the current folder
@@ -78,14 +78,14 @@ public class Utils {
                            list.add(line); //Store the id to the list
                         }
                     } catch(IOException e) {
-                        System.out.println("No filed found in '" + config.getDatasetLocation() + filename + "\\'Place the appropriate files in classpath and re-run the project");
+                        System.out.println("No filed found in '" + config.getDatasetPath() + filename + "\\'Place the appropriate files in classpath and re-run the project");
                         Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
                         System.exit(1);
                     }
                 }
             });     
         } catch (IOException e) {
-            System.out.println("Folder '" + config.getDatasetLocation() + filename + "\\' is missing.\nPlace a correct folder in classpath and re-run the project");
+            System.out.println("Folder '" + config.getDatasetPath() + filename + "\\' is missing.\nPlace a correct folder in classpath and re-run the project");
             Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
             System.exit(1);
         }

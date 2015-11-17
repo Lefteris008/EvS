@@ -20,19 +20,21 @@ import edmodule.utils.Dataset;
 import edmodule.edcow.EDCoW;
 import edmodule.lsh.LSH;
 import java.util.Scanner;
+import preprocessingmodule.Config;
+import preprocessingmodule.nlp.stopwords.StopWords;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.29_1937_planet1
+ * @version 2015.11.17_1852_planet1
  */
 public class EDMethodPicker {
     
     /**
-     * Main method to pick your desired method of Event Detection
-     * @param args 
+     * Constructor to pick method of Event Detection 
+     * @param config A configuration object
      */
-    public static void main(String args[]) {
+    public EDMethodPicker(Config config) {
         System.out.println("Pick a method for Event Detection");
         System.out.println("1. EDCoW");
         System.out.println("2. LSH");
@@ -46,7 +48,9 @@ public class EDMethodPicker {
             case 1: {
                 System.out.println("Selected method: EDCoW");
                 EDCoW edcow = new EDCoW(1, 1, 1, corpus); //Test object
-                edcow.apply(); //Apply the algorithm
+                StopWords stopwordsHandler = new StopWords();
+                stopwordsHandler.loadStopWords(config); //Load the stopwords
+                edcow.apply(stopwordsHandler); //Apply the algorithm
             } 
             case 2: {
                 System.out.println("Selected method: LSH");

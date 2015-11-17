@@ -1,5 +1,5 @@
-/* 
- * Copyright (C) 2015 Lefteris Paraskevas
+/*
+ * Copyright (C) 2015 Adrien Guille <adrien.guille@univ-lyon2.fr>, Lefteris Paraskevas
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule.nlp;
+package preprocessingmodule.nlp.stemming;
+
+import org.apache.lucene.analysis.ar.ArabicStemmer;
 
 /**
- * 
+ *
+ * @author  Farrokh GHAMSARY, Techlimed
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1545_planet1
+ * @versio  2015.11.17_1546_planet1
  */
-public interface Stemmer {
-    public String stem(String word);
+public class ArabicStemming implements Stemmer {
+    ArabicStemmer arabicStemmer;
+
+    public ArabicStemming() {
+        this.arabicStemmer = new ArabicStemmer();
+    }
+
+    @Override
+    public String stem(String word) {
+        char[] wordArray = word.toCharArray();
+        return new String(wordArray, 0, arabicStemmer.stem(wordArray, wordArray.length));
+    }
 }

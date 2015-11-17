@@ -14,31 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule.nlp;
+package preprocessingmodule.nlp.stemming;
 
-import org.tartarus.snowball.ext.EnglishStemmer;
+import org.tartarus.snowball.ext.ItalianStemmer;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1524_planet1
+ * @version 2015.11.17_1555_planet1
  */
-public class EnglishStemming implements Stemmer {
-    
-    EnglishStemmer engStemmer;
+public class ItalianStemming implements Stemmer {
+    ItalianStemmer itStemmer;
 
-    public EnglishStemming() {
-        engStemmer = new EnglishStemmer();
+    public ItalianStemming() {
+        itStemmer = new ItalianStemmer();
     }
     
     @Override
     public String stem(String word) {
-        engStemmer.setCurrent(word);
-        if(engStemmer.stem()){
-            return engStemmer.getCurrent();
+        itStemmer.setCurrent(word);
+        if(itStemmer.stem()){
+            return itStemmer.getCurrent();
         }else{
             return word;
         }
     }
-    
 }

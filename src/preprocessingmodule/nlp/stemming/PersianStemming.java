@@ -14,26 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule.nlp;
+package preprocessingmodule.nlp.stemming;
 
-import org.apache.lucene.analysis.ar.ArabicStemmer;
+import org.apache.lucene.analysis.fa.PersianNormalizer;
 
 /**
  *
  * @author  Farrokh GHAMSARY, Techlimed
  * @author  Lefteris Paraskevas
- * @versio  2015.11.17_1546_planet1
+ * @version 2015.11.17_1551_planet1
  */
-public class ArabicStemming implements Stemmer {
-    ArabicStemmer arabicStemmer;
+public class PersianStemming implements Stemmer {
+    
+    PersianNormalizer persianStemmer;
 
-    public ArabicStemming() {
-        this.arabicStemmer = new ArabicStemmer();
-    }
+	public PersianStemming() {
+		this.persianStemmer = new PersianNormalizer();
+	}
 
-    @Override
-    public String stem(String word) {
-        char[] wordArray = word.toCharArray();
-        return new String(wordArray, 0, arabicStemmer.stem(wordArray, wordArray.length));
-    }
+	@Override
+	public String stem(String word) {
+		char[] wordArray = word.toCharArray();
+		return new String(wordArray, 0, persianStemmer.normalize(wordArray, wordArray.length));
+	}
+    
 }

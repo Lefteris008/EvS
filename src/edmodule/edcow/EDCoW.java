@@ -24,6 +24,7 @@ import java.util.*;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import preprocessingmodule.nlp.stopwords.StopWords;
 
 /**
  *
@@ -64,7 +65,7 @@ public class EDCoW {
         return "Event detection with clustering of wavelet-based signals";
     }
 
-    public void apply() {
+    public void apply(StopWords stopwordsHandler) {
         double minTermOccur = minTermSupport / countCorpus; //Min support * Message count corpus
         double maxTermOccur = maxTermSupport / countCorpus; //Max support * Message count corpus
         //Deltas and gammas already configured
@@ -74,7 +75,7 @@ public class EDCoW {
         eventList = new LinkedList<>();
         for(int i = 0; i < corpus.corpusSize; i++){
             String term = corpus.dataset.get(i);
-            if(term.length()>1 && !corpus.stopWords.contains(term)) {
+            if(term.length()>1 && !stopwordsHandler.isStopWord(term)) {
                 Short[] frequency = corpus.getDocumentsTermFrequency(i);
                 int cf = 0;
                 for(short freq : frequency){
