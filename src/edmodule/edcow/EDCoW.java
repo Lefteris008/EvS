@@ -41,7 +41,7 @@ public class EDCoW {
     private LinkedList<EDCoWEvent> eventList;
     private final int timeSliceA;
     private final int timeSliceB;
-    private final int countCorpus;
+    private final int countCorpus; //Total number of tweets
     private final Dataset corpus;
     public Events events;
     

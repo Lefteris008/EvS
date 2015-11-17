@@ -14,30 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edmodule.utils;
+package preprocessingmodule.nlp;
 
-import java.util.Arrays;
-import java.util.List;
+import org.tartarus.snowball.ext.SpanishStemmer;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.02_1609_planet1
+ * @version 2015.11.17_1558_planet1
  */
-public class Tokenizer {
-    
-    /**
-     * Tokenizes a given String phrase into the words that it consists of.
-     * @param phrase The String phrase that is going to be tokenized
-     * @return A String list with the tokens of the initial phrase
-     */
-    public static List<String> tokenize(String phrase) {
-        String[] temp;
-        temp = phrase.split(" ");
-        
-        ///Code for stopwords and other optimizations
-        
-        return Arrays.asList(temp);
+public class SpanishStemming implements Stemmer {
+    SpanishStemmer esStemmer;
+
+    public SpanishStemming() {
+        esStemmer = new SpanishStemmer();
     }
     
+    @Override
+    public String stem(String word) {
+        esStemmer.setCurrent(word);
+        if(esStemmer.stem()){
+            return esStemmer.getCurrent();
+        }else{
+            return word;
+        }
+    }
 }

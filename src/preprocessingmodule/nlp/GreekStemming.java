@@ -14,24 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edmodule.utils;
+package preprocessingmodule.nlp;
+
+import org.apache.lucene.analysis.el.GreekStemmer;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.02_1453_planet1
+ * @version 2015.11.17_1548_planet1
  */
-public class Lemmatization {
-    
-    /**
-     * Finds and returns the lemma of a given word.
-     * @param term The word to be Lemmatizes
-     * @return The lemma of the word
-     */
-    public static String returnWordLemma(String term) {
-        //Code for lemmatization
-        String lemma = "Test";
-        return lemma;
+public class GreekStemming implements Stemmer {
+    GreekStemmer grStemmer;
+
+    public GreekStemming() {
+        this.grStemmer = new GreekStemmer();
     }
-    
+
+    @Override
+    public String stem(String word) {
+        char[] wordArray = word.toCharArray();
+        return new String(wordArray, 0, grStemmer.stem(wordArray, wordArray.length));
+    }
 }
