@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import preprocessingmodule.nlp.Tokenizer;
+import preprocessingmodule.nlp.stopwords.Language;
+import preprocessingmodule.nlp.stopwords.StopWords;
 
 /**
  *
@@ -72,6 +75,11 @@ public class PreProcessor {
                     System.out.println("Test search for tweet with ID: '"+ id + "'");
                     Tweet tweet = mongoDB.retrieveTweetFromMongoDBStore(config, id);
                     tweet.printTweetData();
+                    
+                    StopWords sw = new StopWords(config);
+                    sw.loadStopWords(Language.english); //Load english stopwords
+                    Tokenizer tk = new Tokenizer(tweet.getText(), sw);
+                    tk.textTokenizingTester();
                     break;
                 } default : {
                     System.out.println("Wrong choice. Exiting now...");

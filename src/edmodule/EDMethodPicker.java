@@ -21,12 +21,13 @@ import edmodule.edcow.EDCoW;
 import edmodule.lsh.LSH;
 import java.util.Scanner;
 import preprocessingmodule.Config;
+import preprocessingmodule.nlp.stopwords.Language;
 import preprocessingmodule.nlp.stopwords.StopWords;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1852_planet1
+ * @version 2015.11.18_2008_planet1
  */
 public class EDMethodPicker {
     
@@ -48,8 +49,8 @@ public class EDMethodPicker {
             case 1: {
                 System.out.println("Selected method: EDCoW");
                 EDCoW edcow = new EDCoW(1, 1, 1, corpus); //Test object
-                StopWords stopwordsHandler = new StopWords();
-                stopwordsHandler.loadStopWords(config); //Load the stopwords
+                StopWords stopwordsHandler = new StopWords(config);
+                stopwordsHandler.loadStopWords(Language.english); //Load the stopwords for english language
                 edcow.apply(stopwordsHandler); //Apply the algorithm
             } 
             case 2: {

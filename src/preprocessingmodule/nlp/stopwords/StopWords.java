@@ -30,29 +30,33 @@ import preprocessingmodule.PreProcessor;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1848_planet1
+ * @version 2015.11.18_2009_planet1
  */
 public final class StopWords {
     
-    private static HashSet<String> stopwords;
+    private final HashSet<String> stopwords = new HashSet<>();
+    private final Config config;
     
     /**
      * Public constructor that initializes a HashSet.
+     * @param config
      */
-    public StopWords() {
-        stopwords = new HashSet<>();
+    public StopWords(Config config) {
+        this.config = config;
     }
     
     /**
      * Method that loads all stopwords contained in various files into a HashSet.
-     * @param config A Configuration object.
+     * @param lan The language for which the stopwords are going to be loaded.
      * @return True if the process succeeds, false otherwise.
      */
-    public final boolean loadStopWords(Config config) {
+    public final boolean loadStopWords(Language lan) {
         
         try {
             Files.walk(Paths.get(config.getStopwordsPath())).forEach(filePath -> {
-                if (Files.isRegularFile(filePath)) { //Open every single file
+                if (Files.isRegularFile(filePath) && 
+                        (filePath.toString().contains(lan.toString()) || 
+                        filePath.toString().contains("punctuation.txt"))) { //Open stopwords files in appropriate language and punctuation
                     try (BufferedReader br = new BufferedReader(new FileReader(filePath.toString()))) {
                         String line;
                         while ((line = br.readLine()) != null) {

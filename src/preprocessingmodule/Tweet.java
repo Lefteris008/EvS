@@ -16,6 +16,14 @@
  */
 package preprocessingmodule;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author  Lefteris Paraskevas
@@ -77,9 +85,18 @@ public class Tweet {
     
     /**
      * Returns the date the tweet was created at.
-     * @return A String containing the date
+     * @return A date object
      */
-    public String getDate() { return date; }
+    public Date getDate() {
+        try {
+            DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+            Date dateObject = format.parse(date);
+            return dateObject;
+        } catch (ParseException e) {
+            Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
+            return null;
+        }
+    }
     
     /**
      * Returns the latitude of the location where the tweet was created.
@@ -139,26 +156,26 @@ public class Tweet {
      * Prints the tweet metadata along with its text.
      */
     public void printTweetData() {
-        System.out.println("Tweet with ID '" + id + "'");
+        System.out.println("Tweet with ID '" + getID() + "'");
         System.out.println("--------------------------------------------");
-        System.out.println("@" + username);
-        System.out.println(text);
-        System.out.println("Created at: " + date);
+        System.out.println("@" + getUsername());
+        System.out.println(getText());
+        System.out.println("Created at: " + getDate().toString());
         System.out.println("Location");
-        if(latitude == -1) {
+        if(getLatitude() == -1) {
             System.out.println("\tNo location info provided.");
         } else {
-            System.out.println("\tLatitude: " + latitude);
-            System.out.println("\tLongitude: " + longitude);
+            System.out.println("\tLatitude: " + getLatitude());
+            System.out.println("\tLongitude: " + getLongitude());
         }
-        if(retweeted) {
-            System.out.println("Retweeted " + numberOfRetweets + " times");
+        if(isRetweeted()) {
+            System.out.println("Retweeted " + getNumberOfRetweets() + " times");
         }
-        if(favorited) {
-            System.out.println("Favorited " + numberOfFavorites + " times");
+        if(isFavorited()) {
+            System.out.println("Favorited " + getNumberOfFavorites() + " times");
         }
-        System.out.println("Language: " + language);
-        System.out.println("Ground truth event: " + groundTruthEvent);
+        System.out.println("Language: " + getLanguage());
+        System.out.println("Ground truth event: " + getGroundTruthEvent());
         System.out.println("--------------------------------------------");
     }
 }
