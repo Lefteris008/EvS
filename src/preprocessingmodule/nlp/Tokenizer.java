@@ -25,7 +25,7 @@ import preprocessingmodule.nlp.stopwords.StopWords;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.18_2017_planet1
+ * @version 2015.11.18_2030_planet1
  */
 public class Tokenizer {
     
@@ -44,6 +44,7 @@ public class Tokenizer {
      */
     public Tokenizer(String text, StopWords sw) {
         String[] temp = text.split(" "); //Split them according to white spaces
+        numberOfTokens = temp.length;
         for (String temp1 : temp) {
             if(isHashtag(temp1)) {
                 hashtags.add(temp1.replace("#", "")); //Remove '#' character
@@ -56,7 +57,6 @@ public class Tokenizer {
             } else {
                 cleanTokens.add(temp1);
             }
-            numberOfTokens++;
         }
     }
     
