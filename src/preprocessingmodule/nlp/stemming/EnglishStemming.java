@@ -21,7 +21,7 @@ import org.tartarus.snowball.ext.EnglishStemmer;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1524_planet1
+ * @version 2015.11.18_2034_planet1
  */
 public class EnglishStemming implements Stemmer {
     
@@ -31,13 +31,18 @@ public class EnglishStemming implements Stemmer {
         engStemmer = new EnglishStemmer();
     }
     
+    /**
+     * Returns the stem of a word in the English language.
+     * @param word The word to be processed.
+     * @return A String in lowercase.
+     */
     @Override
     public String stem(String word) {
         engStemmer.setCurrent(word);
         if(engStemmer.stem()){
-            return engStemmer.getCurrent();
+            return engStemmer.getCurrent().toLowerCase();
         }else{
-            return word;
+            return word.toLowerCase();
         }
     }
     

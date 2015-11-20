@@ -18,6 +18,7 @@ package edmodule.edcow;
 
 import edmodule.edcow.event.Events;
 import ch.epfl.lis.jmod.modularity.community.Community;
+import edmodule.edcow.event.Event;
 import edmodule.utils.Dataset;
 import java.io.IOException;
 import java.util.*;
@@ -43,14 +44,14 @@ public class EDCoW {
     private final int timeSliceA;
     private final int timeSliceB;
     private final int countCorpus; //Total number of tweets
-    private final Dataset corpus;
+    private final Dataset ds;
     public Events events;
     
-    public EDCoW(int timeSliceA, int timeSliceB, int countCorpus, Dataset corpus){
+    public EDCoW(int timeSliceA, int timeSliceB, int countCorpus, Dataset ds){
         this.timeSliceA = timeSliceA;
         this.timeSliceB = timeSliceB;
         this.countCorpus = countCorpus;
-        this.corpus = corpus;
+        this.ds = ds;
     }
 
     public String getName() {
@@ -65,7 +66,7 @@ public class EDCoW {
         return "Event detection with clustering of wavelet-based signals";
     }
 
-    public void apply(StopWords stopwordsHandler) {
+    public void apply(StopWords swHandler) {
         double minTermOccur = minTermSupport / countCorpus; //Min support * Message count corpus
         double maxTermOccur = maxTermSupport / countCorpus; //Max support * Message count corpus
         //Deltas and gammas already configured
@@ -73,10 +74,11 @@ public class EDCoW {
         int windows = (timeSliceB-timeSliceA)/delta2;
         termDocMap = new HashMap<>();
         eventList = new LinkedList<>();
-        for(int i = 0; i < corpus.corpusSize; i++){
-            String term = corpus.dataset.get(i);
-            if(term.length()>1 && !stopwordsHandler.isStopWord(term)) {
-                Short[] frequency = corpus.getDocumentsTermFrequency(i);
+        
+        for(int i = 0; i < ds.getTerms().size(); i++){
+            String term = ds.getTerms().get(i);
+            if(term.length()>1 && !swHandler.isStopWord(term)) {
+                Short[] frequency = ds.getDocumentsTermFrequency(i);
                 int cf = 0;
                 for(short freq : frequency){
                     cf += freq;
@@ -100,7 +102,7 @@ public class EDCoW {
     public void processWindow(int window){
     	try{
             LinkedList<EDCoWKeyword> keyWords = new LinkedList<>();
-            Integer[] distributioni = corpus.getNumberOfDocuments();
+            Integer[] distributioni = ds.getNumberOfDocuments();
             double[] distributiond = new double[delta2];
             int startSlice = window*delta2;
             int endSlice = startSlice+delta2-1;

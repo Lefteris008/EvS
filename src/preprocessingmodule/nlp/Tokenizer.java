@@ -25,11 +25,12 @@ import preprocessingmodule.nlp.stopwords.StopWords;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.18_2030_planet1
+ * @version 2015.11.20_2045_planet1
  */
 public class Tokenizer {
     
     private static final List<String> cleanTokens  = new ArrayList<>();
+    private static final List<String> cleanTokensAndHashtags = new ArrayList<>();
     private static final List<String> hashtags = new ArrayList<>();
     private static final List<String> nameHandles = new ArrayList<>();
     private static final List<String> urlsAndNumberAbbreviations = new ArrayList<>();
@@ -48,6 +49,7 @@ public class Tokenizer {
         for (String temp1 : temp) {
             if(isHashtag(temp1)) {
                 hashtags.add(temp1.replace("#", "")); //Remove '#' character
+                cleanTokensAndHashtags.add(temp1.replace("#", ""));
             } else if(isNameHandle(temp1)) {
                 nameHandles.add(temp1.replace("@", "")); //Remove '@' character
             } else if(isURLOrNumberAbbreviation(temp1)) {
@@ -56,33 +58,40 @@ public class Tokenizer {
                 stopWords.add(temp1);
             } else {
                 cleanTokens.add(temp1);
+                cleanTokensAndHashtags.add(temp1);
             }
         }
     }
     
     /**
      * Returns the clean tokens of the phrase.
-     * @return A String list with the clean tokens of the initial phrase -excluding the URLs, hashtags and name handles
+     * @return A String list with the clean tokens of the initial phrase -excluding the URLs, number abbreviations, hashtags and name handles
      */
-    public static List<String> getCleanTokensFromText() { return cleanTokens; }
+    public List<String> getCleanTokens() { return cleanTokens; }
+    
+    /**
+     * Returns the clean tokens and the hashtags of the phrase.
+     * @return A String list with the clean tokens of the initial phrase and its hashtags -excluding the URLs, number abbreviations and name handles.
+     */
+    public List<String> getCleanTokensAndHashtags() { return cleanTokensAndHashtags; }
     
     /**
      * Returns the stopwords of the phrase.
      * @return A list containing only the stopwords of the original phrase.
      */
-    public static final List<String> getStopWordsFromText() { return stopWords; }
+    public final List<String> getStopWords() { return stopWords; }
     
     /**
      * Returns the hashtags of the phrase.
      * @return A list containing only the hashtags of the tweet, without the '#' character.
      */
-    public static final List<String> getHashtags() { return hashtags; }
+    public final List<String> getHashtags() { return hashtags; }
     
     /**
      * Returns the name handles of the phrase.
      * @return A list containing only the name handles of the tweet, without the '@' character.
      */
-    public static final List<String> getNameHandles() { return nameHandles; }
+    public final List<String> getNameHandles() { return nameHandles; }
     
     /**
      * Returns the URLs and the number abbreviations (e.g. current time) of the phrase.
@@ -127,8 +136,8 @@ public class Tokenizer {
     public final void textTokenizingTester() {
         System.out.println("Given text contains " + numberOfTokens + " tokens of which:");
         
-        System.out.println("\n" + getCleanTokensFromText().size() + " are clean tokens. Printing them now...");
-        getCleanTokensFromText().stream().forEach((token) -> {
+        System.out.println("\n" + getCleanTokens().size() + " are clean tokens. Printing them now...");
+        getCleanTokens().stream().forEach((token) -> {
             System.out.println("\t" + token);
         });
         
@@ -142,13 +151,13 @@ public class Tokenizer {
             System.out.println("\t" + token);
         });
         
-        System.out.println("\n" + getURLsAndNumberAbbreviation().size() + " are URLs. Printing them now...");
+        System.out.println("\n" + getURLsAndNumberAbbreviation().size() + " are URLs and number abbreviations. Printing them now...");
         getURLsAndNumberAbbreviation().stream().forEach((token) -> {
             System.out.println("\t" + token);
         });
         
-        System.out.println("\n" + getStopWordsFromText().size() + " are stopwords. Printing them now...");
-        getStopWordsFromText().stream().forEach((token) -> {
+        System.out.println("\n" + getStopWords().size() + " are stopwords. Printing them now...");
+        getStopWords().stream().forEach((token) -> {
             System.out.println("\t" + token);
         });
     }

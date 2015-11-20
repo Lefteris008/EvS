@@ -34,6 +34,7 @@ public class EDMethodPicker {
     /**
      * Constructor to pick method of Event Detection 
      * @param config A configuration object
+     * @param sw
      */
     public EDMethodPicker(Config config) {
         System.out.println("Pick a method for Event Detection");
@@ -44,13 +45,15 @@ public class EDMethodPicker {
         Scanner keyboard = new Scanner(System.in);
         int choice = keyboard.nextInt();
         
-        Dataset corpus = new Dataset();
         switch(choice) {
             case 1: {
-                System.out.println("Selected method: EDCoW");
-                EDCoW edcow = new EDCoW(1, 1, 1, corpus); //Test object
                 StopWords stopwordsHandler = new StopWords(config);
                 stopwordsHandler.loadStopWords(Language.english); //Load the stopwords for english language
+                Dataset ds = new Dataset(config, stopwordsHandler); //Load the dataset
+                
+                System.out.println("Selected method: EDCoW");
+                
+                EDCoW edcow = new EDCoW(1, 1, 1, ds); //Create the EDCoW object
                 edcow.apply(stopwordsHandler); //Apply the algorithm
             } 
             case 2: {
