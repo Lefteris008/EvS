@@ -77,7 +77,7 @@ public class EDCoW {
         
         for(int i = 0; i < ds.getTerms().size(); i++){
             String term = ds.getTerms().get(i);
-            if(term.length()>1 && !swHandler.isStopWord(term)) {
+            if(term.length()>1) { //Stopwords check removed as they are already ommited when creating the dataset 
                 Short[] frequency = ds.getDocumentsTermFrequency(i);
                 int cf = 0;
                 for(short freq : frequency){
