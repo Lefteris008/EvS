@@ -18,7 +18,6 @@ package edmodule.edcow;
 
 import edmodule.edcow.event.Events;
 import ch.epfl.lis.jmod.modularity.community.Community;
-import edmodule.edcow.event.Event;
 import edmodule.utils.Dataset;
 import java.io.IOException;
 import java.util.*;

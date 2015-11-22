@@ -32,17 +32,19 @@ import preprocessingmodule.nlp.stopwords.StopWords;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.21_2218_planet2
+ * @version 2015.11.22_1829_planet2
  */
 public class Dataset {
     
-    private static List<String> terms = new ArrayList<>();
-    private HashMap<String, Integer> termsWithOccurencies;
+    private static List<String> terms = new ArrayList<>(); //List containing all occuring terms
+    private HashMap<String, Integer> termsWithOccurencies; //A map containing terms along with their frequency of occurance
     private int numberOfTweets;
-    private List<DocumentTermFrequencyItem> term_doc_freq_id;
+    private List<DocumentTermFrequencyItem> termDocFreqId; //A list containg triplets of tweetIDs, termIDs and their frequencies
+    private HashMap<Integer, List<String>> docTerms; //A map containing the tweetIDs and a list of the terms that each one of them includes
+    private HashMap<String, Integer> termIds; //A map containing the ids of the terms (namely, their index as they are being read)
     
     /**
-     * It generates a working dataset. More formally, the constructor retrieves all tweets from MongoDB
+     * It creates a working dataset. More formally, the constructor retrieves all tweets from MongoDB
      * store, iterates through them, tokenizes the text of every single one of them, generates the English
      * stem of every token of them and updates a hashmap that contains terms along with their occurencies.
      * @param config A Configuration object.
@@ -74,22 +76,32 @@ public class Dataset {
                 String text = tweet.getText();
                 Tokenizer tokens = new Tokenizer(text, sw);
                 
+                //Store tokens of tweet for future use
+                docTerms.put(numberOfTweets-1, tokens.getCleanTokensAndHashtags());
+                
                 //Iterate through the clean tokens/hashtags
                 tokens.getCleanTokensAndHashtags().stream().forEach((token) -> {
                     
-                    //Get its english stem and update hashmap
+                    //Get the token's english stem and update hashmap
                     if(termsWithOccurencies.containsKey(engStem.stem(token))) {
-                        termsWithOccurencies.put(engStem.stem(token), 1);
-                    } else {
                         termsWithOccurencies.put(engStem.stem(token), termsWithOccurencies.get(engStem.stem(token)) + 1);
+                    } else {
+                        termsWithOccurencies.put(engStem.stem(token), 1);
                     }
                 });
             }
         });
-        
         terms = new ArrayList<>(termsWithOccurencies.keySet());
+        
+        //Generate the list of term IDs
+        int termCount = 0;
+        for(String term : terms) {
+            termIds.put(term, termCount);
+            termCount++;
+        }
+        
+        mongo.closeMongoConnection(config);
     }
-    
     
     /**
      * Returns the terms of the dataset.
@@ -98,11 +110,42 @@ public class Dataset {
     public List<String> getTerms() { return terms; }
     
     /**
+     * Initializes and stores a list containing objects
+     * of DocumentTermFrequencyItem class. More formally, each
+     * listing in this list contains a triplet with the id of a tweet,
+     * the id of the term that the tweet contains and the term's frequency.
+     * @param config A configuration object
+     */
+    public final void setDocTermFreqIdList(Config config) {
+        
+        docTerms.keySet().stream().forEach((tweetId) -> {
+            docTerms.get(tweetId).stream().forEach((_item) -> {
+                DocumentTermFrequencyItem item = new DocumentTermFrequencyItem(tweetId, termIds.get(_item), termsWithOccurencies.get(_item).shortValue());
+                termDocFreqId.add(item);
+            });
+        });
+        
+    }
+    
+    /**
+     * Returns true if the termDocFreqId list contains values.
+     * @return True if the list is not empty, false otherwise.
+     */
+    public final boolean frequencyListContainsValues() {
+        return !termDocFreqId.isEmpty();
+    }
+    
+    /**
      * Returns the frequencies in all occurring documents of a term.
      * @param term The index of the term in the 'terms' list.
      * @return A Short array containing the frequencies of the term in all documents.
      */
     public Short[] getDocumentsTermFrequency(int term) {
+        
+        if(!frequencyListContainsValues()) {
+            return null;
+        }
+        
         //Creates a short array which length equals to the number of retrieved tweets
         Short[] frqs = new Short[numberOfTweets];
         
@@ -110,16 +153,22 @@ public class Dataset {
         IntStream.range(0, numberOfTweets).forEach(i -> frqs[i] = 0);
         if (term != -1)
             
-            //For every single element in the list 'term_doc_freq_id'
-            term_doc_freq_id.stream()
+            //For every single element in the list 'termDocFreqId'
+            termDocFreqId.stream()
                 .filter(dti -> dti.term_id == term) //Filter out irrelevant terms
                 .forEach(dti -> frqs[dti.doc_id] = dti.frequency); //Go to the corresponding index in 'frqs' array
                 //defined by the id of the document ('doc_id') and store the corresponding frequency that already
-                //exists in 'term_doc_freq_id' array
+                //exists in 'termDocFreqId' array
         return frqs;
     }
     
+    /**
+     * Returns the number of documents.
+     * @return An Integer array containing the number of tweets.
+     */
     public Integer[] getNumberOfDocuments() {
-        return new Integer[1];
+        Integer[] numOfDocuments = new Integer[1];
+        numOfDocuments[0] = numberOfTweets;
+        return numOfDocuments;
     }
 }

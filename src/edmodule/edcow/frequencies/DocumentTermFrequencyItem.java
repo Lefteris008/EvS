@@ -4,13 +4,12 @@ import java.io.Serializable;
 
 /**
  * Created by Farrokh on 8/27/2015.
+ * Changes by Lefteris Paraskevas
  */
 public class DocumentTermFrequencyItem implements Serializable {
     public int doc_id;
     public int term_id;
     public short frequency;
-
-    private static final long serialVersionUID = 6112356138522871333L;
 
     public DocumentTermFrequencyItem() {
     }

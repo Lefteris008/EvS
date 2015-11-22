@@ -27,14 +27,13 @@ import preprocessingmodule.nlp.stopwords.StopWords;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.18_2008_planet1
+ * @version 2015.11.22_1820_planet2
  */
 public class EDMethodPicker {
     
     /**
      * Constructor to pick method of Event Detection 
      * @param config A configuration object
-     * @param sw
      */
     public EDMethodPicker(Config config) {
         System.out.println("Pick a method for Event Detection");
@@ -50,6 +49,7 @@ public class EDMethodPicker {
                 StopWords stopwordsHandler = new StopWords(config);
                 stopwordsHandler.loadStopWords(Language.english); //Load the stopwords for english language
                 Dataset ds = new Dataset(config, stopwordsHandler); //Load the dataset
+                ds.setDocTermFreqIdList(config);
                 
                 System.out.println("Selected method: EDCoW");
                 
