@@ -34,22 +34,22 @@ import preprocessingmodule.nlp.stopwords.StopWords;
  */
 public class EDCoW {
     private final int delta = 8;
-    private final int delta2 = 48;
-    private final int gamma = 5;  
+    private final int delta2 = 1;
+    private final int gamma = 10;  
     private final double minTermSupport = 0.0001;
     private final double maxTermSupport = 0.01;
     private HashMap<String,Short[]> termDocMap;
-    private LinkedList<EDCoWEvent> eventList;
+    public LinkedList<EDCoWEvent> eventList;
     private final int timeSliceA;
     private final int timeSliceB;
     private final int countCorpus; //Total number of tweets
     private final Dataset ds;
     public Events events;
     
-    public EDCoW(int timeSliceA, int timeSliceB, int countCorpus, Dataset ds){
+    public EDCoW(int timeSliceA, int timeSliceB, Dataset ds){
         this.timeSliceA = timeSliceA;
         this.timeSliceB = timeSliceB;
-        this.countCorpus = countCorpus;
+        this.countCorpus = ds.getNumberOfDocuments()[0];
         this.ds = ds;
     }
 

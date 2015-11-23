@@ -29,13 +29,13 @@ import preprocessingmodule.nlp.stopwords.StopWords;
  */
 public class Tokenizer {
     
-    private static final List<String> cleanTokens  = new ArrayList<>();
-    private static final List<String> cleanTokensAndHashtags = new ArrayList<>();
-    private static final List<String> hashtags = new ArrayList<>();
-    private static final List<String> nameHandles = new ArrayList<>();
-    private static final List<String> urlsAndNumberAbbreviations = new ArrayList<>();
-    private static final List<String> stopWords = new ArrayList<>();
-    public static int numberOfTokens;
+    private final List<String> cleanTokens  = new ArrayList<>();
+    private final List<String> cleanTokensAndHashtags = new ArrayList<>();
+    private final List<String> hashtags = new ArrayList<>();
+    private final List<String> nameHandles = new ArrayList<>();
+    private final List<String> urlsAndNumberAbbreviations = new ArrayList<>();
+    private final List<String> stopWords = new ArrayList<>();
+    public int numberOfTokens;
     
     /**
      * Public constructor. It tokenizes a given String and separates hashtags,

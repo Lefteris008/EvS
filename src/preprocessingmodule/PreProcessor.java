@@ -17,6 +17,7 @@
 package preprocessingmodule;
 
 import com.mongodb.MongoException;
+import edmodule.EDMethodPicker;
 import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
@@ -29,7 +30,7 @@ import preprocessingmodule.nlp.stopwords.StopWords;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1854_planet1
+ * @version 2015.11.23_2121_planet2
  */
 public class PreProcessor {
     
@@ -47,6 +48,7 @@ public class PreProcessor {
         System.out.println("1. Collect dataset by Streaming API (Collect real-time data)");
         System.out.println("2. Collect dataset by ID (Collect historical data)");
         System.out.println("3. Get a specific tweet from MongoDB store");
+        System.out.println("4. Apply Event Detection");
         System.out.print("Your choice: ");
         
         Scanner keyboard = new Scanner(System.in);
@@ -81,6 +83,8 @@ public class PreProcessor {
                     Tokenizer tk = new Tokenizer(tweet.getText(), sw);
                     tk.textTokenizingTester();
                     break;
+                } case 4: {
+                    EDMethodPicker picker = new EDMethodPicker(config);
                 } default : {
                     System.out.println("Wrong choice. Exiting now...");
                 }

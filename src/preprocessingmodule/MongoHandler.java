@@ -30,7 +30,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.14_1705_planet1
+ * @version 2015.11.23_2122_planet2
  */
 public class MongoHandler {
     
@@ -159,8 +159,10 @@ public class MongoHandler {
 
             return tweet;
         } catch(MongoException e) {
-            System.out.println("No document with id '" + id + "' was found in the collection.");
+            System.out.println("Unknown Mongo problem with tweet '" + id + "'.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
+            return null;
+        } catch(NullPointerException e) { //Tweet does not exist
             return null;
         }
     }

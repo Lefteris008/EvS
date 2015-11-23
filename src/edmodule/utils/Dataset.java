@@ -32,16 +32,16 @@ import preprocessingmodule.nlp.stopwords.StopWords;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.22_1829_planet2
+ * @version 2015.11.23_2121_planet2
  */
 public class Dataset {
     
     private static List<String> terms = new ArrayList<>(); //List containing all occuring terms
-    private HashMap<String, Integer> termsWithOccurencies; //A map containing terms along with their frequency of occurance
+    private final HashMap<String, Integer> termsWithOccurencies = new HashMap<>(); //A map containing terms along with their frequency of occurance
     private int numberOfTweets;
-    private List<DocumentTermFrequencyItem> termDocFreqId; //A list containg triplets of tweetIDs, termIDs and their frequencies
-    private HashMap<Integer, List<String>> docTerms; //A map containing the tweetIDs and a list of the terms that each one of them includes
-    private HashMap<String, Integer> termIds; //A map containing the ids of the terms (namely, their index as they are being read)
+    private final List<DocumentTermFrequencyItem> termDocFreqId = new ArrayList<>(); //A list containg triplets of tweetIDs, termIDs and their frequencies
+    private final HashMap<Integer, List<String>> docTerms = new HashMap<>(); //A map containing the tweetIDs and a list of the terms that each one of them includes
+    private final HashMap<String, Integer> termIds = new HashMap<>(); //A map containing the ids of the terms (namely, their index as they are being read)
     
     /**
      * It creates a working dataset. More formally, the constructor retrieves all tweets from MongoDB
@@ -56,14 +56,14 @@ public class Dataset {
         //Load the tweet IDs
         List<String> tweetIDs = new ArrayList<>();
         tweetIDs.addAll(Utils.extractTweetIDsFromFile(config, "fa_cup"));
-        tweetIDs.addAll(Utils.extractTweetIDsFromFile(config, "super_tuesday"));
-        tweetIDs.addAll(Utils.extractTweetIDsFromFile(config, "us_elections"));
+        //tweetIDs.addAll(Utils.extractTweetIDsFromFile(config, "super_tuesday"));
+        //tweetIDs.addAll(Utils.extractTweetIDsFromFile(config, "us_elections"));
         
         //Create an English Stemmer
         EnglishStemming engStem = new EnglishStemming();
         
         //Iterate through all tweets
-        tweetIDs.stream().forEach((id) -> {
+        for(String id : tweetIDs) {
             
             //Retrieve the tweet from MongoDB Store
             Tweet tweet = mongo.retrieveTweetFromMongoDBStore(config, id);
@@ -77,20 +77,20 @@ public class Dataset {
                 Tokenizer tokens = new Tokenizer(text, sw);
                 
                 //Store tokens of tweet for future use
-                docTerms.put(numberOfTweets-1, tokens.getCleanTokensAndHashtags());
+                docTerms.put(numberOfTweets-1, getStemsAsList(tokens.getCleanTokensAndHashtags(), engStem));
                 
-                //Iterate through the clean tokens/hashtags
-                tokens.getCleanTokensAndHashtags().stream().forEach((token) -> {
+                //Iterate through the stemmed clean tokens/hashtags
+                for(String token : getStemsAsList(tokens.getCleanTokensAndHashtags(), engStem)) {
                     
-                    //Get the token's english stem and update hashmap
-                    if(termsWithOccurencies.containsKey(engStem.stem(token))) {
-                        termsWithOccurencies.put(engStem.stem(token), termsWithOccurencies.get(engStem.stem(token)) + 1);
+                    //Update hashmap
+                    if(termsWithOccurencies.containsKey(token)) {
+                        termsWithOccurencies.put(token, termsWithOccurencies.get(token) + 1);
                     } else {
-                        termsWithOccurencies.put(engStem.stem(token), 1);
+                        termsWithOccurencies.put(token, 1);
                     }
-                });
+                }
             }
-        });
+        }
         terms = new ArrayList<>(termsWithOccurencies.keySet());
         
         //Generate the list of term IDs
@@ -101,6 +101,20 @@ public class Dataset {
         }
         
         mongo.closeMongoConnection(config);
+    }
+    
+    /**
+     * Transforms a list of tokens into their stems.
+     * @param tokens A String list with the tokens to be transformed.
+     * @param engStem An EnglishStemming handle.
+     * @return A String list with the stems of the original terms.
+     */
+    public final static List<String> getStemsAsList(List<String> tokens, EnglishStemming engStem) {
+        List<String> stemmedTokens = new ArrayList<>();
+        tokens.stream().forEach((token) -> {
+            stemmedTokens.add(engStem.stem(token));
+        });
+        return stemmedTokens;
     }
     
     /**
@@ -118,12 +132,16 @@ public class Dataset {
      */
     public final void setDocTermFreqIdList(Config config) {
         
-        docTerms.keySet().stream().forEach((tweetId) -> {
-            docTerms.get(tweetId).stream().forEach((_item) -> {
-                DocumentTermFrequencyItem item = new DocumentTermFrequencyItem(tweetId, termIds.get(_item), termsWithOccurencies.get(_item).shortValue());
-                termDocFreqId.add(item);
-            });
-        });
+        try {
+            for(int tweetId : docTerms.keySet()) {
+                for(String _item : docTerms.get(tweetId)) {
+                    DocumentTermFrequencyItem item = new DocumentTermFrequencyItem(tweetId, termIds.get(_item), termsWithOccurencies.get(_item).shortValue());
+                    termDocFreqId.add(item);
+                }
+            }
+        } catch(NullPointerException e) {
+            System.out.println("");
+        }
         
     }
     
