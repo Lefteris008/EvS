@@ -34,7 +34,7 @@ import preprocessingmodule.nlp.stopwords.StopWords;
  */
 public class EDCoW {
     private final int delta = 8;
-    private final int delta2 = 1;
+    private final int delta2 = 2;
     private final int gamma = 10;  
     private final double minTermSupport = 0.0001;
     private final double maxTermSupport = 0.01;
@@ -76,7 +76,7 @@ public class EDCoW {
         
         for(int i = 0; i < ds.getTerms().size(); i++){
             String term = ds.getTerms().get(i);
-            if(term.length()>1) { //Stopwords check removed as they are already ommited when creating the dataset 
+            if(term.length() > 1) { //Stopwords check removed as they are already ommited when creating the dataset 
                 Short[] frequency = ds.getDocumentsTermFrequency(i);
                 int cf = 0;
                 for(short freq : frequency){
@@ -87,7 +87,7 @@ public class EDCoW {
                 }
             }
         }
-        for(int i = 0; i < windows ;i++){
+        for(int i = 0; i < windows; i++){
             processWindow(i);
         }
         Collections.sort(eventList);

@@ -27,7 +27,7 @@ import preprocessingmodule.nlp.stopwords.StopWords;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.23_2121_planet2
+ * @version 2015.11.24_2029_planet2
  */
 public class EDMethodPicker {
     
@@ -36,7 +36,7 @@ public class EDMethodPicker {
      * @param config A configuration object
      */
     public EDMethodPicker(Config config) {
-        System.out.println("Pick a method for Event Detection");
+        System.out.println("\nPick a method for Event Detection");
         System.out.println("1. EDCoW");
         System.out.println("2. LSH");
         System.out.print("Your choice: ");
@@ -52,8 +52,9 @@ public class EDMethodPicker {
                 ds.setDocTermFreqIdList(config);
                 
                 System.out.println("Selected method: EDCoW");
+                System.out.println("Now applying EDCoW algorithm...");
                 
-                EDCoW edcow = new EDCoW(0, 1, ds); //Create the EDCoW object
+                EDCoW edcow = new EDCoW(2, 4, ds); //Create the EDCoW object
                 edcow.apply(stopwordsHandler); //Apply the algorithm
                 
                 System.out.println("Succesfully applied EDCoW algorithm");

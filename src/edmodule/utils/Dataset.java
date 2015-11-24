@@ -32,7 +32,7 @@ import preprocessingmodule.nlp.stopwords.StopWords;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.23_2121_planet2
+ * @version 2015.11.24_2028_planet2
  */
 public class Dataset {
     
@@ -135,7 +135,7 @@ public class Dataset {
         try {
             for(int tweetId : docTerms.keySet()) {
                 for(String _item : docTerms.get(tweetId)) {
-                    DocumentTermFrequencyItem item = new DocumentTermFrequencyItem(tweetId, termIds.get(_item), termsWithOccurencies.get(_item).shortValue());
+                    DocumentTermFrequencyItem item = new DocumentTermFrequencyItem(tweetId, termIds.get(_item), (short) (termsWithOccurencies.get(_item).shortValue() / terms.size()));
                     termDocFreqId.add(item);
                 }
             }

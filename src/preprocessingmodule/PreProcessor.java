@@ -30,7 +30,7 @@ import preprocessingmodule.nlp.stopwords.StopWords;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.23_2121_planet2
+ * @version 2015.11.24_2029_planet2
  */
 public class PreProcessor {
     
@@ -39,6 +39,9 @@ public class PreProcessor {
      * @throws java.io.IOException
      */
     public final static void main(String[] args) throws IOException {
+        
+        Logger mongoLogger = Logger.getLogger( "org.mongodb.driver" );
+        mongoLogger.setLevel(Level.SEVERE); 
         
         String[] keywords;
         int choice;
