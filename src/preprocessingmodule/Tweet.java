@@ -16,25 +16,21 @@
  */
 package preprocessingmodule;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.14_1705_planet1
+ * @version 2015.11.25_2359_planet2
  */
 public class Tweet {
     
     private final long id;
     private final String username;
+    private final String displayName;
+    private final long userId;
     private final String text;
-    private final String date;
+    private final Date date;
     private final double latitude;
     private final double longitude;
     private final int numberOfRetweets;
@@ -43,26 +39,26 @@ public class Tweet {
     private final boolean favorited;
     private final boolean retweeted;
     private final String language;
-    private final String groundTruthEvent;
     
-    public Tweet(String id, String username, String text, String date, 
-            String latitude, String longitude, String numberOfRetweets, 
-            String numberOfFavorites, String retweet, String favorited, 
-            String retweeted, String language, String groundTruthEventh) {
+    public Tweet(long id, String username, String displayName, long userId, String text, Date date, 
+            double latitude, double longitude, int numberOfRetweets, 
+            int numberOfFavorites, boolean retweet, boolean favorited, 
+            boolean retweeted, String language) {
         
-        this.id = Long.parseLong(id);
+        this.id = id;
         this.username = username;
+        this.displayName = displayName;
+        this.userId = userId;
         this.text = text;
         this.date = date;
-        this.latitude = Double.parseDouble(latitude);
-        this.longitude = Double.parseDouble(longitude);
-        this.numberOfRetweets = Integer.parseInt(numberOfRetweets);
-        this.numberOfFavorites = Integer.parseInt(numberOfFavorites);
-        this.retweet = retweet.equals("true");
-        this.favorited = favorited.equals("true");
-        this.retweeted = retweeted.equals("true");
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.numberOfRetweets = numberOfRetweets;
+        this.numberOfFavorites = numberOfFavorites;
+        this.retweet = retweet;
+        this.favorited = favorited;
+        this.retweeted = retweeted;
         this.language = language;
-        this.groundTruthEvent = groundTruthEventh;
     }
     
     /**
@@ -73,9 +69,21 @@ public class Tweet {
     
     /**
      * Returns the username of the creator of the tweet.
-     * @return A String containing the username
+     * @return A String containing the username.
      */
     public String getUsername() { return username; }
+    
+    /**
+     * Returns the display name of the creator of the tweet.
+     * @return A String containing the display name.
+     */
+    public String getDisplayName() { return displayName; }
+    
+    /**
+     * Returns the user ID of the creator of the tweet.
+     * @return A long containing the ID of the creator of the tweet.
+     */
+    public long getUserId() { return userId; }
     
     /**
      * Returns the actual text of the tweet.
@@ -87,16 +95,7 @@ public class Tweet {
      * Returns the date the tweet was created at.
      * @return A date object
      */
-    public Date getDate() {
-        try {
-            DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
-            Date dateObject = format.parse(date);
-            return dateObject;
-        } catch (ParseException e) {
-            Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
-            return null;
-        }
-    }
+    public Date getDate() { return date; }
     
     /**
      * Returns the latitude of the location where the tweet was created.
@@ -149,8 +148,9 @@ public class Tweet {
     /**
      * Returns the ground truth event the tweet is referring to.
      * @return A String containing the event's name.
+     * @deprecated Ground truth events removed since Planet2.
      */
-    public String getGroundTruthEvent() { return groundTruthEvent; }
+    public String getGroundTruthEvent() { return "None"; }
     
     /**
      * Prints the tweet metadata along with its text.
@@ -159,6 +159,8 @@ public class Tweet {
         System.out.println("Tweet with ID '" + getID() + "'");
         System.out.println("--------------------------------------------");
         System.out.println("@" + getUsername());
+        System.out.println("Display name: " + getDisplayName());
+        System.out.println("User ID '" + getUserId() + "'");
         System.out.println(getText());
         System.out.println("Created at: " + getDate().toString());
         System.out.println("Location");
@@ -175,7 +177,6 @@ public class Tweet {
             System.out.println("Favorited " + getNumberOfFavorites() + " times");
         }
         System.out.println("Language: " + getLanguage());
-        System.out.println("Ground truth event: " + getGroundTruthEvent());
         System.out.println("--------------------------------------------");
     }
 }

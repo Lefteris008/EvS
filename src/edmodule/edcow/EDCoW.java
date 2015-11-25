@@ -21,6 +21,7 @@ import ch.epfl.lis.jmod.modularity.community.Community;
 import edmodule.utils.Dataset;
 import java.io.IOException;
 import java.util.*;
+import java.util.Map.Entry;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,11 +34,11 @@ import preprocessingmodule.nlp.stopwords.StopWords;
  *   @author Lefteris Paraskevas (changes to omit missing classes)
  */
 public class EDCoW {
-    private final int delta = 8;
-    private final int delta2 = 2;
+    private final int delta = 1;
+    private final int delta2 = 48;
     private final int gamma = 10;  
-    private final double minTermSupport = 0.0001;
-    private final double maxTermSupport = 0.01;
+    private final double minTermSupport = 0.01; //0.0001
+    private final double maxTermSupport = 0.9; //0.01
     private HashMap<String,Short[]> termDocMap;
     public LinkedList<EDCoWEvent> eventList;
     private final int timeSliceA;
@@ -66,8 +67,8 @@ public class EDCoW {
     }
 
     public void apply(StopWords swHandler) {
-        double minTermOccur = minTermSupport / countCorpus; //Min support * Message count corpus
-        double maxTermOccur = maxTermSupport / countCorpus; //Max support * Message count corpus
+        double minTermOccur = minTermSupport * countCorpus; //Min support * Message count corpus
+        double maxTermOccur = maxTermSupport * countCorpus; //Max support * Message count corpus
         //Deltas and gammas already configured
     
         int windows = (timeSliceB-timeSliceA)/delta2;
@@ -108,14 +109,14 @@ public class EDCoW {
             for(int i = startSlice; i < endSlice;  i++){
                 distributiond[i-startSlice] = (double) distributioni[i]; 
             }
-            termDocMap.entrySet().stream().forEach((entry) -> {
+            for(Entry<String, Short[]> entry : termDocMap.entrySet()) {
                 Short frequencyf[] = entry.getValue();
                 double frequencyd[] = new double[delta2];
                 for(int i = startSlice; i < endSlice; i++){
                     frequencyd[i-startSlice] = (double) frequencyf[i];
                 }
-                keyWords.add(new EDCoWKeyword(entry.getKey(),frequencyd,delta,distributiond));
-            });
+                keyWords.add(new EDCoWKeyword(entry.getKey(), frequencyd, delta, distributiond));
+            }
             double[] autoCorrelationValues = new double[keyWords.size()];
             for(int i = 0; i < keyWords.size(); i++){
                 autoCorrelationValues[i] = keyWords.get(i).getAutoCorrelation();
@@ -125,14 +126,22 @@ public class EDCoW {
 
             // Removing trivial keywords based on theta1
             LinkedList<EDCoWKeyword> keyWordsList1 = new LinkedList<>();
-            keyWords.stream().filter((k) -> (k.getAutoCorrelation() > theta1)).forEach((k) -> {
-                keyWordsList1.add(k);
-            });        
-            keyWordsList1.stream().forEach((kw1) -> {
+            for(EDCoWKeyword k : keyWords) {
+                if(k.getAutoCorrelation() > theta1) {
+                    keyWordsList1.add(k);
+                }
+            }
+//            keyWords.stream().filter((k) -> (k.getAutoCorrelation() > theta1)).forEach((k) -> {
+//                keyWordsList1.add(k);
+//            });     
+            for(EDCoWKeyword kw1 : keyWordsList1) {
                 kw1.computeCrossCorrelation(keyWordsList1);
-            });
+            }
+//            keyWordsList1.stream().forEach((kw1) -> {
+//                kw1.computeCrossCorrelation(keyWordsList1);
+//            });
             double[][] bigMatrix = new double[keyWordsList1.size()][keyWordsList1.size()];
-            for(int i=0; i<keyWordsList1.size(); i++){
+            for(int i=0; i < keyWordsList1.size(); i++){
                 bigMatrix[i] = keyWordsList1.get(i).getCrossCorrelation();
             }
 
@@ -140,20 +149,25 @@ public class EDCoW {
             double theta2 = th1.theta2(bigMatrix, gamma);        
             for(int i = 0; i < keyWordsList1.size(); i++){
                 for(int j = i+1; j < keyWordsList1.size(); j++){
-                    bigMatrix[i][j] = (bigMatrix[i][j] < theta2)?0:bigMatrix[i][j];
+                    bigMatrix[i][j] = (bigMatrix[i][j] < theta2) ? 0 : bigMatrix[i][j];
                 }
             }
-            EDCoWModularityDetection modularity = new EDCoWModularityDetection(keyWordsList1,bigMatrix,startSlice,endSlice);
+            EDCoWModularityDetection modularity = new EDCoWModularityDetection(keyWordsList1, bigMatrix, startSlice, endSlice);
 
             double thresholdE = 0.1;
             ArrayList<Community> finalArrCom= modularity.getCommunitiesFiltered(thresholdE);
-            finalArrCom.stream().map((c) -> {
-                System.out.println(c.getCommunitySize());
-                return c;
-                }).forEach((c) -> {
-                    modularity.saveEventFromCommunity(c);
-                });
+            for(Community c : finalArrCom) {
+                 System.out.println(c.getCommunitySize());
+                 modularity.saveEventFromCommunity(c);
+            }
             eventList.addAll(modularity.getEvents());
+//            finalArrCom.stream().map((c) -> {
+//                System.out.println(c.getCommunitySize());
+//                return c;
+//                }).forEach((c) -> {
+//                    modularity.saveEventFromCommunity(c);
+//                });
+//            eventList.addAll(modularity.getEvents());
         } catch (IOException ex) {
             Logger.getLogger(EDCoW.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {

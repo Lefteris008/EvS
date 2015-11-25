@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1854_planet1
+ * @version 2015.11.25_2358_planet2
  */
 public class Utils {
     
@@ -37,6 +37,7 @@ public class Utils {
      * Method to extract search terms from the 'search_terms.txt' file.
      * @param config The configuration object
      * @return A String array containing the search terms
+     * @deprecated To be removed in Planet3
      */
     public final static String[] extractTermsFromFile(Config config) {
         
@@ -62,6 +63,7 @@ public class Utils {
      * @param config The configuration object
      * @param filename The folder name in which the .txt files containing the IDs are placed
      * @return A list containing the tweet IDs
+     * @deprecated To be removed in Planet3
      */
     public final static List<String> extractTweetIDsFromFile(Config config, String filename) {
         

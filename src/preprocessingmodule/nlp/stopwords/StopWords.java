@@ -16,6 +16,7 @@
  */
 package preprocessingmodule.nlp.stopwords;
 
+import preprocessingmodule.language.Language;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -26,11 +27,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import preprocessingmodule.Config;
 import preprocessingmodule.PreProcessor;
+import preprocessingmodule.language.LangUtils;
+import preprocessingmodule.language.LanguageCodes;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.18_2009_planet1
+ * @version 2015.11.25_2357_planet2
  */
 public final class StopWords {
     
@@ -47,10 +50,12 @@ public final class StopWords {
     
     /**
      * Method that loads all stopwords contained in various files into a HashSet.
-     * @param lan The language for which the stopwords are going to be loaded.
+     * @param isoCode The ISO code of the language of the stopwords
      * @return True if the process succeeds, false otherwise.
      */
-    public final boolean loadStopWords(Language lan) {
+    public final boolean loadStopWords(LanguageCodes isoCode) {
+        
+        Language lan = LangUtils.getFullLanguageForISOCode(isoCode);
         
         try {
             Files.walk(Paths.get(config.getStopwordsPath())).forEach(filePath -> {

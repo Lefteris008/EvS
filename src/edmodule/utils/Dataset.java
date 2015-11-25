@@ -24,15 +24,15 @@ import java.util.stream.IntStream;
 import preprocessingmodule.Config;
 import preprocessingmodule.MongoHandler;
 import preprocessingmodule.Tweet;
-import preprocessingmodule.Utils;
+import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.nlp.Tokenizer;
-import preprocessingmodule.nlp.stemming.EnglishStemming;
+import preprocessingmodule.nlp.stemming.Stemmer;
 import preprocessingmodule.nlp.stopwords.StopWords;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.24_2028_planet2
+ * @version 2015.11.25_2348_planet2
  */
 public class Dataset {
     
@@ -43,6 +43,7 @@ public class Dataset {
     private final HashMap<Integer, List<String>> docTerms = new HashMap<>(); //A map containing the tweetIDs and a list of the terms that each one of them includes
     private final HashMap<String, Integer> termIds = new HashMap<>(); //A map containing the ids of the terms (namely, their index as they are being read)
     
+    
     /**
      * It creates a working dataset. More formally, the constructor retrieves all tweets from MongoDB
      * store, iterates through them, tokenizes the text of every single one of them, generates the English
@@ -51,45 +52,41 @@ public class Dataset {
      * @param sw A StopWords handler
      */
     public Dataset(Config config, StopWords sw) {
+        
         MongoHandler mongo = new MongoHandler(config);
         
-        //Load the tweet IDs
-        List<String> tweetIDs = new ArrayList<>();
-        tweetIDs.addAll(Utils.extractTweetIDsFromFile(config, "fa_cup"));
-        //tweetIDs.addAll(Utils.extractTweetIDsFromFile(config, "super_tuesday"));
-        //tweetIDs.addAll(Utils.extractTweetIDsFromFile(config, "us_elections"));
+        //Initialize stopwords and stemmers
+        StopWordsHandlers.initStopWordsHandlers();
+        Stemmers.initStemmers();
         
-        //Create an English Stemmer
-        EnglishStemming engStem = new EnglishStemming();
+        //Load all tweets from MongoDB Store
+        List<Tweet> tweets = mongo.retrieveAllTweetsFromMongoDBStore(config);
         
         //Iterate through all tweets
-        for(String id : tweetIDs) {
-            
-            //Retrieve the tweet from MongoDB Store
-            Tweet tweet = mongo.retrieveTweetFromMongoDBStore(config, id);
-            
-            if(tweet != null) { //If the tweet exists
-                
-                numberOfTweets++; //Count it
-                
-                //Get the tweet's text and tokenize it
-                String text = tweet.getText();
-                Tokenizer tokens = new Tokenizer(text, sw);
-                
-                //Store tokens of tweet for future use
-                docTerms.put(numberOfTweets-1, getStemsAsList(tokens.getCleanTokensAndHashtags(), engStem));
-                
-                //Iterate through the stemmed clean tokens/hashtags
-                for(String token : getStemsAsList(tokens.getCleanTokensAndHashtags(), engStem)) {
-                    
-                    //Update hashmap
-                    if(termsWithOccurencies.containsKey(token)) {
-                        termsWithOccurencies.put(token, termsWithOccurencies.get(token) + 1);
-                    } else {
-                        termsWithOccurencies.put(token, 1);
-                    }
+        for(Tweet tweet : tweets) {            
+            numberOfTweets++; //Count it
+
+            //Get the tweet's text and tokenize it
+            String text = tweet.getText();
+            Tokenizer tokens = new Tokenizer(text, 
+                    StopWordsHandlers.getSWHandlerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())));
+
+            //Store tokens of tweet for future use
+            docTerms.put(numberOfTweets-1, getStemsAsList(tokens.getCleanTokensAndHashtags(), 
+                    Stemmers.getStemmerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage()))));
+
+            //Iterate through the stemmed clean tokens/hashtags
+            for(String token : getStemsAsList(tokens.getCleanTokensAndHashtags(), 
+                    Stemmers.getStemmerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())))) {
+
+                //Update hashmap
+                if(termsWithOccurencies.containsKey(token)) {
+                    termsWithOccurencies.put(token, termsWithOccurencies.get(token) + 1);
+                } else {
+                    termsWithOccurencies.put(token, 1);
                 }
             }
+            
         }
         terms = new ArrayList<>(termsWithOccurencies.keySet());
         
@@ -106,13 +103,13 @@ public class Dataset {
     /**
      * Transforms a list of tokens into their stems.
      * @param tokens A String list with the tokens to be transformed.
-     * @param engStem An EnglishStemming handle.
+     * @param stemmer An EnglishStemming handle.
      * @return A String list with the stems of the original terms.
      */
-    public final static List<String> getStemsAsList(List<String> tokens, EnglishStemming engStem) {
+    public final static List<String> getStemsAsList(List<String> tokens, Stemmer stemmer) {
         List<String> stemmedTokens = new ArrayList<>();
         tokens.stream().forEach((token) -> {
-            stemmedTokens.add(engStem.stem(token));
+            stemmedTokens.add(stemmer.stem(token));
         });
         return stemmedTokens;
     }
@@ -135,7 +132,7 @@ public class Dataset {
         try {
             for(int tweetId : docTerms.keySet()) {
                 for(String _item : docTerms.get(tweetId)) {
-                    DocumentTermFrequencyItem item = new DocumentTermFrequencyItem(tweetId, termIds.get(_item), (short) (termsWithOccurencies.get(_item).shortValue() / terms.size()));
+                    DocumentTermFrequencyItem item = new DocumentTermFrequencyItem(tweetId, termIds.get(_item), termsWithOccurencies.get(_item).shortValue());
                     termDocFreqId.add(item);
                 }
             }

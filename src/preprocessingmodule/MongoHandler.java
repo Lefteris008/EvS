@@ -16,12 +16,16 @@
  */
 package preprocessingmodule;
 
+import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientException;
 import com.mongodb.MongoException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bson.Document;
@@ -30,7 +34,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.23_2122_planet2
+ * @version 2015.11.26_0008_planet2
  */
 public class MongoHandler {
     
@@ -87,6 +91,8 @@ public class MongoHandler {
      * @param config A configuration object
      * @param event The ground truth event, for which the tweet is actually referring to
      * @return True if the process succeeds, false otherwise
+     * @deprecated To be removed in future iteration -dataset already present and stored
+     * @since Wave2
      */
     public final boolean insertTweetIntoMongoDB(Status status, Config config, String event) {
         
@@ -118,44 +124,152 @@ public class MongoHandler {
     }
     
     /**
+     * Retrieves all stored retrievedTweets in MongoDB Store.
+     * @param config A configuration object
+     * @return A List containing all retrieved retrievedTweets
+     */
+    public final List<Tweet> retrieveAllTweetsFromMongoDBStore(Config config) {
+        
+        List<Tweet> retrievedTweets = new ArrayList<>();
+        MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
+        
+        try {
+            FindIterable<Document> iterable = collection.find(); //Load all documents
+            iterable.forEach(new Block<Document>() {
+                @Override
+                public void apply(final Document tweetDoc) {
+                    //Get tweet ID
+                    long id = tweetDoc.getLong("id");
+                    Document user = tweetDoc.get("user", Document.class); //Get the embedded document
+
+                    //User details
+                    String username = user.getString("name"); //Name
+                    String screenName = user.getString("screen_name"); //Screen name
+                    long userId; //User ID
+                    try {
+                        userId = user.getInteger("id");
+                    } catch(ClassCastException e) { //Catch case where id was incorrectly stored as long
+                        userId = user.getLong("id");
+                    }
+                    
+                    //Tweet text, date and language
+                    String text = tweetDoc.getString("text");
+                    Date date = tweetDoc.getDate("created_at");
+                    String language = tweetDoc.getString("lang");
+
+                    //Coordinates
+                    Document coordinates = tweetDoc.get("coordinates", Document.class);
+                    double latitude = -1;
+                    double longitude = -1;
+                    if(coordinates != null) {
+                        try {
+                            List<Double> coords = coordinates.get("coordinates", ArrayList.class);
+                            latitude = coords.get(0);
+                            longitude = coords.get(1);
+                        } catch(ClassCastException e) { //Case where data where incorrectly casted as integers
+                            List<Integer> coords = coordinates.get("coordinates", ArrayList.class);
+                            latitude = coords.get(0);
+                            longitude = coords.get(1);
+                        }
+                    }
+
+                    //Number of retweets and favorites
+                    int numberOfRetweets = tweetDoc.getInteger("retweet_count");
+                    int numberOfFavorites = tweetDoc.getInteger("favorite_count");
+                    boolean isFavorited = tweetDoc.getBoolean("favorited");
+                    boolean isRetweeted = tweetDoc.getBoolean("retweeted");
+
+                    //Retweet status
+                    boolean isRetweet;
+                    try {
+                        tweetDoc.get("retweeted_status", Document.class);
+                        isRetweet = true;
+                    } catch(NullPointerException e) {
+                        isRetweet = false;
+                    }
+
+                    Tweet tweet = new Tweet(id, username, screenName, userId, text, date, latitude, 
+                            longitude, numberOfRetweets, numberOfFavorites, isRetweet, isFavorited, 
+                            isRetweeted, language);
+
+                    retrievedTweets.add(tweet);
+                }
+            });
+            return retrievedTweets;
+        } catch(MongoException e) {
+            System.out.println("Cannot find documents in MongoDB Store.");
+            Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
+            return null;
+        } 
+    }
+    
+    /**
      * This method parses the MongoDB store and returns the tweet that matches the String 'id'.
      * @param config A configuration object
      * @param id The id of the document to be retrieved
      * @return A Tweet object containing all the information found in the document that matched the String 'id'
+     * @deprecated Subsumed by retrieveAllTweetsFromMongoDBStore() method.
      */
-    public final Tweet retrieveTweetFromMongoDBStore(Config config, String id) {
-        
+    public final Tweet getATweetByIdFromMongoDBStore(Config config, long id) {
         MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
-        
         try {
-            FindIterable<Document> iterable = collection.find(new Document("tweet.id", id));
+            FindIterable<Document> iterable = collection.find(new Document("id", id));
             
-            Document document = iterable.first();
-            Document doc = document.get("tweet", Document.class); //Get the embedded document
+            Document tweetDoc = iterable.first();
             
-            //Get the tweet properties
-            String user = doc.get("user", String.class);
-            String text = doc.get("text", String.class);
-            String date = doc.get("date", String.class);
-            String latitude = doc.get("latitude", String.class);
-            if(latitude.equals("NULL")) {
-                latitude = "-1";
+            //Get tweet ID
+            long id_ = tweetDoc.getLong("id");
+            Document user = tweetDoc.get("user", Document.class); //Get the embedded document
+            
+            //User details
+            String username = user.getString("name"); //Name
+            String screenName = user.getString("screen_name"); //Screen name
+            long userId; //User ID
+            try {
+                userId = user.getInteger("id");
+            } catch(ClassCastException e) { //Catch case where id was incorrectly stored as long
+                userId = user.getLong("id");
             }
-            String longitude = doc.get("longitude", String.class);
-            if(longitude.equals("NULL")) {
-                longitude = "-1";
+            
+            //Tweet text, date and language
+            String text = tweetDoc.getString("text");
+            Date date = tweetDoc.getDate("created_at");
+            String language = tweetDoc.getString("lang");
+            
+            //Coordinates
+            Document coordinates = tweetDoc.get("coordinates", Document.class);
+            double latitude = -1;
+            double longitude = -1;
+            if(coordinates != null) {
+                try {
+                    List<Double> coords = coordinates.get("coordinates", ArrayList.class);
+                    latitude = coords.get(0);
+                    longitude = coords.get(1);
+                } catch(ClassCastException e) { //Case where data where incorrectly casted as integers
+                    List<Integer> coords = coordinates.get("coordinates", ArrayList.class);
+                    latitude = coords.get(0);
+                    longitude = coords.get(1);
+                }
             }
-            String numberOfRetweets = doc.get("number_of_retweets", String.class);
-            String numberOfFavorites = doc.get("number_of_favorites", String.class);
-            String isRetweet = doc.get("is_retweet", String.class);
-            String isFavorited = doc.get("is_favorited", String.class);
-            String isRetweeted = doc.get("is_retweeted", String.class);
-            String language = doc.get("language", String.class);
-            String groundTruthEvent = doc.get("groundTruthEvent", String.class);
+            
+            //Number of retweets and favorites
+            int numberOfRetweets = tweetDoc.getInteger("retweet_count");
+            int numberOfFavorites = tweetDoc.getInteger("favorite_count");
+            boolean isFavorited = tweetDoc.getBoolean("favorited");
+            boolean isRetweeted = tweetDoc.getBoolean("retweeted");
+            
+            //Retweet status
+            boolean isRetweet;
+            try {
+                tweetDoc.get("retweeted_status", Document.class);
+                isRetweet = true;
+            } catch(NullPointerException e) {
+                isRetweet = false;
+            }
 
-            Tweet tweet = new Tweet(id, user, text, date, latitude, 
+            Tweet tweet = new Tweet(id_, username, screenName, userId, text, date, latitude, 
                     longitude, numberOfRetweets, numberOfFavorites, isRetweet, isFavorited, 
-                    isRetweeted, language, groundTruthEvent);
+                    isRetweeted, language);
 
             return tweet;
         } catch(MongoException e) {

@@ -24,15 +24,17 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import preprocessingmodule.nlp.Tokenizer;
-import preprocessingmodule.nlp.stopwords.Language;
+import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.nlp.stopwords.StopWords;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.24_2029_planet2
+ * @version 2015.11.25_2355_planet2
  */
 public class PreProcessor {
+    
+    public final static boolean showMongoLogging = false;
     
     /**
      * @param args the command line arguments
@@ -40,8 +42,12 @@ public class PreProcessor {
      */
     public final static void main(String[] args) throws IOException {
         
-        Logger mongoLogger = Logger.getLogger( "org.mongodb.driver" );
-        mongoLogger.setLevel(Level.SEVERE); 
+        if(!showMongoLogging) {
+            
+            //Stop reporting logging information
+            Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
+            mongoLogger.setLevel(Level.SEVERE); 
+        }
         
         String[] keywords;
         int choice;
@@ -51,7 +57,8 @@ public class PreProcessor {
         System.out.println("1. Collect dataset by Streaming API (Collect real-time data)");
         System.out.println("2. Collect dataset by ID (Collect historical data)");
         System.out.println("3. Get a specific tweet from MongoDB store");
-        System.out.println("4. Apply Event Detection");
+        System.out.println("4. Retrieve all tweets from MongoDB Store");
+        System.out.println("5. Apply Event Detection");
         System.out.print("Your choice: ");
         
         Scanner keyboard = new Scanner(System.in);
@@ -76,17 +83,21 @@ public class PreProcessor {
                     break;
                 } case 3: {
                     System.out.print("Type in the ID you want to search for: ");
-                    String id = keyboard.next();
+                    long id = keyboard.nextLong();
                     System.out.println("Test search for tweet with ID: '"+ id + "'");
-                    Tweet tweet = mongoDB.retrieveTweetFromMongoDBStore(config, id);
+                    Tweet tweet = mongoDB.getATweetByIdFromMongoDBStore(config, id);
                     tweet.printTweetData();
                     
                     StopWords sw = new StopWords(config);
-                    sw.loadStopWords(Language.english); //Load english stopwords
+                    sw.loadStopWords(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())); //Load stopwords
                     Tokenizer tk = new Tokenizer(tweet.getText(), sw);
                     tk.textTokenizingTester();
                     break;
                 } case 4: {
+                    System.out.println("Retrieve all tweets from MongoDB Store");
+                    List<Tweet> tweet = mongoDB.retrieveAllTweetsFromMongoDBStore(config);
+                    System.out.println("Database '" + config.getDBName() + "' contains " + tweet.size() + " tweets.");
+                } case 5: {
                     EDMethodPicker picker = new EDMethodPicker(config);
                 } default : {
                     System.out.println("Wrong choice. Exiting now...");

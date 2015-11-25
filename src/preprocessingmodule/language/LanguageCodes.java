@@ -14,20 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule.nlp.stopwords;
+package preprocessingmodule.language;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.18_planet1
+ * @version 2015.11.25_2306_planet2
  */
-public enum Language {
-    english,
-    greek,
-    french,
-    arabic,
-    german,
-    italian,
-    spanish,
-    persian
+public enum LanguageCodes {
+    en, //English
+    de, //German
+    es, //Spanish
+    it, //Italian
+    fr, //French
+    gr, //Greek
+    fa, //Persian
+    ar  //Arabic
 }
