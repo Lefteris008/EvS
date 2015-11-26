@@ -25,7 +25,7 @@ import preprocessingmodule.nlp.stopwords.StopWords;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.20_2045_planet1
+ * @version 2015.11.26_1732_planet1
  */
 public class Tokenizer {
     
@@ -45,6 +45,7 @@ public class Tokenizer {
      */
     public Tokenizer(String text, StopWords sw) {
         String[] temp = text.split(" "); //Split them according to white spaces
+        String temp2;
         numberOfTokens = temp.length;
         for (String temp1 : temp) {
             if(isHashtag(temp1)) {
@@ -57,10 +58,21 @@ public class Tokenizer {
             } else if(sw.isStopWord(temp1)) {
                 stopWords.add(temp1);
             } else {
-                cleanTokens.add(temp1);
-                cleanTokensAndHashtags.add(temp1);
+                //Remove punctuation that was bound to the token and then store it
+                temp2 = removeMissingPunctuation(temp1);
+                cleanTokens.add(temp2);
+                cleanTokensAndHashtags.add(temp2);
             }
         }
+    }
+    
+    /**
+     * Removes punctuation bound to an input word.
+     * @param word The input word.
+     * @return A String with the punctuation omitted.
+     */
+    public final String removeMissingPunctuation(String word) {
+        return word.replaceAll("[^a-zA-Z ]", "");    
     }
     
     /**

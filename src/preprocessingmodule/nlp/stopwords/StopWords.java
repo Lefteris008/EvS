@@ -33,7 +33,7 @@ import preprocessingmodule.language.LanguageCodes;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.25_2357_planet2
+ * @version 2015.11.26_1717_planet2
  */
 public final class StopWords {
     
