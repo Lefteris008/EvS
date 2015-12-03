@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule;
+package preprocessingmodule.dataset;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -25,11 +25,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import preprocessingmodule.Config;
+import preprocessingmodule.PreProcessor;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.25_2358_planet2
+ * @version 2015.12.03_1722_planet2
  */
 public class Utils {
     
@@ -37,7 +39,7 @@ public class Utils {
      * Method to extract search terms from the 'search_terms.txt' file.
      * @param config The configuration object
      * @return A String array containing the search terms
-     * @deprecated To be removed in Planet3
+     * @deprecated No longer used as of Planet2.
      */
     public final static String[] extractTermsFromFile(Config config) {
         
@@ -63,7 +65,7 @@ public class Utils {
      * @param config The configuration object
      * @param filename The folder name in which the .txt files containing the IDs are placed
      * @return A list containing the tweet IDs
-     * @deprecated To be removed in Planet3
+     * @deprecated No longer used as of Planet2.
      */
     public final static List<String> extractTweetIDsFromFile(Config config, String filename) {
         

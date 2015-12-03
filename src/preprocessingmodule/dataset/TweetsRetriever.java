@@ -14,12 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule;
+package preprocessingmodule.dataset;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import preprocessingmodule.Config;
+import preprocessingmodule.PreProcessor;
 import twitter4j.FilterQuery;
 import twitter4j.StallWarning;
 import twitter4j.Status;
@@ -35,7 +37,7 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.11.11_1506_planet1
+ * @version 2015.12.03_1724_planet2
  */
 public class TweetsRetriever {
 

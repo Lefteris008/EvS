@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule;
+package preprocessingmodule.dataset;
 
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
@@ -29,12 +29,13 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bson.Document;
+import preprocessingmodule.Config;
 import twitter4j.Status;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.26_0008_planet2
+ * @version 2015.12.03_1723_planet2
  */
 public class MongoHandler {
     

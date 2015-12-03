@@ -16,6 +16,10 @@
  */
 package preprocessingmodule;
 
+import preprocessingmodule.dataset.TweetsRetriever;
+import preprocessingmodule.dataset.Tweet;
+import preprocessingmodule.dataset.MongoHandler;
+import preprocessingmodule.dataset.Utils;
 import com.mongodb.MongoException;
 import edmodule.EDMethodPicker;
 import java.io.IOException;

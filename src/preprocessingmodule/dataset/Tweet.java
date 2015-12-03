@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * aString with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule;
+package preprocessingmodule.dataset;
 
 import java.util.Date;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.25_2359_planet2
+ * @version 2015.12.03_1719_planet2
  */
 public class Tweet {
     
@@ -144,14 +144,7 @@ public class Tweet {
      * @return A String containing the abbreviation of the tweet's language.
      */
     public String getLanguage() { return language; }
-    
-    /**
-     * Returns the ground truth event the tweet is referring to.
-     * @return A String containing the event's name.
-     * @deprecated Ground truth events removed since Planet2.
-     */
-    public String getGroundTruthEvent() { return "None"; }
-    
+        
     /**
      * Prints the tweet metadata along with its text.
      */
@@ -171,10 +164,10 @@ public class Tweet {
             System.out.println("\tLongitude: " + getLongitude());
         }
         if(isRetweeted()) {
-            System.out.println("Retweeted " + getNumberOfRetweets() + " times");
+            System.out.println("Retweeted " + (getNumberOfRetweets() == 1 ? "1 time." : getNumberOfRetweets() + " times."));
         }
         if(isFavorited()) {
-            System.out.println("Favorited " + getNumberOfFavorites() + " times");
+            System.out.println("Favorited " + (getNumberOfFavorites() == 1 ? "1 time." : getNumberOfFavorites() + " times."));
         }
         System.out.println("Language: " + getLanguage());
         System.out.println("--------------------------------------------");
