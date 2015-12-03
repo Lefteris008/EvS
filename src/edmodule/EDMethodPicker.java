@@ -27,15 +27,15 @@ import preprocessingmodule.nlp.stopwords.StopWords;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.25_2358_planet2
+ * @version 2015.12.03_1411_planet2
  */
 public class EDMethodPicker {
     
     /**
-     * Constructor to pick method of Event Detection 
+     * Pick method of Event Detection.
      * @param config A configuration object
      */
-    public EDMethodPicker(Config config) {
+    public static void selectEDMethod(Config config) {
         System.out.println("\nPick a method for Event Detection");
         System.out.println("1. EDCoW");
         System.out.println("2. LSH");

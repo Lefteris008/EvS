@@ -26,11 +26,12 @@ import java.util.logging.Logger;
 import preprocessingmodule.nlp.Tokenizer;
 import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.nlp.stopwords.StopWords;
+import samodule.SentimentAnalyzer;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.25_2355_planet2
+ * @version 2015.12.03_1657_planet2
  */
 public class PreProcessor {
     
@@ -48,66 +49,62 @@ public class PreProcessor {
             Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
             mongoLogger.setLevel(Level.SEVERE); 
         }
-        
-        String[] keywords;
+
         int choice;
         Config config = new Config(); //Create the configuration object
         
-        System.out.println("Pick one");
-        System.out.println("1. Collect dataset by Streaming API (Collect real-time data)");
-        System.out.println("2. Collect dataset by ID (Collect historical data)");
-        System.out.println("3. Get a specific tweet from MongoDB store");
-        System.out.println("4. Retrieve all tweets from MongoDB Store");
-        System.out.println("5. Apply Event Detection");
+        System.out.println("Select one of the following options");
+        System.out.println("1. Test a tweet");
+        System.out.println("\tGet a specific tweet from MongoDB Store and test the preprocessing procedure.");
+        System.out.println("2. Apply Event Detection");
+        System.out.println("\tApply the EDCoW algorithm.");
+        System.out.println("3. Apply Event Detection combining Sentiment Analysis");
+        System.out.println("\tMain option of project.");
         System.out.print("Your choice: ");
         
         Scanner keyboard = new Scanner(System.in);
         choice = keyboard.nextInt();
         
-        MongoHandler mongoDB = new MongoHandler(config);
-        
-        try {
-            mongoDB.connectToMongoDB(config); //Get MongoDB connection
+        switch(choice) {
+            case 1: {
+                MongoHandler mongoDB = new MongoHandler(config);
+                try {
+                    //Establish the connection
+                    mongoDB.connectToMongoDB(config);
 
-            switch(choice) {
-                case 1: {
-                    System.out.println("Streaming API");
-                    System.out.println("Collect real-time data and store them in MongoDB.");
-                    keywords = Utils.extractTermsFromFile(config); //Get the keywords
-                    retrieveByStreamingAPI(config, mongoDB, keywords); //Retrieve tweets
-                    break;
-                } case 2: {
-                    System.out.println("Direct call by ID");
-                    System.out.println("Collect historical data and store them in MongoDB.");
-                    retrieveByID(config, mongoDB); //Retrieve tweets
-                    break;
-                } case 3: {
                     System.out.print("Type in the ID you want to search for: ");
                     long id = keyboard.nextLong();
+
+                    //Get tweet and print its data
                     System.out.println("Test search for tweet with ID: '"+ id + "'");
                     Tweet tweet = mongoDB.getATweetByIdFromMongoDBStore(config, id);
                     tweet.printTweetData();
-                    
+
+                    //Sentiment part
+                    SentimentAnalyzer.initAnalyzer(true);
+                    System.out.println("Sentiment: " + SentimentAnalyzer.getSentiment(SentimentAnalyzer.getSentimentOfSentence(tweet.getText())));
+                    SentimentAnalyzer.postActions(true);
+
+                    //Preprocess part
                     StopWords sw = new StopWords(config);
                     sw.loadStopWords(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())); //Load stopwords
                     Tokenizer tk = new Tokenizer(tweet.getText(), sw);
                     tk.textTokenizingTester();
                     break;
-                } case 4: {
-                    System.out.println("Retrieve all tweets from MongoDB Store");
-                    List<Tweet> tweet = mongoDB.retrieveAllTweetsFromMongoDBStore(config);
-                    System.out.println("Database '" + config.getDBName() + "' contains " + tweet.size() + " tweets.");
-                } case 5: {
-                    EDMethodPicker picker = new EDMethodPicker(config);
-                } default : {
-                    System.out.println("Wrong choice. Exiting now...");
-                }
+                } catch(MongoException e) {
+                    System.out.println("Error: Can't establish a connection with MongoDB");
+                    Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
+                    mongoDB.closeMongoConnection(config); //Close DB
+                } 
+            } case 2: {
+                EDMethodPicker.selectEDMethod(config);
+                break;
+            } case 3: {
+                System.out.println("Not supported yet");
+                break;
+            } default : {
+                System.out.println("Wrong choice. Exiting now...");
             }
-        } catch(MongoException e) {
-            System.out.println("Error: Can't establish a connection with MongoDB");
-            Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
-        } finally {
-            mongoDB.closeMongoConnection(config); //Close DB
         }
     }
     
