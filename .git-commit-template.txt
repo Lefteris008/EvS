@@ -1,5 +1,5 @@
 #Version of commit (daily branch -hours should be omitted)
-2015.11.21_planet2
+2015.12.05_planet3
 
 #Signed off by (pick one, delete the other)
 Lefteris Paraskevas
