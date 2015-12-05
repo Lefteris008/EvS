@@ -16,17 +16,37 @@
  */
 package edmodule.lsh;
 
+import edmodule.EDMethod;
+
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.26_1553_planet1
+ * @version 2015.12.05_2023_planet3
  */
-public class LSH {
+public class LSH implements EDMethod {
+  
+    @Override
+    public String getName() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getCitation() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getAuthors() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getDescription() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
-    /**
-     * Method that runs LSH algorithm
-     */
-    public void run() {
-        ///
+    @Override
+    public void apply() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

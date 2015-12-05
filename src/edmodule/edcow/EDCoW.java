@@ -18,6 +18,7 @@ package edmodule.edcow;
 
 import edmodule.edcow.event.Events;
 import ch.epfl.lis.jmod.modularity.community.Community;
+import edmodule.EDMethod;
 import edmodule.utils.Dataset;
 import java.io.IOException;
 import java.util.*;
@@ -25,15 +26,16 @@ import java.util.Map.Entry;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import preprocessingmodule.nlp.stopwords.StopWords;
 
 /**
  *
- *   @author Adrien GUILLE, ERIC Lab, University of Lyon 2
- *   @email adrien.guille@univ-lyon2.fr
- *   @author Lefteris Paraskevas (changes to omit missing classes)
+ * @author  Adrien GUILLE, ERIC Lab, University of Lyon 2
+ * @email   adrien.guille@univ-lyon2.fr
+ * 
+ * @author  Lefteris Paraskevas (changes to omit missing classes)
+ * @version 2015.12.05_2024_planet3 (For EDviaSA project version alignment) 
  */
-public class EDCoW {
+public class EDCoW implements EDMethod {
     private final int delta = 1;
     private final int delta2 = 48;
     private final int gamma = 10;  
@@ -54,19 +56,28 @@ public class EDCoW {
         this.ds = ds;
     }
 
+    @Override
     public String getName() {
         return "EDCoW";
     }
 
+    @Override
     public String getCitation() {
         return "<li><b>EDCoW:</b> J. Weng and B. Lee (2011) Event Detection in Twitter, In Proceedings of the 2011 AAAI Conference on Weblogs and Social Media (ICWSM), pp. 401-408</li>";
     }
     
+    @Override
+    public String getAuthors() {
+        return "J. Weng and B. Lee";
+    }
+    
+    @Override
     public String getDescription() {
         return "Event detection with clustering of wavelet-based signals";
     }
 
-    public void apply(StopWords swHandler) {
+    @Override
+    public void apply() {
         double minTermOccur = minTermSupport * countCorpus; //Min support * Message count corpus
         double maxTermOccur = maxTermSupport * countCorpus; //Max support * Message count corpus
         //Deltas and gammas already configured

@@ -27,7 +27,7 @@ import preprocessingmodule.nlp.stopwords.StopWords;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.03_1411_planet2
+ * @version 2015.12.05_2027_planet3
  */
 public class EDMethodPicker {
     
@@ -55,14 +55,14 @@ public class EDMethodPicker {
                 System.out.println("Now applying EDCoW algorithm...");
                 
                 EDCoW edcow = new EDCoW(452, 500, ds); //Create the EDCoW object
-                edcow.apply(stopwordsHandler); //Apply the algorithm
+                edcow.apply(); //Apply the algorithm
                 
                 System.out.println("Succesfully applied EDCoW algorithm");
             } 
             case 2: {
                 System.out.println("Selected method: LSH");
                 LSH lsh = new LSH();
-                lsh.run();
+                lsh.apply();
             }
             default: {
                 System.out.println("No method selected. Exiting now...");
