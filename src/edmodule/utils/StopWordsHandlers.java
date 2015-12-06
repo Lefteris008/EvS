@@ -16,13 +16,14 @@
  */
 package edmodule.utils;
 
+import preprocessingmodule.Config;
 import preprocessingmodule.language.LanguageCodes;
 import preprocessingmodule.nlp.stopwords.StopWords;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.25_2357_planet2
+ * @version 2015.12.06_1936_planet3
  */
 public class StopWordsHandlers {
     
@@ -36,9 +37,19 @@ public class StopWordsHandlers {
     private static StopWords swAr; //Arabic
     
     /**
-     * Initialize stopwords handlers.
+     * Initialize the StopWords handler.
+     * @param config A configuration object.
      */
-    public final static void initStopWordsHandlers() {
+    public StopWordsHandlers(Config config) {
+        swEn = new StopWords(config);
+        swFr = new StopWords(config);
+        swIt = new StopWords(config);
+        swEs = new StopWords(config);
+        swDe = new StopWords(config);
+        swGr = new StopWords(config);
+        swFa = new StopWords(config);
+        swAr = new StopWords(config);
+        
         swAr.loadStopWords(LanguageCodes.ar);
         swDe.loadStopWords(LanguageCodes.de);
         swEn.loadStopWords(LanguageCodes.en);
@@ -54,7 +65,7 @@ public class StopWordsHandlers {
      * @param isoCode The ISO code of the language.
      * @return A StopWords handler.
      */
-    public static StopWords getSWHandlerAccordingToLanguage(LanguageCodes isoCode) {
+    public StopWords getSWHandlerAccordingToLanguage(LanguageCodes isoCode) {
         if(isoCode.equals(LanguageCodes.ar)) {
             return swAr;
         } else if(isoCode.equals(LanguageCodes.de)) {

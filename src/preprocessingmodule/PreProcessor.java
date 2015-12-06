@@ -16,10 +16,10 @@
  */
 package preprocessingmodule;
 
-import preprocessingmodule.dataset.TweetsRetriever;
-import preprocessingmodule.dataset.Tweet;
-import preprocessingmodule.dataset.MongoHandler;
-import preprocessingmodule.dataset.Utils;
+import dsretriever.TweetsRetriever;
+import dsretriever.Tweet;
+import dsretriever.MongoHandler;
+import dsretriever.Utils;
 import com.mongodb.MongoException;
 import edmodule.EDMethodPicker;
 import java.io.IOException;
@@ -58,12 +58,12 @@ public class PreProcessor {
         Config config = new Config(); //Create the configuration object
         
         System.out.println("Select one of the following options");
-        System.out.println("1. Test a tweet");
-        System.out.println("\tGet a specific tweet from MongoDB Store and test the preprocessing procedure.");
-        System.out.println("2. Apply Event Detection");
-        System.out.println("\tApply the EDCoW algorithm.");
-        System.out.println("3. Apply Event Detection combining Sentiment Analysis");
-        System.out.println("\tMain option of project.");
+        System.out.println("1.\tTest a tweet");
+        System.out.println("\tGet a specific tweet from MongoDB Store and test the preprocessing procedure.\n");
+        System.out.println("2.\tApply Event Detection");
+        System.out.println("\tApply the EDCoW algorithm.\n");
+        System.out.println("3.\tApply Event Detection combining Sentiment Analysis");
+        System.out.println("\tMain option of project.\n");
         System.out.print("Your choice: ");
         
         Scanner keyboard = new Scanner(System.in);
@@ -105,6 +105,13 @@ public class PreProcessor {
                 break;
             } case 3: {
                 System.out.println("Not supported yet");
+                break;
+            } case 4: {
+                MongoHandler mongoDB = new MongoHandler(config);
+                mongoDB.connectToMongoDB(config);
+                List<Tweet> tweets = mongoDB.retrieveAllTweetsFromMongoDBStore(config);
+                tweets.get(tweets.size()-1).printTweetData();
+                mongoDB.closeMongoConnection(config);
                 break;
             } default : {
                 System.out.println("Wrong choice. Exiting now...");

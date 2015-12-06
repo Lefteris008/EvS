@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule.dataset;
+package dsretriever;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,7 +37,7 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.12.03_1724_planet2
+ * @version 2015.12.06_1935_planet3
  */
 public class TweetsRetriever {
 

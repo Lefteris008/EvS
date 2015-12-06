@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edmodule.utils;
+package edmodule.dataset;
 
 import edmodule.edcow.frequencies.DocumentTermFrequencyItem;
 import java.util.ArrayList;
@@ -22,27 +22,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.IntStream;
 import preprocessingmodule.Config;
-import preprocessingmodule.dataset.MongoHandler;
-import preprocessingmodule.dataset.Tweet;
+import dsretriever.MongoHandler;
+import dsretriever.Tweet;
+import edmodule.utils.Stemmers;
+import edmodule.utils.StopWordsHandlers;
+import java.util.Calendar;
+import java.util.Date;
 import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.nlp.Tokenizer;
 import preprocessingmodule.nlp.stemming.Stemmer;
-import preprocessingmodule.nlp.stopwords.StopWords;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.25_2348_planet2
+ * @version 2015.12.06_1934_planet3
  */
-public class Dataset {
+public final class Dataset {
     
-    private static List<String> terms = new ArrayList<>(); //List containing all occuring terms
+    private List<String> terms = new ArrayList<>(); //List containing all occuring terms
     private final HashMap<String, Integer> termsWithOccurencies = new HashMap<>(); //A map containing terms along with their frequency of occurance
     private int numberOfTweets;
     private final List<DocumentTermFrequencyItem> termDocFreqId = new ArrayList<>(); //A list containg triplets of tweetIDs, termIDs and their frequencies
     private final HashMap<Integer, List<String>> docTerms = new HashMap<>(); //A map containing the tweetIDs and a list of the terms that each one of them includes
     private final HashMap<String, Integer> termIds = new HashMap<>(); //A map containing the ids of the terms (namely, their index as they are being read)
-    
+    private Integer[] numberOfDocuments;
+    private final HashMap<Integer, Integer> messageDistribution = new HashMap<>();
     
     /**
      * It creates a working dataset. More formally, the constructor retrieves all tweets from MongoDB
@@ -51,25 +55,34 @@ public class Dataset {
      * @param config A Configuration object.
      * @param sw A StopWords handler
      */
-    public Dataset(Config config, StopWords sw) {
+    public Dataset(Config config) {
+        long startTime = System.currentTimeMillis(); //Start time
         
         MongoHandler mongo = new MongoHandler(config);
+        mongo.connectToMongoDB(config);
+        Calendar cal;
         
         //Initialize stopwords and stemmers
-        StopWordsHandlers.initStopWordsHandlers();
+        StopWordsHandlers swH = new StopWordsHandlers(config);
         Stemmers.initStemmers();
         
         //Load all tweets from MongoDB Store
         List<Tweet> tweets = mongo.retrieveAllTweetsFromMongoDBStore(config);
+        mongo.closeMongoConnection(config);
+        
+        //Get the date of the first tweet
+        cal = Calendar.getInstance();
         
         //Iterate through all tweets
         for(Tweet tweet : tweets) {            
             numberOfTweets++; //Count it
-
+            
+            updateMessageDistribution(cal, tweet.getDate()); //Store the date
+            
             //Get the tweet's text and tokenize it
             String text = tweet.getText();
             Tokenizer tokens = new Tokenizer(text, 
-                    StopWordsHandlers.getSWHandlerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())));
+                    swH.getSWHandlerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())));
 
             //Store tokens of tweet for future use
             docTerms.put(numberOfTweets-1, getStemsAsList(tokens.getCleanTokensAndHashtags(), 
@@ -88,6 +101,7 @@ public class Dataset {
             }
             
         }
+        this.setNumberOfDocuments(messageDistribution);
         terms = new ArrayList<>(termsWithOccurencies.keySet());
         
         //Generate the list of term IDs
@@ -97,7 +111,31 @@ public class Dataset {
             termCount++;
         }
         
-        mongo.closeMongoConnection(config);
+        long endTime = System.currentTimeMillis();
+        System.out.println(Dataset.class.getName() + " run for " + ((endTime - startTime)/1000) + " seconds");
+    }
+    
+    /**
+     * Updates the distribution of incoming messages (tweets).
+     * More formally, it calculates the tweets belonging to a certain document. In this iteration, a document
+     * is set in a 24-h window, so the method calculates and stores the tweets of a certain day. It then stores
+     * this information into a HashMap which its key is the corresponding date and its value is the summary of
+     * the messages that have been generated into that day.
+     * @param cal A Calendar instance, already set.
+     * @param date The date to be checked.
+     */
+    public final void updateMessageDistribution(Calendar cal, Date date) {
+        int day;
+        int month;
+        cal.setTime(date);
+        day = cal.get(Calendar.DAY_OF_MONTH); //Get the current day of month
+        month = cal.get(Calendar.MONTH);
+        int key = (month * 100) + day; //E.g. for December 6th, the key would be 1106 (11 * 100 + 6) -0 index used
+        if(messageDistribution.containsKey(key)) {
+            messageDistribution.put(key, messageDistribution.get(key) + 1);
+        } else {
+            messageDistribution.put(key, 1);
+        }
     }
     
     /**
@@ -178,12 +216,23 @@ public class Dataset {
     }
     
     /**
+     * Sets an integer array of numberOfDocuments size that contains
+     * the tweets distribution of the 24-h window.
+     * @param numberOfDocuments A HashMap containing the tweets distribution.
+     */
+    public void setNumberOfDocuments(HashMap<Integer, Integer> distribution) {
+        numberOfDocuments = new Integer[distribution.size()];
+        int i = 0;
+        distribution.keySet().stream().forEach((key) -> {
+            numberOfDocuments[i] = distribution.get(key);
+        });
+    }
+    
+    /**
      * Returns the number of documents.
      * @return An Integer array containing the number of tweets.
      */
     public Integer[] getNumberOfDocuments() {
-        Integer[] numOfDocuments = new Integer[1];
-        numOfDocuments[0] = numberOfTweets;
-        return numOfDocuments;
+        return numberOfDocuments;
     }
 }

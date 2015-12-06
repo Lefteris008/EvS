@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule.dataset;
+package dsretriever;
 
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
@@ -35,7 +35,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.03_1723_planet2
+ * @version 2015.12.06_1819_planet3
  */
 public class MongoHandler {
     
@@ -92,8 +92,6 @@ public class MongoHandler {
      * @param config A configuration object
      * @param event The ground truth event, for which the tweet is actually referring to
      * @return True if the process succeeds, false otherwise
-     * @deprecated To be removed in future iteration -dataset already present and stored
-     * @since Wave2
      */
     public final boolean insertTweetIntoMongoDB(Status status, Config config, String event) {
         

@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * aString with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule.dataset;
+package dsretriever;
 
 import java.util.Date;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.03_1719_planet2
+ * @version 2015.12.06_1935_planet3
  */
 public class Tweet {
     

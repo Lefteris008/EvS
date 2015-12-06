@@ -19,7 +19,7 @@ package edmodule.edcow;
 import edmodule.edcow.event.Events;
 import ch.epfl.lis.jmod.modularity.community.Community;
 import edmodule.EDMethod;
-import edmodule.utils.Dataset;
+import edmodule.dataset.Dataset;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  * @email   adrien.guille@univ-lyon2.fr
  * 
  * @author  Lefteris Paraskevas (changes to omit missing classes)
- * @version 2015.12.05_2024_planet3 (For EDviaSA project version alignment) 
+ * @version 2015.12.06_1935_planet3 (For EDviaSA project version alignment) 
  */
 public class EDCoW implements EDMethod {
     private final int delta = 1;

@@ -16,7 +16,7 @@
  */
 package edmodule;
 
-import edmodule.utils.Dataset;
+import edmodule.dataset.Dataset;
 import edmodule.edcow.EDCoW;
 import edmodule.lsh.LSH;
 import java.util.Scanner;
@@ -27,7 +27,7 @@ import preprocessingmodule.nlp.stopwords.StopWords;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.05_2027_planet3
+ * @version 2015.12.06_1935_planet3
  */
 public class EDMethodPicker {
     
@@ -46,9 +46,7 @@ public class EDMethodPicker {
         
         switch(choice) {
             case 1: {
-                StopWords stopwordsHandler = new StopWords(config);
-                stopwordsHandler.loadStopWords(LanguageCodes.en); //Load the stopwords for the english language
-                Dataset ds = new Dataset(config, stopwordsHandler); //Load the dataset
+                Dataset ds = new Dataset(config); //Load the dataset
                 ds.setDocTermFreqIdList(config);
                 
                 System.out.println("Selected method: EDCoW");
