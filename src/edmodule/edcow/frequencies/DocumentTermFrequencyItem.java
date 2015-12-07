@@ -5,14 +5,12 @@ import java.io.Serializable;
 /**
  * Created by Farrokh on 8/27/2015.
  * Changes by Lefteris Paraskevas
+ * @version 2015.12.06_1745_planet3
  */
 public class DocumentTermFrequencyItem implements Serializable {
     public int doc_id;
     public int term_id;
     public short frequency;
-
-    public DocumentTermFrequencyItem() {
-    }
 
     public DocumentTermFrequencyItem(int doc_id, int term_id, short frequency) {
         this.doc_id = doc_id;

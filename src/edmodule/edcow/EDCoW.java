@@ -33,26 +33,29 @@ import java.util.logging.Logger;
  * @email   adrien.guille@univ-lyon2.fr
  * 
  * @author  Lefteris Paraskevas (changes to omit missing classes)
- * @version 2015.12.06_1935_planet3 (For EDviaSA project version alignment) 
+ * @version 2015.12.07_1939_planet3 (For EDviaSA project version alignment) 
  */
 public class EDCoW implements EDMethod {
     private final int delta = 1;
     private final int delta2 = 48;
     private final int gamma = 10;  
-    private final double minTermSupport = 0.01; //0.0001
-    private final double maxTermSupport = 0.9; //0.01
+    private final double minTermSupport = 0.0001; //0.0001
+    private final double maxTermSupport = 0.01; //0.01
     private HashMap<String,Short[]> termDocMap;
     public LinkedList<EDCoWEvent> eventList;
     private final int timeSliceA;
     private final int timeSliceB;
-    private final int countCorpus; //Total number of tweets
+    private int countCorpus; //Total number of tweets
     private final Dataset ds;
     public Events events;
     
     public EDCoW(int timeSliceA, int timeSliceB, Dataset ds){
         this.timeSliceA = timeSliceA;
         this.timeSliceB = timeSliceB;
-        this.countCorpus = ds.getNumberOfDocuments()[0];
+        this.countCorpus = 0;
+        for (Integer numberOfDocument : ds.getNumberOfDocuments()) {
+            this.countCorpus += numberOfDocument;
+        }
         this.ds = ds;
     }
 
@@ -88,7 +91,7 @@ public class EDCoW implements EDMethod {
         
         for(int i = 0; i < ds.getTerms().size(); i++){
             String term = ds.getTerms().get(i);
-            if(term.length() > 1) { //Stopwords check removed as they are already ommited when creating the dataset 
+            if(term.length() > 1) { //Stopwords check removed as they are already ommitted when creating the dataset 
                 Short[] frequency = ds.getDocumentsTermFrequency(i);
                 int cf = 0;
                 for(short freq : frequency){
@@ -115,9 +118,9 @@ public class EDCoW implements EDMethod {
             LinkedList<EDCoWKeyword> keyWords = new LinkedList<>();
             Integer[] distributioni = ds.getNumberOfDocuments();
             double[] distributiond = new double[delta2];
-            int startSlice = window*delta2;
-            int endSlice = startSlice+delta2-1;
-            for(int i = startSlice; i < endSlice;  i++){
+            int startSlice = window * delta2;
+            int endSlice = startSlice + delta2 - 1;
+            for(int i = startSlice; i < endSlice; i++){
                 distributiond[i-startSlice] = (double) distributioni[i]; 
             }
             for(Entry<String, Short[]> entry : termDocMap.entrySet()) {
@@ -156,7 +159,7 @@ public class EDCoW implements EDMethod {
                 bigMatrix[i] = keyWordsList1.get(i).getCrossCorrelation();
             }
 
-            //compute theta2 using the bigmatrix
+            //Compute theta2 using the BigMatrix
             double theta2 = th1.theta2(bigMatrix, gamma);        
             for(int i = 0; i < keyWordsList1.size(); i++){
                 for(int j = i+1; j < keyWordsList1.size(); j++){

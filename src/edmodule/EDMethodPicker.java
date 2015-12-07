@@ -21,13 +21,11 @@ import edmodule.edcow.EDCoW;
 import edmodule.lsh.LSH;
 import java.util.Scanner;
 import preprocessingmodule.Config;
-import preprocessingmodule.language.LanguageCodes;
-import preprocessingmodule.nlp.stopwords.StopWords;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.06_1935_planet3
+ * @version 2015.12.07_1939_planet3
  */
 public class EDMethodPicker {
     
@@ -46,8 +44,9 @@ public class EDMethodPicker {
         
         switch(choice) {
             case 1: {
-                Dataset ds = new Dataset(config); //Load the dataset
-                ds.setDocTermFreqIdList(config);
+                Dataset ds = new Dataset(config);
+                ds.createCorpus();
+                ds.setDocTermFreqIdList();
                 
                 System.out.println("Selected method: EDCoW");
                 System.out.println("Now applying EDCoW algorithm...");

@@ -28,6 +28,8 @@ import edmodule.utils.Stemmers;
 import edmodule.utils.StopWordsHandlers;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.nlp.Tokenizer;
 import preprocessingmodule.nlp.stemming.Stemmer;
@@ -35,23 +37,23 @@ import preprocessingmodule.nlp.stemming.Stemmer;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.06_1934_planet3
+ * @version 2015.12.07_1939_planet3
  */
 public final class Dataset {
     
-    private List<String> terms = new ArrayList<>(); //List containing all occuring terms
-    private final HashMap<String, Integer> termsWithOccurencies = new HashMap<>(); //A map containing terms along with their frequency of occurance
     private int numberOfTweets;
-    private final List<DocumentTermFrequencyItem> termDocFreqId = new ArrayList<>(); //A list containg triplets of tweetIDs, termIDs and their frequencies
-    private final HashMap<Integer, List<String>> docTerms = new HashMap<>(); //A map containing the tweetIDs and a list of the terms that each one of them includes
-    private final HashMap<String, Integer> termIds = new HashMap<>(); //A map containing the ids of the terms (namely, their index as they are being read)
+    private final StopWordsHandlers swH;
     private Integer[] numberOfDocuments;
+    private List<String> terms = new ArrayList<>(); //List containing all occuring termsprivate final HashMap<String, Integer> termsMap = new HashMap<>(); //A map containing terms along with their frequency of occurance
+    private final List<DocumentTermFrequencyItem> termDocFreqId = new ArrayList<>(); //A list containg triplets of tweetIDs, termIDs and their frequenciesprivate final HashMap<Integer, List<String>> docTerms = new HashMap<>(); //A map containing the tweetIDs and a list of the terms that each one of them includes
+    private final List<Tweet> tweets;
+    private final HashMap<Integer, HashMap<String, Integer>> termsDocsWithOccurencies = new HashMap<>();
+    private final HashMap<String, Integer> termIds = new HashMap<>(); //A map containing the ids of the terms (namely, their index as they are being read)
     private final HashMap<Integer, Integer> messageDistribution = new HashMap<>();
-    
+    private final HashMap<Integer, Integer> documentIndices = new HashMap<>();
+
     /**
-     * It creates a working dataset. More formally, the constructor retrieves all tweets from MongoDB
-     * store, iterates through them, tokenizes the text of every single one of them, generates the English
-     * stem of every token of them and updates a hashmap that contains terms along with their occurencies.
+     * It retrieves a dataset from the already stored MongoDB collection.
      * @param config A Configuration object.
      * @param sw A StopWords handler
      */
@@ -60,82 +62,108 @@ public final class Dataset {
         
         MongoHandler mongo = new MongoHandler(config);
         mongo.connectToMongoDB(config);
-        Calendar cal;
-        
+ 
         //Initialize stopwords and stemmers
-        StopWordsHandlers swH = new StopWordsHandlers(config);
+        swH = new StopWordsHandlers(config);
         Stemmers.initStemmers();
         
         //Load all tweets from MongoDB Store
-        List<Tweet> tweets = mongo.retrieveAllTweetsFromMongoDBStore(config);
+        tweets = mongo.retrieveAllTweetsFromMongoDBStore(config);
         mongo.closeMongoConnection(config);
+ 
+        long endTime = System.currentTimeMillis();
+        System.out.println(Dataset.class.getName() + " run for " + ((endTime - startTime)/1000) + " seconds");
+    }
+    
+    /**
+     * Creates a working corpus from a loaded dataset.
+     * More formally, it iterates through the tweets retrieved, tokenizes their text,
+     * gets the stems of every single token and updates various HashMaps and fields for
+     * future use.
+     */
+    public final void createCorpus() {
+        long startTime = System.currentTimeMillis();
         
-        //Get the date of the first tweet
+        Calendar cal;
+        int docKey;
+        int termCount = 0;
+        int documentCount = 0;        
+        
+        //Set the calendar instance
         cal = Calendar.getInstance();
-        
-        //Iterate through all tweets
+
         for(Tweet tweet : tweets) {            
-            numberOfTweets++; //Count it
             
-            updateMessageDistribution(cal, tweet.getDate()); //Store the date
+            //Count the tweet, update the distribution, get the docKey
+            //and update the corresponding HashMap
+            numberOfTweets++;
+            docKey = updateMessageDistribution(cal, tweet.getDate());
+            if(!documentIndices.containsKey(docKey)) {
+                documentIndices.put(docKey, documentCount);
+                documentCount++;
+            }
             
             //Get the tweet's text and tokenize it
             String text = tweet.getText();
             Tokenizer tokens = new Tokenizer(text, 
                     swH.getSWHandlerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())));
 
-            //Store tokens of tweet for future use
-            docTerms.put(numberOfTweets-1, getStemsAsList(tokens.getCleanTokensAndHashtags(), 
-                    Stemmers.getStemmerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage()))));
-
             //Iterate through the stemmed clean tokens/hashtags
             for(String token : getStemsAsList(tokens.getCleanTokensAndHashtags(), 
                     Stemmers.getStemmerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())))) {
 
-                //Update hashmap
-                if(termsWithOccurencies.containsKey(token)) {
-                    termsWithOccurencies.put(token, termsWithOccurencies.get(token) + 1);
-                } else {
+                //Update the HashMap with the triplet Document, Token, Frequency
+                if(termsDocsWithOccurencies.containsKey(docKey)) { //Document already exists, update it
+                    HashMap<String, Integer> termsWithOccurencies = termsDocsWithOccurencies.get(docKey);
+                    if(termsWithOccurencies.containsKey(token)) { //Token already exists, update it
+                        termsWithOccurencies.put(token, termsWithOccurencies.get(token) + 1);
+                    } else { //Token does not exist, put it
+                        termsWithOccurencies.put(token, 1);
+                    }
+                    termsDocsWithOccurencies.put(docKey, termsWithOccurencies); //Store inner HashMap
+                } else { //Document does not exist, so as the token -create it and put it
+                    HashMap<String, Integer> termsWithOccurencies = new HashMap<>();
                     termsWithOccurencies.put(token, 1);
+                    termsDocsWithOccurencies.put(docKey, termsWithOccurencies);
+                }
+                
+                //Generate a HashMap containig the index IDs of the terms
+                if(!termIds.containsKey(token)) {
+                    termIds.put(token, termCount);
+                    termCount++;
                 }
             }
-            
         }
-        this.setNumberOfDocuments(messageDistribution);
-        terms = new ArrayList<>(termsWithOccurencies.keySet());
-        
-        //Generate the list of term IDs
-        int termCount = 0;
-        for(String term : terms) {
-            termIds.put(term, termCount);
-            termCount++;
-        }
+        setNumberOfDocuments(messageDistribution);
         
         long endTime = System.currentTimeMillis();
-        System.out.println(Dataset.class.getName() + " run for " + ((endTime - startTime)/1000) + " seconds");
+        System.out.println("Creating corpus proceedure run for " + ((endTime - startTime)/1000) + " seconds");
     }
     
     /**
      * Updates the distribution of incoming messages (tweets).
      * More formally, it calculates the tweets belonging to a certain document. In this iteration, a document
      * is set in a 24-h window, so the method calculates and stores the tweets of a certain day. It then stores
-     * this information into a HashMap which its key is the corresponding date and its value is the summary of
+     * this information into a HashMap which its docKey is the corresponding date and its value is the summary of
      * the messages that have been generated into that day.
      * @param cal A Calendar instance, already set.
      * @param date The date to be checked.
+     * @return The key of the document, for HashMap storage. The key is in the form of 'mmDD', e.g.
+     * for December 26th it will be '1226' but for January 1st it will be '101'.
      */
-    public final void updateMessageDistribution(Calendar cal, Date date) {
+    public final int updateMessageDistribution(Calendar cal, Date date) {
         int day;
         int month;
         cal.setTime(date);
         day = cal.get(Calendar.DAY_OF_MONTH); //Get the current day of month
-        month = cal.get(Calendar.MONTH);
-        int key = (month * 100) + day; //E.g. for December 6th, the key would be 1106 (11 * 100 + 6) -0 index used
+        month = cal.get(Calendar.MONTH) + 1; //Zero-index based
+        int key = (month * 100) + day; //E.g. for December 6th, the docKey would be 1206 (12 * 100 + 6)
         if(messageDistribution.containsKey(key)) {
             messageDistribution.put(key, messageDistribution.get(key) + 1);
         } else {
             messageDistribution.put(key, 1);
         }
+        return key;
     }
     
     /**
@@ -154,30 +182,34 @@ public final class Dataset {
     
     /**
      * Returns the terms of the dataset.
-     * @return A String list containing the terms of the dataset.
+     * @return A String list containing the unique terms of the dataset.
      */
-    public List<String> getTerms() { return terms; }
+    public List<String> getTerms() { 
+        Set<String> termsSet = new HashSet<>();
+        for(int docKey : termsDocsWithOccurencies.keySet()) {
+            termsSet = termsDocsWithOccurencies.get(docKey).keySet();
+        }
+        terms = new ArrayList<>(termsSet); //Store them
+        return terms; 
+    }
     
     /**
-     * Initializes and stores a list containing objects
-     * of DocumentTermFrequencyItem class. More formally, each
-     * listing in this list contains a triplet with the id of a tweet,
-     * the id of the term that the tweet contains and the term's frequency.
-     * @param config A configuration object
+     * Initializes and stores a list containing objects of DocumentTermFrequencyItem class.
+     * More formally, each listing in this list contains a triplet with the ID of a document,
+     * the ID of a term that the document contains and the term's frequency.
      */
-    public final void setDocTermFreqIdList(Config config) {
-        
-        try {
-            for(int tweetId : docTerms.keySet()) {
-                for(String _item : docTerms.get(tweetId)) {
-                    DocumentTermFrequencyItem item = new DocumentTermFrequencyItem(tweetId, termIds.get(_item), termsWithOccurencies.get(_item).shortValue());
-                    termDocFreqId.add(item);
-                }
+    public final void setDocTermFreqIdList() {
+        int documentID, termID;
+        short frequency;
+        for(int docKey : termsDocsWithOccurencies.keySet()) {
+            documentID = documentIndices.get(docKey); //Get the actual ID
+            for(String token : termsDocsWithOccurencies.get(docKey).keySet()) {
+                termID = termIds.get(token);
+                frequency = termsDocsWithOccurencies.get(docKey).get(token).shortValue();
+                DocumentTermFrequencyItem item = new DocumentTermFrequencyItem(documentID, termID, frequency);
+                termDocFreqId.add(item);
             }
-        } catch(NullPointerException e) {
-            System.out.println("");
         }
-        
     }
     
     /**
@@ -189,7 +221,7 @@ public final class Dataset {
     }
     
     /**
-     * Returns the frequencies in all occurring documents of a term.
+     * Returns the frequencies in all occurring documents/tweets of a term.
      * @param term The index of the term in the 'terms' list.
      * @return A Short array containing the frequencies of the term in all documents.
      */
@@ -199,8 +231,8 @@ public final class Dataset {
             return null;
         }
         
-        //Creates a short array which length equals to the number of retrieved tweets
-        Short[] frqs = new Short[numberOfTweets];
+        //Creates a short array which equals the number of documents
+        Short[] frqs = new Short[numberOfDocuments.length];
         
         //Initializes the 'frqs' array with zeros
         IntStream.range(0, numberOfTweets).forEach(i -> frqs[i] = 0);
