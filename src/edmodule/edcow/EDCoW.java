@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import utilities.Utils;
 
 /**
  *
@@ -33,19 +34,19 @@ import java.util.logging.Logger;
  * @email   adrien.guille@univ-lyon2.fr
  * 
  * @author  Lefteris Paraskevas (changes to omit missing classes)
- * @version 2015.12.07_1939_planet3 (For EDviaSA project version alignment) 
+ * @version 2015.12.08_1715_planet3 (For EDviaSA project version alignment) 
  */
 public class EDCoW implements EDMethod {
-    private final int delta = 1;
-    private final int delta2 = 48;
-    private final int gamma = 10;  
+    private final int delta = 2;
+    private final int delta2 = 2;
+    private final int gamma = 5;  
     private final double minTermSupport = 0.0001; //0.0001
     private final double maxTermSupport = 0.01; //0.01
     private HashMap<String,Short[]> termDocMap;
     public LinkedList<EDCoWEvent> eventList;
     private final int timeSliceA;
     private final int timeSliceB;
-    private int countCorpus; //Total number of tweets
+    private int countCorpus = 0; //Total number of tweets
     private final Dataset ds;
     public Events events;
     
@@ -81,11 +82,13 @@ public class EDCoW implements EDMethod {
 
     @Override
     public void apply() {
+        long startTime = System.currentTimeMillis();
+        
         double minTermOccur = minTermSupport * countCorpus; //Min support * Message count corpus
         double maxTermOccur = maxTermSupport * countCorpus; //Max support * Message count corpus
         //Deltas and gammas already configured
     
-        int windows = (timeSliceB-timeSliceA)/delta2;
+        int windows = (timeSliceB - timeSliceA) / delta2;
         termDocMap = new HashMap<>();
         eventList = new LinkedList<>();
         
@@ -111,6 +114,9 @@ public class EDCoW implements EDMethod {
             //events.list.add(new Event(event.getKeywordsAsString(),AppParameters.dataset.corpus.convertTimeSliceToDay((int)event.startSlice)+","+AppParameters.dataset.corpus.convertTimeSliceToDay((int)event.endSlice)));
         });
         events.setFullList();
+        
+        long endTime = System.currentTimeMillis();
+        Utils.printExecutionTime(startTime, endTime, EDCoW.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
     public void processWindow(int window){
@@ -119,7 +125,7 @@ public class EDCoW implements EDMethod {
             Integer[] distributioni = ds.getNumberOfDocuments();
             double[] distributiond = new double[delta2];
             int startSlice = window * delta2;
-            int endSlice = startSlice + delta2 - 1;
+            int endSlice = startSlice + delta2;
             for(int i = startSlice; i < endSlice; i++){
                 distributiond[i-startSlice] = (double) distributioni[i]; 
             }

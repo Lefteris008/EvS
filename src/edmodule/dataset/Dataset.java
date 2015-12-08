@@ -33,6 +33,7 @@ import java.util.Set;
 import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.nlp.Tokenizer;
 import preprocessingmodule.nlp.stemming.Stemmer;
+import utilities.Utils;
 
 /**
  *
@@ -72,7 +73,7 @@ public final class Dataset {
         mongo.closeMongoConnection(config);
  
         long endTime = System.currentTimeMillis();
-        System.out.println(Dataset.class.getName() + " run for " + ((endTime - startTime)/1000) + " seconds");
+        Utils.printExecutionTime(startTime, endTime, Dataset.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
     /**
@@ -137,7 +138,7 @@ public final class Dataset {
         setNumberOfDocuments(messageDistribution);
         
         long endTime = System.currentTimeMillis();
-        System.out.println("Creating corpus proceedure run for " + ((endTime - startTime)/1000) + " seconds");
+        Utils.printExecutionTime(startTime, endTime, Dataset.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
     /**
@@ -235,7 +236,7 @@ public final class Dataset {
         Short[] frqs = new Short[numberOfDocuments.length];
         
         //Initializes the 'frqs' array with zeros
-        IntStream.range(0, numberOfTweets).forEach(i -> frqs[i] = 0);
+        IntStream.range(0, numberOfDocuments.length).forEach(i -> frqs[i] = 0);
         if (term != -1)
             
             //For every single element in the list 'termDocFreqId'
@@ -255,9 +256,10 @@ public final class Dataset {
     public void setNumberOfDocuments(HashMap<Integer, Integer> distribution) {
         numberOfDocuments = new Integer[distribution.size()];
         int i = 0;
-        distribution.keySet().stream().forEach((key) -> {
+        for(int key : distribution.keySet()) {
             numberOfDocuments[i] = distribution.get(key);
-        });
+            i++;
+        }
     }
     
     /**

@@ -25,7 +25,7 @@ import preprocessingmodule.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.07_1939_planet3
+ * @version 2015.12.08_1715_planet3
  */
 public class EDMethodPicker {
     
@@ -48,12 +48,11 @@ public class EDMethodPicker {
                 ds.createCorpus();
                 ds.setDocTermFreqIdList();
                 
-                System.out.println("Selected method: EDCoW");
-                System.out.println("Now applying EDCoW algorithm...");
+                EDCoW edcow = new EDCoW(24, 26, ds); //Create the EDCoW object
+                System.out.println("Selected method: " + edcow.getName());
+                System.out.println("Now applying algorithm...");
                 
-                EDCoW edcow = new EDCoW(452, 500, ds); //Create the EDCoW object
                 edcow.apply(); //Apply the algorithm
-                
                 System.out.println("Succesfully applied EDCoW algorithm");
             } 
             case 2: {
