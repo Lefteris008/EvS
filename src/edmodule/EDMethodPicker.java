@@ -48,7 +48,7 @@ public class EDMethodPicker {
                 ds.createCorpus();
                 ds.setDocTermFreqIdList();
                 
-                EDCoW edcow = new EDCoW(24, 26, ds); //Create the EDCoW object
+                EDCoW edcow = new EDCoW(46, 200, ds); //Create the EDCoW object
                 System.out.println("Selected method: " + edcow.getName());
                 System.out.println("Now applying algorithm...");
                 

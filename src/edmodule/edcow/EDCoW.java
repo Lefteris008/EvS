@@ -33,13 +33,13 @@ import utilities.Utils;
  * @author  Adrien GUILLE, ERIC Lab, University of Lyon 2
  * @email   adrien.guille@univ-lyon2.fr
  * 
- * @author  Lefteris Paraskevas (changes to omit missing classes)
+ * @author  Lefteris Paraskevas (configurations in EDCoW to omit missing components)
  * @version 2015.12.08_1715_planet3 (For EDviaSA project version alignment) 
  */
 public class EDCoW implements EDMethod {
-    private final int delta = 2;
-    private final int delta2 = 2;
-    private final int gamma = 5;  
+    private final int delta = 6; //6
+    private final int delta2 = 22; //48
+    private final int gamma = 5; //5
     private final double minTermSupport = 0.0001; //0.0001
     private final double maxTermSupport = 0.01; //0.01
     private HashMap<String,Short[]> termDocMap;

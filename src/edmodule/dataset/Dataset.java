@@ -38,7 +38,7 @@ import utilities.Utils;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.07_1939_planet3
+ * @version 2015.12.09_1740_planet3
  */
 public final class Dataset {
     
@@ -48,10 +48,10 @@ public final class Dataset {
     private List<String> terms = new ArrayList<>(); //List containing all occuring termsprivate final HashMap<String, Integer> termsMap = new HashMap<>(); //A map containing terms along with their frequency of occurance
     private final List<DocumentTermFrequencyItem> termDocFreqId = new ArrayList<>(); //A list containg triplets of tweetIDs, termIDs and their frequenciesprivate final HashMap<Integer, List<String>> docTerms = new HashMap<>(); //A map containing the tweetIDs and a list of the terms that each one of them includes
     private final List<Tweet> tweets;
-    private final HashMap<Integer, HashMap<String, Integer>> termsDocsWithOccurencies = new HashMap<>();
+    private final HashMap<String, HashMap<String, Integer>> termsDocsWithOccurencies = new HashMap<>();
     private final HashMap<String, Integer> termIds = new HashMap<>(); //A map containing the ids of the terms (namely, their index as they are being read)
-    private final HashMap<Integer, Integer> messageDistribution = new HashMap<>();
-    private final HashMap<Integer, Integer> documentIndices = new HashMap<>();
+    private final HashMap<String, Integer> messageDistribution = new HashMap<>();
+    private final HashMap<String, Integer> documentIndices = new HashMap<>();
 
     /**
      * It retrieves a dataset from the already stored MongoDB collection.
@@ -86,7 +86,7 @@ public final class Dataset {
         long startTime = System.currentTimeMillis();
         
         Calendar cal;
-        int docKey;
+        String docKey;
         int termCount = 0;
         int documentCount = 0;        
         
@@ -149,16 +149,32 @@ public final class Dataset {
      * the messages that have been generated into that day.
      * @param cal A Calendar instance, already set.
      * @param date The date to be checked.
-     * @return The key of the document, for HashMap storage. The key is in the form of 'mmDD', e.g.
-     * for December 26th it will be '1226' but for January 1st it will be '101'.
+     * @return The key of the document, for HashMap storage. The key is assembled in YYYYMMDD_HHMM fashion
+     * using a 10-minute precision window (HH00-HH09 belong to the 0-th 10-minute window etc.) 
+     * For December 6th, 2014 10:07 PM, the generated key would be 20141206_2200
+     * For January 21st, 2015 10:27 AM, the generated key would be 20150121_1020
      */
-    public final int updateMessageDistribution(Calendar cal, Date date) {
-        int day;
+    public final String updateMessageDistribution(Calendar cal, Date date) {
+        int year;
         int month;
+        int day;
+        int hour;
+        int minute;
         cal.setTime(date);
-        day = cal.get(Calendar.DAY_OF_MONTH); //Get the current day of month
+        year = cal.get(Calendar.YEAR); //Current year
         month = cal.get(Calendar.MONTH) + 1; //Zero-index based
-        int key = (month * 100) + day; //E.g. for December 6th, the docKey would be 1206 (12 * 100 + 6)
+        day = cal.get(Calendar.DAY_OF_MONTH); //Get the current day of month
+        hour = cal.get(Calendar.HOUR_OF_DAY); //24h
+        minute = cal.get(Calendar.MINUTE) / 10; //10-minute cadence
+        
+        //Assemble the key in YYYYMMDD_HHMM form. 10-minute precision used.
+        String key = String.valueOf(year) 
+                + (month < 10 ? "0" + String.valueOf(month) : String.valueOf(month)) 
+                + (day < 10 ? "0" + String.valueOf(day) : String.valueOf(day))
+                + "_" //Separate actual date from hour information
+                + (hour < 10 ? "0" + String.valueOf(hour) : String.valueOf(hour))
+                + String.valueOf(minute) + "0";
+        
         if(messageDistribution.containsKey(key)) {
             messageDistribution.put(key, messageDistribution.get(key) + 1);
         } else {
@@ -187,7 +203,7 @@ public final class Dataset {
      */
     public List<String> getTerms() { 
         Set<String> termsSet = new HashSet<>();
-        for(int docKey : termsDocsWithOccurencies.keySet()) {
+        for(String docKey : termsDocsWithOccurencies.keySet()) {
             termsSet = termsDocsWithOccurencies.get(docKey).keySet();
         }
         terms = new ArrayList<>(termsSet); //Store them
@@ -202,7 +218,7 @@ public final class Dataset {
     public final void setDocTermFreqIdList() {
         int documentID, termID;
         short frequency;
-        for(int docKey : termsDocsWithOccurencies.keySet()) {
+        for(String docKey : termsDocsWithOccurencies.keySet()) {
             documentID = documentIndices.get(docKey); //Get the actual ID
             for(String token : termsDocsWithOccurencies.get(docKey).keySet()) {
                 termID = termIds.get(token);
@@ -253,10 +269,10 @@ public final class Dataset {
      * the tweets distribution of the 24-h window.
      * @param numberOfDocuments A HashMap containing the tweets distribution.
      */
-    public void setNumberOfDocuments(HashMap<Integer, Integer> distribution) {
+    public void setNumberOfDocuments(HashMap<String, Integer> distribution) {
         numberOfDocuments = new Integer[distribution.size()];
         int i = 0;
-        for(int key : distribution.keySet()) {
+        for(String key : distribution.keySet()) {
             numberOfDocuments[i] = distribution.get(key);
             i++;
         }

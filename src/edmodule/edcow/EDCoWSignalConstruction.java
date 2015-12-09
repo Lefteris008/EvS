@@ -64,19 +64,19 @@ public class EDCoWSignalConstruction {
     public void secondSignalConstruction(double[] sw, int delta, int level){		
         this.sw = sw;
         this.delta = delta;
-        int sizeSw2 = (sw.length/delta) - 1;
+        int sizeSw2 = (sw.length / delta) - 1;
         sw2 = new double[sizeSw2];
 
-        for (int i=0, k=0; i < sw2.length*delta; i=i+delta, k++){
+        for (int i = 0, k = 0; i < sw2.length * delta; i = i + delta, k++){
             double[] signDtPrime = new double[delta];
             double[] signDtStar = new double[delta*2];
 
-            for (int j=0; j <delta; j++){
-                signDtPrime[j] = sw[i+j];				
+            for (int j = 0; j < delta; j++) {
+                signDtPrime[j] = sw[i + j];				
             }	
 
-            for (int j=0; j <delta*2; j++){
-                signDtStar[j] = sw[i+j];				
+            for (int j = 0; j < delta * 2; j++){
+                signDtStar[j] = sw[i + j];				
             }
 
             EDCoWDwt dwtDtPrime = new EDCoWDwt(signDtPrime,level);
@@ -88,7 +88,7 @@ public class EDCoWSignalConstruction {
             double htStar = dwtDtStar.gethMeasure();
 
             if (htStar > htPrime)
-                sw2[k] = (htStar - htPrime)/htPrime;
+                sw2[k] = (htStar - htPrime) / htPrime;
             else
                 sw2[k] = 0;
         }

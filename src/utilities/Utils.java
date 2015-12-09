@@ -31,7 +31,7 @@ public class Utils {
      */
     public static void printExecutionTime(long startTime, long endTime, String className, String methodName) {
         long runningTime = (endTime - startTime) / 1000; //Convert to seconds
-        System.out.println(className + "->" + methodName + "() run for " + (runningTime == 1 ? runningTime + " second." : runningTime + " seconds."));
+        System.out.println(className + " " + methodName + " run for " + (runningTime == 1 ? runningTime + " second." : runningTime + " seconds."));
     }
     
 }
