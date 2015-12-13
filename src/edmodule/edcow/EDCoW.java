@@ -34,10 +34,10 @@ import utilities.Utils;
  * @email   adrien.guille@univ-lyon2.fr
  * 
  * @author  Lefteris Paraskevas (configurations in EDCoW to omit missing components)
- * @version 2015.12.08_1715_planet3 (For EDviaSA project version alignment) 
+ * @version 2015.12.13_1951_planet3 (For EDviaSA project version alignment) 
  */
 public class EDCoW implements EDMethod {
-    private final int delta = 6; //6
+    private final int delta = 10; //6
     private final int delta2 = 22; //48
     private final int gamma = 5; //5
     private final double minTermSupport = 0.0001; //0.0001

@@ -23,6 +23,7 @@ import dsretriever.Utils;
 import com.mongodb.MongoException;
 import edmodule.EDMethodPicker;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -35,7 +36,7 @@ import samodule.SentimentAnalyzer;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.03_1657_planet2
+ * @version 2015.12.13_1951_planet3
  */
 public class PreProcessor {
     
@@ -107,10 +108,13 @@ public class PreProcessor {
                 System.out.println("Not supported yet");
                 break;
             } case 4: {
+                System.out.println("Test case\n");
                 MongoHandler mongoDB = new MongoHandler(config);
                 mongoDB.connectToMongoDB(config);
-                List<Tweet> tweets = mongoDB.retrieveAllTweetsFromMongoDBStore(config);
-                tweets.get(tweets.size()-1).printTweetData();
+                ArrayList<ArrayList<String>> tweets = new ArrayList<>(Utils.getTweetDataFromFile(config));
+                tweets.stream().forEach((tweet) -> {
+                    mongoDB.insertTweetIntoMongo(tweet, config);
+                });
                 mongoDB.closeMongoConnection(config);
                 break;
             } default : {

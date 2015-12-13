@@ -59,8 +59,8 @@ public class EDCoWKeyword {
     }
 
     public final void computations() {
-        //int lev = (int) (Math.log(delta) / Math.log(2));
-        int lev = 3;
+        int lev = (int) (Math.log(delta) / Math.log(2));
+        
         EDCoWSignalConstruction signWavelet = new EDCoWSignalConstruction();
         signWavelet.firstSignalConstruction(nwt, nt);
         signWavelet.secondSignalConstruction(signWavelet.getSw(), delta, lev);

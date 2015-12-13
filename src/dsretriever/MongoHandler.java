@@ -24,6 +24,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import java.util.ArrayList;
+import static java.util.Arrays.asList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -35,7 +36,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.06_1819_planet3
+ * @version 2015.12.13_1950_planet3
  */
 public class MongoHandler {
     
@@ -58,61 +59,129 @@ public class MongoHandler {
     
     /**
      * Create a connection to the MongoDB database
-     * @param config A configuration object
+     * @param config A configuration object.
+     * @return True if the process succeeds, false otherwise.
      */
-    public final void connectToMongoDB(Config config) {
+    public final boolean connectToMongoDB(Config config) {
         
         try {
             db = client.getDatabase(config.getDBName());
-            System.out.println("Succesfully connected to '" + db.getName() + "'");
+            System.out.println("Succesfully connected to '" + db.getName() + "' database.");
+            return true;
         } catch (Exception e) {
             System.out.println("There was a problem connecting to MongoDB client.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
+            return false;
+        }
+    }
+    
+    /**
+     * Creates an index on the 'id' field of the tweet collection
+     * @param config A configuration object.
+     * @return True if the process succeeds, false otherwise.
+     */
+    public final boolean createIndex(Config config) {
+        try {
+            db.getCollection(config.getRawTweetsCollectionName())
+                    .createIndex(new Document("id", 1));
+            return true;
+        } catch(MongoException e) {
+            System.out.println("Cannot create index for collection '" + config.getRawTweetsCollectionName() + "'");
+            Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
+            return false;
         }
     }
     
     /**
      * Closes an open connection with the MongoDB client
      * @param config A configuration object
+     * @return True if the process succeeds, false otherwise.
      */
-    public final void closeMongoConnection(Config config) {
+    public final boolean closeMongoConnection(Config config) {
         
         try {
             client.close();
-            System.out.println("Database '" + config.getDBName() + "' closed!");
+            System.out.println("Database '" + config.getDBName() + "' closed.");
+            return true;
         } catch (Exception e) {
-            System.out.println("Problem closing the database");
+            System.out.println("There was a roblem while closing the database.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
+            return false;
         }
     }
     
     /**
-     * Method to store a newly retrieved tweet and its metadata into the MongoDB store
+     * Store a tweet retrieved previously from a 3-party source (e.g. a text file).
+     * @param tweet An ArrayList containing the appropriate information for the tweet. The list must
+     * be created according to the following scheme:<br/>
+     * [0] -> Tweet ID<br/>
+     * [1] -> User (For retweets this is the original user created the tweet)<br/>
+     * [2] -> 1 if the tweet is a retweet, 0 otherwise<br/>
+     * [3] -> Text of the tweet<br/>
+     * [4] -> Date and time of the original tweet<br/>
+     * [5] -> Number of retweets<br/>
+     * [6] -> Number of favorites<br/>
+     * [7] -> Latitude (if available, -1 otherwise)<br/>
+     * [8] -> Longitude (if available, -1 otherwise)<br/>
+     * @param config A configuration object
+     * @return True if the process succeeds, false otherwise
+     */
+    public final boolean insertTweetIntoMongo(ArrayList<String> tweet, Config config) {
+        try {
+            db.getCollection(config.getRawTweetsCollectionName()).insertOne(
+                new Document()
+                    .append("id", Long.parseLong(tweet.get(0))) //Tweet ID
+                    .append("user", new Document() //Embedded document
+                        .append("name", tweet.get(1))
+                    )
+                    .append("text", Utils.assembleText(tweet.get(2), tweet.get(3))) //Actual tweet
+                    .append("date", Utils.stringToDate(tweet.get(4), tweet)) //Date published/retrieved
+                    .append("retweeted", (Integer.parseInt(tweet.get(5)) > 0)) //Boolean
+                    .append("retweet_count", Integer.parseInt(tweet.get(5)))
+                    .append("favorited", (Integer.parseInt(tweet.get(6)) > 0)) //Boolean
+                    .append("favorite_count", Integer.parseInt(tweet.get(6)))
+                    .append("language", "en") //Language of text
+                    .append("coordinates", new Document() //Embedded document
+                        .append("coordinates", asList( //Embeded array
+                            tweet.get(7), //Latitude
+                            tweet.get(8)) //Longitude
+                        )   
+                    )
+            );
+        return true;
+        } catch(MongoException e) {
+            System.out.println("There was a problem inserting the tweet.");
+            Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
+            return false;
+        }
+    }
+    
+    /**
+     * Store a tweet retrieved previously by using the Twitter API.
      * @param status The tweet along with its additional information (location, date etc)
      * @param config A configuration object
      * @param event The ground truth event, for which the tweet is actually referring to
      * @return True if the process succeeds, false otherwise
+     * @deprecated Since Wave3
+     * @see insertTweetToMongo()
      */
     public final boolean insertTweetIntoMongoDB(Status status, Config config, String event) {
-        
         try {
             db.getCollection(config.getRawTweetsCollectionName()).insertOne(
-                new Document("tweet",
-                        new Document()
-                                .append("id", String.valueOf(status.getId())) //Tweet ID
-                                .append("user", status.getUser().getName()) //Username
-                                .append("text", status.getText()) //Actual tweet
-                                .append("date", String.valueOf(status.getCreatedAt())) //Date published
-                                .append("latitude", status.getGeoLocation() != null ? String.valueOf(status.getGeoLocation().getLatitude()) : "NULL") //Latitude
-                                .append("longitude", status.getGeoLocation() != null ? String.valueOf(status.getGeoLocation().getLongitude()) : "NULL") //Longitude
-                                .append("number_of_retweets", String.valueOf(status.getRetweetCount())) //Retweet count
-                                .append("number_of_favorites", String.valueOf(status.getFavoriteCount())) //Favorite count
-                                .append("is_retweet", status.isRetweet() ? "true" : "false") //True if the tweet is a retweet, false otherwise
-                                .append("is_favorited", status.getFavoriteCount() > 0 ? "true" : "false") //True if the tweet is favorited, false otherwise
-                                .append("is_retweeted", status.getRetweetCount() > 0 ? "true" : "false") //True if the tweet is retweeted, false otherwise
-                                .append("language", status.getLang()) //Language of text
-                                .append("groundTruthEvent", event) //Ground truth event
-                )
+                new Document()
+                    .append("id", status.getId()) //Tweet ID
+                    .append("user", status.getUser().getName()) //Username
+                    .append("text", status.getText()) //Actual tweet
+                    .append("date", String.valueOf(status.getCreatedAt())) //Date published
+                    .append("latitude", status.getGeoLocation() != null ? String.valueOf(status.getGeoLocation().getLatitude()) : "NULL") //Latitude
+                    .append("longitude", status.getGeoLocation() != null ? String.valueOf(status.getGeoLocation().getLongitude()) : "NULL") //Longitude
+                    .append("number_of_retweets", String.valueOf(status.getRetweetCount())) //Retweet count
+                    .append("number_of_favorites", String.valueOf(status.getFavoriteCount())) //Favorite count
+                    .append("is_retweet", status.isRetweet() ? "true" : "false") //True if the tweet is a retweet, false otherwise
+                    .append("is_favorited", status.getFavoriteCount() > 0 ? "true" : "false") //True if the tweet is favorited, false otherwise
+                    .append("is_retweeted", status.getRetweetCount() > 0 ? "true" : "false") //True if the tweet is retweeted, false otherwise
+                    .append("language", status.getLang()) //Language of text
+                    .append("groundTruthEvent", event) //Ground truth event 
             );
         return true;
         } catch(MongoException e) {

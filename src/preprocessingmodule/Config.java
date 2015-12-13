@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1834_planet1
+ * @version 2015.12.13_1952_planet3
  */
 public class Config {
     private static String consumerKey;
@@ -41,6 +41,7 @@ public class Config {
     private static int maximumTweetsRetrieved;
     private static String datasetLocation;
     private static String stopwordsLocation;
+    private static String tweetDataFile;
     
     public Config() throws IOException {
         
@@ -70,6 +71,7 @@ public class Config {
             maximumTweetsRetrieved = Integer.parseInt(prop.getProperty("MaximumTweetsRetrieved"));
             datasetLocation = prop.getProperty("DatasetLocation");
             stopwordsLocation = prop.getProperty("StopwordsLocation");
+            tweetDataFile = prop.getProperty("TweetDataFile");
             
             inputStream.close();
             
@@ -152,4 +154,10 @@ public class Config {
      * @return A String containing the path of the stopwords files location
      */
     public String getStopwordsPath() { return stopwordsLocation; }
+    
+    /**
+     * Returns the name of file that contains tweet information.
+     * @return A String containing the name of the tweet's file.
+     */
+    public String getTweetDataFile() { return tweetDataFile; }
 }
