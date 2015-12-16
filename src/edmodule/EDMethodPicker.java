@@ -20,12 +20,13 @@ import edmodule.dataset.Dataset;
 import edmodule.edcow.EDCoW;
 import edmodule.lsh.LSH;
 import java.util.Scanner;
-import preprocessingmodule.Config;
+import utilities.Config;
+import utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.08_1715_planet3
+ * @version 2015.12.16_2100_planet3
  */
 public class EDMethodPicker {
     
@@ -45,15 +46,15 @@ public class EDMethodPicker {
         switch(choice) {
             case 1: {
                 Dataset ds = new Dataset(config);
-                ds.createCorpus();
+                ds.createCorpus(config);
                 ds.setDocTermFreqIdList();
                 
-                EDCoW edcow = new EDCoW(46, 200, ds); //Create the EDCoW object
-                System.out.println("Selected method: " + edcow.getName());
-                System.out.println("Now applying algorithm...");
+                EDCoW edcow = new EDCoW(91, 400, ds); //Create the EDCoW object
+                Utilities.printInfoMessage("Selected method: " + edcow.getName());
+                Utilities.printInfoMessage("Now applying algorithm...");
                 
                 edcow.apply(); //Apply the algorithm
-                System.out.println("Succesfully applied EDCoW algorithm");
+                Utilities.printInfoMessage("Succesfully applied EDCoW algorithm");
             } 
             case 2: {
                 System.out.println("Selected method: LSH");

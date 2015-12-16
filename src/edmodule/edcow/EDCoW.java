@@ -18,6 +18,7 @@ package edmodule.edcow;
 
 import edmodule.edcow.event.Events;
 import ch.epfl.lis.jmod.modularity.community.Community;
+import ch.epfl.lis.networks.NetworkException;
 import edmodule.EDMethod;
 import edmodule.dataset.Dataset;
 import java.io.IOException;
@@ -26,7 +27,7 @@ import java.util.Map.Entry;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import utilities.Utils;
+import utilities.Utilities;
 
 /**
  *
@@ -38,7 +39,7 @@ import utilities.Utils;
  */
 public class EDCoW implements EDMethod {
     private final int delta = 10; //6
-    private final int delta2 = 22; //48
+    private final int delta2 = 103; //48
     private final int gamma = 5; //5
     private final double minTermSupport = 0.0001; //0.0001
     private final double maxTermSupport = 0.01; //0.01
@@ -92,6 +93,7 @@ public class EDCoW implements EDMethod {
         termDocMap = new HashMap<>();
         eventList = new LinkedList<>();
         
+        Utilities.printInfoMessage("Now calculating term frequencies...");
         for(int i = 0; i < ds.getTerms().size(); i++){
             String term = ds.getTerms().get(i);
             if(term.length() > 1) { //Stopwords check removed as they are already ommitted when creating the dataset 
@@ -105,6 +107,7 @@ public class EDCoW implements EDMethod {
                 }
             }
         }
+        Utilities.printInfoMessage("Now calculating windows...");
         for(int i = 0; i < windows; i++){
             processWindow(i);
         }
@@ -116,7 +119,7 @@ public class EDCoW implements EDMethod {
         events.setFullList();
         
         long endTime = System.currentTimeMillis();
-        Utils.printExecutionTime(startTime, endTime, EDCoW.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        Utilities.printExecutionTime(startTime, endTime, EDCoW.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
     public void processWindow(int window){
@@ -175,7 +178,7 @@ public class EDCoW implements EDMethod {
             EDCoWModularityDetection modularity = new EDCoWModularityDetection(keyWordsList1, bigMatrix, startSlice, endSlice);
 
             double thresholdE = 0.1;
-            ArrayList<Community> finalArrCom= modularity.getCommunitiesFiltered(thresholdE);
+            ArrayList<Community> finalArrCom = modularity.getCommunitiesFiltered(thresholdE);
             for(Community c : finalArrCom) {
                  System.out.println(c.getCommunitySize());
                  modularity.saveEventFromCommunity(c);
@@ -188,10 +191,12 @@ public class EDCoW implements EDMethod {
 //                    modularity.saveEventFromCommunity(c);
 //                });
 //            eventList.addAll(modularity.getEvents());
-        } catch (IOException ex) {
-            Logger.getLogger(EDCoW.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(EDCoW.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NullPointerException e) {
+            //Do nothing
+        } catch (IOException | NetworkException e) {
+            Logger.getLogger(EDCoW.class.getName()).log(Level.SEVERE, null, e);
+        } catch (Exception e) {
+            Logger.getLogger(EDCoW.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 }

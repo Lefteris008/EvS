@@ -16,7 +16,7 @@
  */
 package edmodule.utils;
 
-import preprocessingmodule.Config;
+import utilities.Config;
 import preprocessingmodule.language.LanguageCodes;
 import preprocessingmodule.nlp.stopwords.StopWords;
 

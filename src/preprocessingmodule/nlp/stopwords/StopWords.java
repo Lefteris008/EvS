@@ -25,7 +25,7 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import preprocessingmodule.Config;
+import utilities.Config;
 import preprocessingmodule.PreProcessor;
 import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.language.LanguageCodes;
@@ -33,7 +33,7 @@ import preprocessingmodule.language.LanguageCodes;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.26_1717_planet2
+ * @version 2015.12.16_2101_planet3
  */
 public final class StopWords {
     
@@ -58,17 +58,17 @@ public final class StopWords {
         Language lan = LangUtils.getFullLanguageForISOCode(isoCode);
         
         try {
-            Files.walk(Paths.get(config.getStopwordsPath())).forEach(filePath -> {
+            Files.walk(Paths.get(config.getResourcesPath() + config.getStopwordsPath())).forEach(filePath -> {
                 if (Files.isRegularFile(filePath) && 
                         (filePath.toString().contains(lan.toString()) || 
-                        filePath.toString().contains("punctuation.txt"))) { //Open stopwords files in appropriate language and punctuation
+                        filePath.toString().contains(config.getPunctuationFile()))) { //Open stopwords files in appropriate language and punctuation
                     try (BufferedReader br = new BufferedReader(new FileReader(filePath.toString()))) {
                         String line;
                         while ((line = br.readLine()) != null) {
                            stopwords.add(line); 
                         }
                     } catch(IOException e) {
-                        System.out.println("No filed found in '" + config.getStopwordsPath() + "\\'Place the appropriate files in classpath and re-run the project");
+                        System.out.println("No filed found in '" + config.getResourcesPath() + config.getStopwordsPath() + "\\'Place the appropriate files in classpath and re-run the project");
                         Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
                     }
                 }
@@ -87,7 +87,7 @@ public final class StopWords {
      * @return True if 'stopwords' contains 'word', false otherwise.
      */
     public final boolean isStopWord(String word) {
-        return stopwords.contains(word);
+        return stopwords.contains(word.toLowerCase());
     }
     
 }

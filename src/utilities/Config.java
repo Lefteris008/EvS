@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule;
+package utilities;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,11 +22,12 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.13_1952_planet3
+ * @version 2015.12.16_2101_planet3
  */
 public class Config {
     private static String consumerKey;
@@ -42,6 +43,10 @@ public class Config {
     private static String datasetLocation;
     private static String stopwordsLocation;
     private static String tweetDataFile;
+    private static String resourcesPath;
+    private static String punctuationFile;
+    private static Pattern punctuationPattern;
+    private static Pattern urlPattern;
     
     public Config() throws IOException {
         
@@ -72,8 +77,13 @@ public class Config {
             datasetLocation = prop.getProperty("DatasetLocation");
             stopwordsLocation = prop.getProperty("StopwordsLocation");
             tweetDataFile = prop.getProperty("TweetDataFile");
+            resourcesPath = prop.getProperty("ResourcesPath");
+            punctuationFile = prop.getProperty("PunctuationFile");
             
             inputStream.close();
+            
+            punctuationPattern = Pattern.compile("[^\\dA-Za-z-_0-9 ]");
+            urlPattern = Pattern.compile("(@)?(href=')?(HREF=')?(HREF=\")?(href=\")?(http://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?");
             
         } catch (IOException | NumberFormatException e) {
             if(inputStream != null) {
@@ -160,4 +170,28 @@ public class Config {
      * @return A String containing the name of the tweet's file.
      */
     public String getTweetDataFile() { return tweetDataFile; }
+    
+    /**
+     * Returns the path of the resources folder.
+     * @return A String containing the resources path.
+     */
+    public String getResourcesPath() { return resourcesPath; }
+    
+    /**
+     * Returns the punctuation text file name.
+     * @return A String containing the punctuation file name.
+     */
+    public String getPunctuationFile() { return punctuationFile; }
+    
+    /**
+     * Returns a pre-compiled pattern for punctuation removal.
+     * @return A pre-compiled pattern.
+     */
+    public Pattern getPunctuationPattern() { return punctuationPattern; }
+    
+    /**
+     * Returns a pre-compiled pattern for URL matching.
+     * @return A pre-compiled pattern.
+     */
+    public Pattern getURLPattern() { return urlPattern; }
 }

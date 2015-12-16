@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import preprocessingmodule.Config;
+import utilities.Config;
 import preprocessingmodule.PreProcessor;
 import twitter4j.FilterQuery;
 import twitter4j.StallWarning;
@@ -37,7 +37,7 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.12.06_1935_planet3
+ * @version 2015.12.16_2104_planet3
  */
 public class TweetsRetriever {
 

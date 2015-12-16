@@ -24,19 +24,19 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import java.util.ArrayList;
-import static java.util.Arrays.asList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bson.Document;
-import preprocessingmodule.Config;
+import utilities.Config;
+import utilities.Utilities;
 import twitter4j.Status;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.13_1950_planet3
+ * @version 2015.12.16_2059_planet3
  */
 public class MongoHandler {
     
@@ -51,7 +51,7 @@ public class MongoHandler {
         try {
         client = new MongoClient(config.getServerName(), config.getServerPort());
         } catch (MongoClientException e) {
-            System.out.println("Error connecting to client");
+            Utilities.printInfoMessage("Error connecting to client");
             client = null;
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -66,10 +66,10 @@ public class MongoHandler {
         
         try {
             db = client.getDatabase(config.getDBName());
-            System.out.println("Succesfully connected to '" + db.getName() + "' database.");
+            Utilities.printInfoMessage("Succesfully connected to '" + db.getName() + "' database.");
             return true;
         } catch (Exception e) {
-            System.out.println("There was a problem connecting to MongoDB client.");
+            Utilities.printInfoMessage("There was a problem connecting to MongoDB client.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -86,7 +86,7 @@ public class MongoHandler {
                     .createIndex(new Document("id", 1));
             return true;
         } catch(MongoException e) {
-            System.out.println("Cannot create index for collection '" + config.getRawTweetsCollectionName() + "'");
+            Utilities.printInfoMessage("Cannot create index for collection '" + config.getRawTweetsCollectionName() + "'");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -101,10 +101,10 @@ public class MongoHandler {
         
         try {
             client.close();
-            System.out.println("Database '" + config.getDBName() + "' closed.");
+            Utilities.printInfoMessage("Database '" + config.getDBName() + "' closed.");
             return true;
         } catch (Exception e) {
-            System.out.println("There was a roblem while closing the database.");
+            Utilities.printInfoMessage("There was a roblem while closing the database.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -128,29 +128,55 @@ public class MongoHandler {
      */
     public final boolean insertTweetIntoMongo(ArrayList<String> tweet, Config config) {
         try {
-            db.getCollection(config.getRawTweetsCollectionName()).insertOne(
-                new Document()
-                    .append("id", Long.parseLong(tweet.get(0))) //Tweet ID
-                    .append("user", new Document() //Embedded document
-                        .append("name", tweet.get(1))
-                    )
-                    .append("text", Utils.assembleText(tweet.get(2), tweet.get(3))) //Actual tweet
-                    .append("date", Utils.stringToDate(tweet.get(4), tweet)) //Date published/retrieved
-                    .append("retweeted", (Integer.parseInt(tweet.get(5)) > 0)) //Boolean
-                    .append("retweet_count", Integer.parseInt(tweet.get(5)))
-                    .append("favorited", (Integer.parseInt(tweet.get(6)) > 0)) //Boolean
-                    .append("favorite_count", Integer.parseInt(tweet.get(6)))
-                    .append("language", "en") //Language of text
-                    .append("coordinates", new Document() //Embedded document
-                        .append("coordinates", asList( //Embeded array
-                            tweet.get(7), //Latitude
-                            tweet.get(8)) //Longitude
-                        )   
-                    )
-            );
-        return true;
+            if("0".equals(tweet.get(2))) {
+                db.getCollection(config.getRawTweetsCollectionName()).insertOne(
+                    new Document()
+                        .append("id", Long.parseLong(tweet.get(0))) //Tweet ID
+                        .append("user", new Document() //Embedded document
+                            .append("name", tweet.get(1))
+                        )
+                        .append("text", Utils.assembleText(tweet.get(2), tweet.get(3))) //Actual tweet
+                        .append("created_at", Utils.stringToDate(tweet.get(4), tweet)) //Date published/retrieved
+                        .append("retweeted", (Integer.parseInt(tweet.get(5)) > 0)) //Boolean
+                        .append("retweet_count", Integer.parseInt(tweet.get(5)))
+                        .append("favorited", (Integer.parseInt(tweet.get(6)) > 0)) //Boolean
+                        .append("favorite_count", Integer.parseInt(tweet.get(6)))
+                        .append("lang", "en") //Language of text
+                        .append("coordinates", null)
+//                        .append("coordinates", new Document() //Embedded document
+//                            .append("coordinates", asList( //Embeded array
+//                                tweet.get(7), //Latitude
+//                                tweet.get(8)) //Longitude
+//                            )   
+//                        )
+                );
+            } else {
+                db.getCollection(config.getRawTweetsCollectionName()).insertOne(
+                    new Document()
+                        .append("id", Long.parseLong(tweet.get(0))) //Tweet ID
+                        .append("user", new Document() //Embedded document
+                            .append("name", tweet.get(1))
+                        )
+                        .append("retweeted_status", new Document())
+                        .append("text", Utils.assembleText(tweet.get(2), tweet.get(3))) //Actual tweet
+                        .append("created_at", Utils.stringToDate(tweet.get(4), tweet)) //Date published/retrieved
+                        .append("retweeted", (Integer.parseInt(tweet.get(5)) > 0)) //Boolean
+                        .append("retweet_count", Integer.parseInt(tweet.get(5)))
+                        .append("favorited", (Integer.parseInt(tweet.get(6)) > 0)) //Boolean
+                        .append("favorite_count", Integer.parseInt(tweet.get(6)))
+                        .append("lang", "en") //Language of text
+                        .append("coordinates", null)
+//                        .append("coordinates", new Document() //Embedded document
+//                            .append("coordinates", asList( //Embeded array
+//                                Long.parseLong(tweet.get(7)), //Latitude
+//                                Long.parseLong(tweet.get(8))) //Longitude
+//                            )   
+//                        )
+                );
+            }
+            return true;
         } catch(MongoException e) {
-            System.out.println("There was a problem inserting the tweet.");
+            Utilities.printInfoMessage("There was a problem inserting the tweet.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -185,7 +211,7 @@ public class MongoHandler {
             );
         return true;
         } catch(MongoException e) {
-            System.out.println("There was a problem inserting the tweet.");
+            Utilities.printInfoMessage("There was a problem inserting the tweet.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -212,13 +238,6 @@ public class MongoHandler {
 
                     //User details
                     String username = user.getString("name"); //Name
-                    String screenName = user.getString("screen_name"); //Screen name
-                    long userId; //User ID
-                    try {
-                        userId = user.getInteger("id");
-                    } catch(ClassCastException e) { //Catch case where id was incorrectly stored as long
-                        userId = user.getLong("id");
-                    }
                     
                     //Tweet text, date and language
                     String text = tweetDoc.getString("text");
@@ -256,7 +275,7 @@ public class MongoHandler {
                         isRetweet = false;
                     }
 
-                    Tweet tweet = new Tweet(id, username, screenName, userId, text, date, latitude, 
+                    Tweet tweet = new Tweet(id, username, text, date, latitude, 
                             longitude, numberOfRetweets, numberOfFavorites, isRetweet, isFavorited, 
                             isRetweeted, language);
 
@@ -265,7 +284,7 @@ public class MongoHandler {
             });
             return retrievedTweets;
         } catch(MongoException e) {
-            System.out.println("Cannot find documents in MongoDB Store.");
+            Utilities.printInfoMessage("Cannot find documents in MongoDB Store.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return null;
         } 
@@ -291,13 +310,6 @@ public class MongoHandler {
             
             //User details
             String username = user.getString("name"); //Name
-            String screenName = user.getString("screen_name"); //Screen name
-            long userId; //User ID
-            try {
-                userId = user.getInteger("id");
-            } catch(ClassCastException e) { //Catch case where id was incorrectly stored as long
-                userId = user.getLong("id");
-            }
             
             //Tweet text, date and language
             String text = tweetDoc.getString("text");
@@ -335,13 +347,13 @@ public class MongoHandler {
                 isRetweet = false;
             }
 
-            Tweet tweet = new Tweet(id_, username, screenName, userId, text, date, latitude, 
+            Tweet tweet = new Tweet(id_, username, text, date, latitude, 
                     longitude, numberOfRetweets, numberOfFavorites, isRetweet, isFavorited, 
                     isRetweeted, language);
 
             return tweet;
         } catch(MongoException e) {
-            System.out.println("Unknown Mongo problem with tweet '" + id + "'.");
+            Utilities.printInfoMessage("Unknown Mongo problem with tweet '" + id + "'.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return null;
         } catch(NullPointerException e) { //Tweet does not exist
@@ -360,7 +372,7 @@ public class MongoHandler {
             db.getCollection(collectionName).drop();
             return true;
         } catch (MongoException e) {
-            System.out.println("There was a problem deleting collection '" + collectionName + "'");
+            Utilities.printInfoMessage("There was a problem deleting collection '" + collectionName + "'");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -375,7 +387,7 @@ public class MongoHandler {
             db.drop();
             return true;
         } catch (MongoException e) {
-            System.out.println("There was a problem deleting database '" + db.getName() + "'");
+            Utilities.printInfoMessage("There was a problem deleting database '" + db.getName() + "'");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }

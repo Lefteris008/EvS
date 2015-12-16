@@ -21,14 +21,12 @@ import java.util.Date;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.06_1935_planet3
+ * @version 2015.12.16_2100_planet3
  */
 public class Tweet {
     
     private final long id;
     private final String username;
-    private final String displayName;
-    private final long userId;
     private final String text;
     private final Date date;
     private final double latitude;
@@ -40,15 +38,13 @@ public class Tweet {
     private final boolean retweeted;
     private final String language;
     
-    public Tweet(long id, String username, String displayName, long userId, String text, Date date, 
+    public Tweet(long id, String username, String text, Date date, 
             double latitude, double longitude, int numberOfRetweets, 
             int numberOfFavorites, boolean retweet, boolean favorited, 
             boolean retweeted, String language) {
         
         this.id = id;
         this.username = username;
-        this.displayName = displayName;
-        this.userId = userId;
         this.text = text;
         this.date = date;
         this.latitude = latitude;
@@ -72,18 +68,6 @@ public class Tweet {
      * @return A String containing the username.
      */
     public String getUsername() { return username; }
-    
-    /**
-     * Returns the display name of the creator of the tweet.
-     * @return A String containing the display name.
-     */
-    public String getDisplayName() { return displayName; }
-    
-    /**
-     * Returns the user ID of the creator of the tweet.
-     * @return A long containing the ID of the creator of the tweet.
-     */
-    public long getUserId() { return userId; }
     
     /**
      * Returns the actual text of the tweet.
@@ -152,8 +136,6 @@ public class Tweet {
         System.out.println("Tweet with ID '" + getID() + "'");
         System.out.println("--------------------------------------------");
         System.out.println("@" + getUsername());
-        System.out.println("Display name: " + getDisplayName());
-        System.out.println("User ID '" + getUserId() + "'");
         System.out.println(getText());
         System.out.println("Created at: " + getDate().toString());
         System.out.println("Location");

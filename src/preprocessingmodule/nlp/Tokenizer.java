@@ -16,16 +16,20 @@
  */
 package preprocessingmodule.nlp;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import preprocessingmodule.nlp.stopwords.StopWords;
+import utilities.Config;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.26_1732_planet1
+ * @version 2015.12.16_2101_planet3
  */
 public class Tokenizer {
     
@@ -33,8 +37,9 @@ public class Tokenizer {
     private final List<String> cleanTokensAndHashtags = new ArrayList<>();
     private final List<String> hashtags = new ArrayList<>();
     private final List<String> nameHandles = new ArrayList<>();
-    private final List<String> urlsAndNumberAbbreviations = new ArrayList<>();
+    private final List<String> urls = new ArrayList<>();
     private final List<String> stopWords = new ArrayList<>();
+    private final Config config;
     public int numberOfTokens;
     
     /**
@@ -43,25 +48,26 @@ public class Tokenizer {
      * @param text The text to be tokenized.
      * @param sw A StopWords handle.
      */
-    public Tokenizer(String text, StopWords sw) {
+    public Tokenizer(Config config, String text, StopWords sw) {
+        this.config = config;
         String[] temp = text.split(" "); //Split them according to white spaces
-        String temp2;
         numberOfTokens = temp.length;
         for (String temp1 : temp) {
             if(isHashtag(temp1)) {
-                hashtags.add(temp1.replace("#", "")); //Remove '#' character
+                hashtags.add(temp1.replace("#", "")); //Remove '#' character and all other punctuation
                 cleanTokensAndHashtags.add(temp1.replace("#", ""));
             } else if(isNameHandle(temp1)) {
                 nameHandles.add(temp1.replace("@", "")); //Remove '@' character
-            } else if(isURLOrNumberAbbreviation(temp1)) {
-                urlsAndNumberAbbreviations.add(temp1);
+            } else if(isURL(temp1)) {
+                urls.add(temp1);
             } else if(sw.isStopWord(temp1)) {
                 stopWords.add(temp1);
             } else {
                 //Remove punctuation that was bound to the token and then store it
-                temp2 = removeMissingPunctuation(temp1);
-                cleanTokens.add(temp2);
-                cleanTokensAndHashtags.add(temp2);
+                String[] temp_ = removeMissingPunctuationAndSeparate(temp1);
+                cleanTokens.addAll(Arrays.asList(temp_));
+                cleanTokensAndHashtags.addAll(Arrays.asList(temp_));
+                numberOfTokens += temp_.length - 1; //Entire listing already add initially
             }
         }
     }
@@ -69,10 +75,21 @@ public class Tokenizer {
     /**
      * Removes punctuation bound to an input word.
      * @param word The input word.
-     * @return A String with the punctuation omitted.
+     * @return A String with punctuation omitted.
      */
     public final String removeMissingPunctuation(String word) {
-        return word.replaceAll("[^a-zA-Z ]", "");    
+        return config.getPunctuationPattern().matcher(word).replaceAll("");
+    }
+    
+    /**
+     * Removes punctuation bound to an input word and separates using white space.
+     * @param word The input word.
+     * @return A String array with punctuation omitted. Since the input word is
+     * split in the spot where the original punctuation was located, an array of
+     * at least two elements is returned.
+     */
+    public final String[] removeMissingPunctuationAndSeparate(String word) {
+        return config.getPunctuationPattern().matcher(word).replaceAll(" ").split(" ");
     }
     
     /**
@@ -109,14 +126,14 @@ public class Tokenizer {
      * Returns the URLs and the number abbreviations (e.g. current time) of the phrase.
      * @return A list containing only the URLs of the tweet.
      */
-    public final List<String> getURLsAndNumberAbbreviation() { return urlsAndNumberAbbreviations; }
+    public final List<String> getURLs() { return urls; }
     
     /**
      * Returns true if the token is a hashtag. 
      * @param token A String containing the token to be checked.
      * @return True if the token is a hashtag, false otherwise.
      */
-    public final static boolean isHashtag(String token) {
+    public final boolean isHashtag(String token) {
         return token.startsWith("#");
     }
     
@@ -125,21 +142,17 @@ public class Tokenizer {
      * @param token A String containing the token to be checked.
      * @return True if the token is a name handle, false otherwise.
      */
-    public final static boolean isNameHandle(String token) {
+    public final boolean isNameHandle(String token) {
         return token.startsWith("@");
     }
     
     /**
-     * Returns true if the token is a URL or a number abbreviation (e.g. current time).
+     * Returns true if the token is a URL.
      * @param token A String containing the token to be checked.
      * @return True if the token is a URL, false otherwise.
      */
-    public final static boolean isURLOrNumberAbbreviation(String token) {
-        
-        Pattern pattern = Pattern.compile("(@)?(href=')?(HREF=')?(HREF=\")?(href=\")?(http://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?");
-        Matcher matcher = pattern.matcher(token);
-        
-        return matcher.matches();
+    public final boolean isURL(String token) {
+        return config.getURLPattern().matcher(token).matches();
     }
     
     /**
@@ -148,27 +161,27 @@ public class Tokenizer {
     public final void textTokenizingTester() {
         System.out.println("Given text contains " + numberOfTokens + " tokens of which:");
         
-        System.out.println("\n" + getCleanTokens().size() + " are clean tokens. Printing them now...");
+        System.out.println("\n" + getCleanTokens().size() + (getCleanTokens().size() == 1 ? " is clean token. Printing it now..." : " are clean tokens. Printing them now..."));
         getCleanTokens().stream().forEach((token) -> {
             System.out.println("\t" + token);
         });
         
-        System.out.println("\n" + getHashtags().size() + " are hashtags. Printing them now...");
+        System.out.println("\n" + getHashtags().size() + (getHashtags().size() == 1 ? " is hashtag. Printing it now..." : " are hashtags. Printing them now..."));
         getHashtags().stream().forEach((token) -> {
             System.out.println("\t" + token);
         });
         
-        System.out.println("\n" + getNameHandles().size() + " are name handles. Printing them now...");
+        System.out.println("\n" + getNameHandles().size() + (getNameHandles().size() == 1 ? " is name handle. Printing it now..." : " are name handles. Printing them now..."));
         getNameHandles().stream().forEach((token) -> {
             System.out.println("\t" + token);
         });
         
-        System.out.println("\n" + getURLsAndNumberAbbreviation().size() + " are URLs and number abbreviations. Printing them now...");
-        getURLsAndNumberAbbreviation().stream().forEach((token) -> {
+        System.out.println("\n" + getURLs().size() + (getURLs().size() == 1 ? " is URL. Printing it now..." : " are URLs. Printing them now..."));
+        getURLs().stream().forEach((token) -> {
             System.out.println("\t" + token);
         });
         
-        System.out.println("\n" + getStopWords().size() + " are stopwords. Printing them now...");
+        System.out.println("\n" + getStopWords().size() + (getStopWords().size() == 1 ? " is stopword. Printing it now..." : " are stopwords. Printintg them now..."));
         getStopWords().stream().forEach((token) -> {
             System.out.println("\t" + token);
         });

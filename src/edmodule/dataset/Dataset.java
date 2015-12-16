@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.IntStream;
-import preprocessingmodule.Config;
+import utilities.Config;
 import dsretriever.MongoHandler;
 import dsretriever.Tweet;
 import edmodule.utils.Stemmers;
@@ -33,12 +33,12 @@ import java.util.Set;
 import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.nlp.Tokenizer;
 import preprocessingmodule.nlp.stemming.Stemmer;
-import utilities.Utils;
+import utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.09_1740_planet3
+ * @version 2015.12.16_2100_planet3
  */
 public final class Dataset {
     
@@ -73,7 +73,7 @@ public final class Dataset {
         mongo.closeMongoConnection(config);
  
         long endTime = System.currentTimeMillis();
-        Utils.printExecutionTime(startTime, endTime, Dataset.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        Utilities.printExecutionTime(startTime, endTime, Dataset.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
     /**
@@ -82,7 +82,7 @@ public final class Dataset {
      * gets the stems of every single token and updates various HashMaps and fields for
      * future use.
      */
-    public final void createCorpus() {
+    public final void createCorpus(Config config) {
         long startTime = System.currentTimeMillis();
         
         Calendar cal;
@@ -98,7 +98,7 @@ public final class Dataset {
             //Count the tweet, update the distribution, get the docKey
             //and update the corresponding HashMap
             numberOfTweets++;
-            docKey = updateMessageDistribution(cal, tweet.getDate());
+            docKey = updateMessageDistribution(cal, tweet.getDate(), 60);
             if(!documentIndices.containsKey(docKey)) {
                 documentIndices.put(docKey, documentCount);
                 documentCount++;
@@ -106,7 +106,7 @@ public final class Dataset {
             
             //Get the tweet's text and tokenize it
             String text = tweet.getText();
-            Tokenizer tokens = new Tokenizer(text, 
+            Tokenizer tokens = new Tokenizer(config, text, 
                     swH.getSWHandlerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())));
 
             //Iterate through the stemmed clean tokens/hashtags
@@ -138,7 +138,7 @@ public final class Dataset {
         setNumberOfDocuments(messageDistribution);
         
         long endTime = System.currentTimeMillis();
-        Utils.printExecutionTime(startTime, endTime, Dataset.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        Utilities.printExecutionTime(startTime, endTime, Dataset.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
     /**
@@ -149,12 +149,15 @@ public final class Dataset {
      * the messages that have been generated into that day.
      * @param cal A Calendar instance, already set.
      * @param date The date to be checked.
+     * @param refreshWindow An integer representing the precision window (1-60) (in minutes) -E.g. 10 for 10-minute
+     * window, 30 for 30 minute window etc.
      * @return The key of the document, for HashMap storage. The key is assembled in YYYYMMDD_HHMM fashion
-     * using a 10-minute precision window (HH00-HH09 belong to the 0-th 10-minute window etc.) 
+     * using a refreshWindow-minute precision window (for values of 10, HH00-HH09 belong to the 0-th 
+     * 10-minute window etc.)<br/> 
      * For December 6th, 2014 10:07 PM, the generated key would be 20141206_2200
      * For January 21st, 2015 10:27 AM, the generated key would be 20150121_1020
      */
-    public final String updateMessageDistribution(Calendar cal, Date date) {
+    public final String updateMessageDistribution(Calendar cal, Date date, int refreshWindow) {
         int year;
         int month;
         int day;
@@ -165,7 +168,7 @@ public final class Dataset {
         month = cal.get(Calendar.MONTH) + 1; //Zero-index based
         day = cal.get(Calendar.DAY_OF_MONTH); //Get the current day of month
         hour = cal.get(Calendar.HOUR_OF_DAY); //24h
-        minute = cal.get(Calendar.MINUTE) / 10; //10-minute cadence
+        minute = cal.get(Calendar.MINUTE) / refreshWindow; //10-minute cadence
         
         //Assemble the key in YYYYMMDD_HHMM form. 10-minute precision used.
         String key = String.valueOf(year) 

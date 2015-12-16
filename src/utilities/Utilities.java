@@ -16,12 +16,16 @@
  */
 package utilities;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.08_1715_planet3
+ * @version 2015.12.16_2100_planet3
  */
-public class Utils {
+public class Utilities {
     
     /**
      * Prints the execution time of a current running method in seconds.
@@ -30,8 +34,25 @@ public class Utils {
      * @param methodName A String containing the name of the current running method.
      */
     public static void printExecutionTime(long startTime, long endTime, String className, String methodName) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Calendar cal = Calendar.getInstance();
         long runningTime = (endTime - startTime) / 1000; //Convert to seconds
-        System.out.println(className + " " + methodName + " run for " + (runningTime == 1 ? runningTime + " second." : runningTime + " seconds."));
+        System.err.println("INFO: " + 
+                dateFormat.format(cal.getTime()) + " " + 
+                className + " " + methodName + " run for " + 
+                (runningTime == 1 ? runningTime + " second." : runningTime + " seconds."));
+    }
+    
+    /**
+     * Supplies a message to the error stream, formatting it according to a standard.
+     * @param message The message to be printed.
+     */
+    public final static void printInfoMessage(String message) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Calendar cal = Calendar.getInstance();
+        System.err.println("INFO: " + 
+                dateFormat.format(cal.getTime()) + " " + 
+                message);
     }
     
 }

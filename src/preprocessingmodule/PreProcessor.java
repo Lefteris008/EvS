@@ -16,6 +16,7 @@
  */
 package preprocessingmodule;
 
+import utilities.Config;
 import dsretriever.TweetsRetriever;
 import dsretriever.Tweet;
 import dsretriever.MongoHandler;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import preprocessingmodule.nlp.Tokenizer;
 import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.nlp.stopwords.StopWords;
@@ -36,7 +38,7 @@ import samodule.SentimentAnalyzer;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.13_1951_planet3
+ * @version 2015.12.16_2101_planet3
  */
 public class PreProcessor {
     
@@ -93,7 +95,7 @@ public class PreProcessor {
                     //Preprocess part
                     StopWords sw = new StopWords(config);
                     sw.loadStopWords(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())); //Load stopwords
-                    Tokenizer tk = new Tokenizer(tweet.getText(), sw);
+                    Tokenizer tk = new Tokenizer(config, tweet.getText(), sw);
                     tk.textTokenizingTester();
                     break;
                 } catch(MongoException e) {
