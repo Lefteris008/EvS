@@ -56,8 +56,11 @@ public class EDCoWSignalConstruction {
         double tempRatio = ni.getSum()/nwi.getSum();
 
         for(int i=0; i<nwt.length ;i++){
-                if(nt[i]==0)sw[i]=0;
-                else sw[i] = (nwt[i] / nt[i]) * (Math.log(tempRatio)/Math.log(2)); 
+            if(nt[i]==0){ 
+                sw[i]=0;
+            } else {
+                sw[i] = (nwt[i] / nt[i]) * (Math.log(tempRatio) / Math.log(2));
+            } 
         }		
     }
 

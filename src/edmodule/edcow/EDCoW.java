@@ -35,7 +35,7 @@ import utilities.Utilities;
  * @email   adrien.guille@univ-lyon2.fr
  * 
  * @author  Lefteris Paraskevas (configurations in EDCoW to omit missing components)
- * @version 2015.12.13_1951_planet3 (For EDviaSA project version alignment) 
+ * @version 2015.12.21_2001_gargantua (For EDviaSA project version alignment) 
  */
 public class EDCoW implements EDMethod {
     private final int delta = 10; //6
@@ -43,7 +43,7 @@ public class EDCoW implements EDMethod {
     private final int gamma = 5; //5
     private final double minTermSupport = 0.0001; //0.0001
     private final double maxTermSupport = 0.01; //0.01
-    private HashMap<String,Short[]> termDocMap;
+    private HashMap<String, Integer[]> termDocMap;
     public LinkedList<EDCoWEvent> eventList;
     private final int timeSliceA;
     private final int timeSliceB;
@@ -97,9 +97,9 @@ public class EDCoW implements EDMethod {
         for(int i = 0; i < ds.getTerms().size(); i++){
             String term = ds.getTerms().get(i);
             if(term.length() > 1) { //Stopwords check removed as they are already ommitted when creating the dataset 
-                Short[] frequency = ds.getDocumentsTermFrequency(i);
+                Integer[] frequency = ds.getDocumentsTermFrequency(i);
                 int cf = 0;
-                for(short freq : frequency){
+                for(int freq : frequency){
                     cf += freq;
                 }
                 if(cf > minTermOccur && cf < maxTermOccur){
@@ -122,7 +122,7 @@ public class EDCoW implements EDMethod {
         Utilities.printExecutionTime(startTime, endTime, EDCoW.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
-    public void processWindow(int window){
+    public void processWindow(int window) {
     	try{
             LinkedList<EDCoWKeyword> keyWords = new LinkedList<>();
             Integer[] distributioni = ds.getNumberOfDocuments();
@@ -132,8 +132,8 @@ public class EDCoW implements EDMethod {
             for(int i = startSlice; i < endSlice; i++){
                 distributiond[i-startSlice] = (double) distributioni[i]; 
             }
-            for(Entry<String, Short[]> entry : termDocMap.entrySet()) {
-                Short frequencyf[] = entry.getValue();
+            for(Entry<String, Integer[]> entry : termDocMap.entrySet()) {
+                Integer frequencyf[] = entry.getValue();
                 double frequencyd[] = new double[delta2];
                 for(int i = startSlice; i < endSlice; i++){
                     frequencyd[i-startSlice] = (double) frequencyf[i];

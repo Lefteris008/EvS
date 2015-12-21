@@ -38,7 +38,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.16_2100_planet3
+ * @version 2015.12.21_1938_gargantua
  */
 public final class Dataset {
     
@@ -110,18 +110,16 @@ public final class Dataset {
                     swH.getSWHandlerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())));
 
             //Iterate through the stemmed clean tokens/hashtags
-            for(String token : getStemsAsList(tokens.getCleanTokensAndHashtags(), 
+            for(String token : getStemsAsList(tokens.getCleanTokensAndHashtags(),
                     Stemmers.getStemmerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())))) {
-
+                
                 //Update the HashMap with the triplet Document, Token, Frequency
                 if(termsDocsWithOccurencies.containsKey(docKey)) { //Document already exists, update it
-                    HashMap<String, Integer> termsWithOccurencies = termsDocsWithOccurencies.get(docKey);
-                    if(termsWithOccurencies.containsKey(token)) { //Token already exists, update it
-                        termsWithOccurencies.put(token, termsWithOccurencies.get(token) + 1);
+                    if(termsDocsWithOccurencies.get(docKey).containsKey(token)) { //Token already exists, update it
+                        termsDocsWithOccurencies.get(docKey).put(token, (termsDocsWithOccurencies.get(docKey).get(token) + 1));
                     } else { //Token does not exist, put it
-                        termsWithOccurencies.put(token, 1);
+                        termsDocsWithOccurencies.get(docKey).put(token, 1);
                     }
-                    termsDocsWithOccurencies.put(docKey, termsWithOccurencies); //Store inner HashMap
                 } else { //Document does not exist, so as the token -create it and put it
                     HashMap<String, Integer> termsWithOccurencies = new HashMap<>();
                     termsWithOccurencies.put(token, 1);
@@ -144,15 +142,15 @@ public final class Dataset {
     /**
      * Updates the distribution of incoming messages (tweets).
      * More formally, it calculates the tweets belonging to a certain document. In this iteration, a document
-     * is set in a 24-h window, so the method calculates and stores the tweets of a certain day. It then stores
-     * this information into a HashMap which its docKey is the corresponding date and its value is the summary of
-     * the messages that have been generated into that day.
+     * is set in a user-defined refresh window, so the method calculates and stores the tweets of this period. 
+     * It then stores this information into a HashMap which its docKey is the corresponding date and its value
+     * is the summary of the messages that have been generated into that time period.
      * @param cal A Calendar instance, already set.
      * @param date The date to be checked.
      * @param refreshWindow An integer representing the precision window (1-60) (in minutes) -E.g. 10 for 10-minute
      * window, 30 for 30 minute window etc.
-     * @return The key of the document, for HashMap storage. The key is assembled in YYYYMMDD_HHMM fashion
-     * using a refreshWindow-minute precision window (for values of 10, HH00-HH09 belong to the 0-th 
+     * @return The key of the document for HashMap storage. The key is assembled in YYYYMMDD_HHMM fashion
+     * using a user-defined precision window (for values of 10, HH00-HH09 belong to the 0-th 
      * 10-minute window etc.)<br/> 
      * For December 6th, 2014 10:07 PM, the generated key would be 20141206_2200
      * For January 21st, 2015 10:27 AM, the generated key would be 20150121_1020
@@ -168,9 +166,9 @@ public final class Dataset {
         month = cal.get(Calendar.MONTH) + 1; //Zero-index based
         day = cal.get(Calendar.DAY_OF_MONTH); //Get the current day of month
         hour = cal.get(Calendar.HOUR_OF_DAY); //24h
-        minute = cal.get(Calendar.MINUTE) / refreshWindow; //10-minute cadence
+        minute = cal.get(Calendar.MINUTE) / refreshWindow; //Nearest 10-minute window, starting from 0
         
-        //Assemble the key in YYYYMMDD_HHMM form. 10-minute precision used.
+        //Assemble the key in YYYYMMDD_HHMM form.
         String key = String.valueOf(year) 
                 + (month < 10 ? "0" + String.valueOf(month) : String.valueOf(month)) 
                 + (day < 10 ? "0" + String.valueOf(day) : String.valueOf(day))
@@ -220,12 +218,12 @@ public final class Dataset {
      */
     public final void setDocTermFreqIdList() {
         int documentID, termID;
-        short frequency;
+        int frequency;
         for(String docKey : termsDocsWithOccurencies.keySet()) {
             documentID = documentIndices.get(docKey); //Get the actual ID
             for(String token : termsDocsWithOccurencies.get(docKey).keySet()) {
                 termID = termIds.get(token);
-                frequency = termsDocsWithOccurencies.get(docKey).get(token).shortValue();
+                frequency = termsDocsWithOccurencies.get(docKey).get(token);
                 DocumentTermFrequencyItem item = new DocumentTermFrequencyItem(documentID, termID, frequency);
                 termDocFreqId.add(item);
             }
@@ -243,33 +241,33 @@ public final class Dataset {
     /**
      * Returns the frequencies in all occurring documents/tweets of a term.
      * @param term The index of the term in the 'terms' list.
-     * @return A Short array containing the frequencies of the term in all documents.
+     * @return An Integer array containing the frequencies of the term in all documents.
      */
-    public Short[] getDocumentsTermFrequency(int term) {
+    public Integer[] getDocumentsTermFrequency(int term) {
         
         if(!frequencyListContainsValues()) {
             return null;
         }
         
         //Creates a short array which equals the number of documents
-        Short[] frqs = new Short[numberOfDocuments.length];
+        Integer[] frqs = new Integer[numberOfDocuments.length];
         
         //Initializes the 'frqs' array with zeros
         IntStream.range(0, numberOfDocuments.length).forEach(i -> frqs[i] = 0);
-        if (term != -1)
-            
+        if (term != -1) {   
             //For every single element in the list 'termDocFreqId'
             termDocFreqId.stream()
                 .filter(dti -> dti.term_id == term) //Filter out irrelevant terms
                 .forEach(dti -> frqs[dti.doc_id] = dti.frequency); //Go to the corresponding index in 'frqs' array
                 //defined by the id of the document ('doc_id') and store the corresponding frequency that already
                 //exists in 'termDocFreqId' array
+        }
         return frqs;
     }
     
     /**
      * Sets an integer array of numberOfDocuments size that contains
-     * the tweets distribution of the 24-h window.
+     * the tweets distribution of the user-defined window.
      * @param numberOfDocuments A HashMap containing the tweets distribution.
      */
     public void setNumberOfDocuments(HashMap<String, Integer> distribution) {
@@ -287,5 +285,13 @@ public final class Dataset {
      */
     public Integer[] getNumberOfDocuments() {
         return numberOfDocuments;
+    }
+    
+    /**
+     * Returns the total number of tweets of the given corpus.
+     * @return An integer containing the number of tweets.
+     */
+    public int getNumberOfTweets() {
+        return numberOfTweets;
     }
 }

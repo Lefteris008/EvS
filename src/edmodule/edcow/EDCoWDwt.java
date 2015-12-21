@@ -85,21 +85,22 @@ public class EDCoWDwt {
     	
 	/** compute proba vector*/
 	public void probaVector() {
-		// TODO Auto-generated method stub
 		double sSquare = 0;
 		probaVector = new double[level];
 		
-		for(int i=0; i<level; i++){
+		for(int i=0; i < level; i++){
 			double[] coeff = getCoefficients(i+1);						
 			EDCoWVector vec = new EDCoWVector(coeff);
 			sSquare = sSquare + Math.pow(vec.getNorm(),2);												
 		}
-		for(int i=0; i<level; i++){
+		for(int i = 0; i < level; i++){
 			double[] coeff = getCoefficients(i+1);						
 			EDCoWVector vec = new EDCoWVector(coeff);
-			//System.out.println("lalala" + sSquare);
-			if (sSquare == 0) probaVector[i] = 0;
-			else probaVector[i] = Math.pow(vec.getNorm(),2) / sSquare;											
+			if (sSquare == 0) {
+                            probaVector[i] = 0;
+                        } else {
+                            probaVector[i] = Math.pow(vec.getNorm(), 2) / sSquare;
+                        }											
 		}				
 //		for(double x:probaVector){
 //			System.out.println("p = "+x);
@@ -107,23 +108,19 @@ public class EDCoWDwt {
 	}	
     
 	public void shannonEntropy() {
-		shannonEntropy=0;
-		for(double x:probaVector){			
-			shannonEntropy = shannonEntropy - (x * (Math.log(x)/Math.log(2)));
-			//System.out.println("shannonEntropy "+shannonEntropy);
+		shannonEntropy = 0;
+		for(double x : probaVector) {			
+			shannonEntropy = shannonEntropy - (x * (Math.log(x) / Math.log(2)));
+			//System.out.println("shannonEntropy " + shannonEntropy);
 		}
 		//System.out.println("shannon Entropy :"+shannonEntropy);		
 	}
     
 	public void hMeasure(){
-		probaVector();
-		shannonEntropy();
-		swemax = Math.log(level)/Math.log(2);
-		hMeasure = shannonEntropy / swemax;
-		
-//		System.out.println("swemax");System.out.println(shannonEntropy + "\t");
-//		System.out.println(swemax);
-//		System.out.println("h(s) is " + hMeasure);	
+            probaVector();
+            shannonEntropy();
+            swemax = Math.log(level) / Math.log(2);
+            hMeasure = shannonEntropy / swemax;
 	}
 	
 	public int getLevel() {
