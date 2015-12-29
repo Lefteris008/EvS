@@ -16,13 +16,9 @@
  */
 package preprocessingmodule.nlp;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import preprocessingmodule.nlp.stopwords.StopWords;
 import utilities.Config;
 
@@ -52,10 +48,11 @@ public class Tokenizer {
         this.config = config;
         String[] temp = text.split(" "); //Split them according to white spaces
         numberOfTokens = temp.length;
-        for (String temp1 : temp) {
+        for (String temp1_ : temp) {
+            String temp1 = temp1_.replaceAll(String.valueOf((char) 160), " ").trim();
             if(isHashtag(temp1)) {
-                hashtags.add(temp1.replace("#", "")); //Remove '#' character and all other punctuation
-                cleanTokensAndHashtags.add(temp1.replace("#", ""));
+                hashtags.add(temp1); //Remove '#' character and all other punctuation
+                cleanTokensAndHashtags.add(temp1);
             } else if(isNameHandle(temp1)) {
                 nameHandles.add(temp1.replace("@", "")); //Remove '@' character
             } else if(isURL(temp1)) {
@@ -152,7 +149,7 @@ public class Tokenizer {
      * @return True if the token is a URL, false otherwise.
      */
     public final boolean isURL(String token) {
-        return config.getURLPattern().matcher(token).matches();
+        return config.getURLPattern().matcher(token).find();
     }
     
     /**

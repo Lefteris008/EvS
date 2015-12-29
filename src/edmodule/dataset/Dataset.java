@@ -98,7 +98,7 @@ public final class Dataset {
             //Count the tweet, update the distribution, get the docKey
             //and update the corresponding HashMap
             numberOfTweets++;
-            docKey = updateMessageDistribution(cal, tweet.getDate(), 60);
+            docKey = updateMessageDistribution(cal, tweet.getDate(), 10);
             if(!documentIndices.containsKey(docKey)) {
                 documentIndices.put(docKey, documentCount);
                 documentCount++;
@@ -171,10 +171,10 @@ public final class Dataset {
         //Assemble the key in YYYYMMDD_HHMM form.
         String key = String.valueOf(year) 
                 + (month < 10 ? "0" + String.valueOf(month) : String.valueOf(month)) 
-                + (day < 10 ? "0" + String.valueOf(day) : String.valueOf(day))
-                + "_" //Separate actual date from hour information
-                + (hour < 10 ? "0" + String.valueOf(hour) : String.valueOf(hour))
-                + String.valueOf(minute) + "0";
+                + (day < 10 ? "0" + String.valueOf(day) : String.valueOf(day));
+                //+ "_" //Separate actual date from hour information
+                //+ (hour < 10 ? "0" + String.valueOf(hour) : String.valueOf(hour))
+                //+ String.valueOf(minute) + "0";
         
         if(messageDistribution.containsKey(key)) {
             messageDistribution.put(key, messageDistribution.get(key) + 1);
@@ -205,7 +205,7 @@ public final class Dataset {
     public List<String> getTerms() { 
         Set<String> termsSet = new HashSet<>();
         for(String docKey : termsDocsWithOccurencies.keySet()) {
-            termsSet = termsDocsWithOccurencies.get(docKey).keySet();
+            termsSet.addAll(termsDocsWithOccurencies.get(docKey).keySet());
         }
         terms = new ArrayList<>(termsSet); //Store them
         return terms; 

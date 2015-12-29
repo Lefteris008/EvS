@@ -82,8 +82,8 @@ public class Config {
             
             inputStream.close();
             
-            punctuationPattern = Pattern.compile("[^\\dA-Za-z-_0-9 ]");
-            urlPattern = Pattern.compile("(@)?(href=')?(HREF=')?(HREF=\")?(href=\")?(http://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?");
+            punctuationPattern = Pattern.compile("[^\\dA-Za-z ]");
+            urlPattern = Pattern.compile("[hH][tT]{2}[Pp][sS]?://(\\w+(\\.\\w+?)?)+");
             
         } catch (IOException | NumberFormatException e) {
             if(inputStream != null) {

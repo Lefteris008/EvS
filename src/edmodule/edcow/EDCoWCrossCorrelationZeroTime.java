@@ -17,6 +17,9 @@
 package edmodule.edcow;
 
 ////////////////////////////////////////////////////////////////////////////////
+
+import utilities.Utilities;
+
 //  This file is part of SONDY.                                               //
 //                                                                            //
 //  SONDY is free software: you can redistribute it and/or modify             //
@@ -38,6 +41,9 @@ package edmodule.edcow;
  *      The computing is done using the FFT.
  *
  *      @author siniwitt
+ * 
+ * @author  Lefteris Paraskevas
+ * @version 2015.12.23_1612_gargantua
  */
 public class EDCoWCrossCorrelationZeroTime {       	
 	
@@ -49,10 +55,14 @@ public class EDCoWCrossCorrelationZeroTime {
 
     public double correlationZeroTime(double[] sign1, double[] sign2){
         double sum = 0.0;
-        if(sign1.length == sign2.length)
-            for(int i=0; i < sign1.length; i++)
+        if(sign1.length == sign2.length) {
+            for(int i=0; i < sign1.length; i++) {
                 sum += (sign1[i] * sign2[i]);
-        else System.out.println("The length of sign1 and sign2 is not the same.");
+            }
+        }
+        else {
+            Utilities.printInfoMessage("The length of sign1 and sign2 is not the same.");
+        }
         return (sum<0.00001)?0:sum;
     }
 }       

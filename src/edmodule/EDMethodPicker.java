@@ -49,17 +49,19 @@ public class EDMethodPicker {
                 ds.createCorpus(config);
                 ds.setDocTermFreqIdList();
                 
-                EDCoW edcow = new EDCoW(91, 400, ds); //Create the EDCoW object
+                EDCoW edcow = new EDCoW(14, 100, ds); //Create the EDCoW object
                 Utilities.printInfoMessage("Selected method: " + edcow.getName());
                 Utilities.printInfoMessage("Now applying algorithm...");
                 
                 edcow.apply(); //Apply the algorithm
                 Utilities.printInfoMessage("Succesfully applied EDCoW algorithm");
+                break;
             } 
             case 2: {
                 System.out.println("Selected method: LSH");
                 LSH lsh = new LSH();
                 lsh.apply();
+                break;
             }
             default: {
                 System.out.println("No method selected. Exiting now...");

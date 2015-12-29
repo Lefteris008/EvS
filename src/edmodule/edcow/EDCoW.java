@@ -39,8 +39,8 @@ import utilities.Utilities;
  */
 public class EDCoW implements EDMethod {
     private final int delta = 10; //6
-    private final int delta2 = 103; //48
-    private final int gamma = 5; //5
+    private final int delta2 = 43; //48
+    private final int gamma = 4; //5
     private final double minTermSupport = 0.0001; //0.0001
     private final double maxTermSupport = 0.01; //0.01
     private HashMap<String, Integer[]> termDocMap;
@@ -94,8 +94,9 @@ public class EDCoW implements EDMethod {
         eventList = new LinkedList<>();
         
         Utilities.printInfoMessage("Now calculating term frequencies...");
-        for(int i = 0; i < ds.getTerms().size(); i++){
-            String term = ds.getTerms().get(i);
+        List<String> terms = ds.getTerms();
+        for(int i = 0; i < terms.size(); i++){
+            String term = terms.get(i);
             if(term.length() > 1) { //Stopwords check removed as they are already ommitted when creating the dataset 
                 Integer[] frequency = ds.getDocumentsTermFrequency(i);
                 int cf = 0;
@@ -108,7 +109,8 @@ public class EDCoW implements EDMethod {
             }
         }
         Utilities.printInfoMessage("Now calculating windows...");
-        for(int i = 0; i < windows; i++){
+        for(int i = 0; i < windows; i++) {
+            Utilities.printInfoMessage("Calculating window " + (i + 1) + "\n");
             processWindow(i);
         }
         Collections.sort(eventList);
