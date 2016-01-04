@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Lefteris Paraskevas
+ * Copyright (C) 2016 Lefteris Paraskevas
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,9 @@ package edmodule;
 import edmodule.dataset.Dataset;
 import edmodule.edcow.EDCoW;
 import edmodule.lsh.LSH;
+import edmodule.peakfinding.BinsCreator;
+import edmodule.peakfinding.OfflinePeakFinding;
+import java.util.List;
 import java.util.Scanner;
 import utilities.Config;
 import utilities.Utilities;
@@ -26,7 +29,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.16_2100_planet3
+ * @version 2016.01.04_1914_gargantua
  */
 public class EDMethodPicker {
     
@@ -38,6 +41,7 @@ public class EDMethodPicker {
         System.out.println("\nPick a method for Event Detection");
         System.out.println("1. EDCoW");
         System.out.println("2. LSH");
+        System.out.println("3. Offline Peak Finding");
         System.out.print("Your choice: ");
         
         Scanner keyboard = new Scanner(System.in);
@@ -56,14 +60,18 @@ public class EDMethodPicker {
                 edcow.apply(); //Apply the algorithm
                 Utilities.printInfoMessage("Succesfully applied EDCoW algorithm");
                 break;
-            } 
-            case 2: {
+            } case 2: {
                 System.out.println("Selected method: LSH");
                 LSH lsh = new LSH();
                 lsh.apply();
                 break;
-            }
-            default: {
+            } case 3: {
+                List<Integer> bins = BinsCreator.createBins(1);
+                OfflinePeakFinding opf = new OfflinePeakFinding(bins, 0.125, 2, 5);
+                Utilities.printInfoMessage("Selected method: " + opf.getName());
+                Utilities.printInfoMessage("Now applying algorithm...");
+                break;
+            } default: {
                 System.out.println("No method selected. Exiting now...");
                 System.exit(0);
             }

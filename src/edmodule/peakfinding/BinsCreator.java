@@ -14,29 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package preprocessingmodule.nlp.stemming;
+package edmodule.peakfinding;
 
-import org.tartarus.snowball.ext.SpanishStemmer;
+import java.util.List;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1558_planet1
+ * @version 2016.01.04_1909_planet3
  */
-public class SpanishStemming implements Stemmer {
-    SpanishStemmer esStemmer;
-
-    public SpanishStemming() {
-        esStemmer = new SpanishStemmer();
-    }
+public class BinsCreator {
     
-    @Override
-    public String stem(String word) {
-        esStemmer.setCurrent(word);
-        if(esStemmer.stem()){
-            return esStemmer.getCurrent();
-        }else{
-            return word;
-        }
+    /**
+     * Method to create and return the bins needed for OfflinePeakFinding algorithm to operate.
+     * More formally, it creates an ArrayList of integers, containing the count of tweets in a pre-specified
+     * time interval (windows).
+     * @param window An integer indicating the time interval in which the tweets should be counted.
+     * All values in minutes. <br/>
+     * E.g. For 1 minute interval --> 1. <br/>
+     * For half an hour interval --> 30. <br/>
+     * For 5 hours interval --> 300.
+     * @return An ArrayList containing the bins.
+     */
+    public static List<Integer> createBins(int window) {
+        return null;
     }
 }

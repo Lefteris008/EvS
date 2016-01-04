@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Lefteris Paraskevas
+ * Copyright (C) 2016 Lefteris Paraskevas
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package evaluation;
+package edmodule.peakfinding;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.10.13_1532_planet1
+ * @version 2016.01.04_1916_planet3
  * @param <Start>
  * @param <End>
  */
