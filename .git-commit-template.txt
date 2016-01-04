@@ -1,3 +1,7 @@
+#If you commit more than one milestone, you should include the following:
+#Committing two milestones
+--------------------------------------------------
+
 #Version of commit (daily branch -hours should be omitted)
 2015.12.05_planet3
 
@@ -13,4 +17,4 @@ Despina Chantzakou
 [REF]: Extract empathy stuff to an abstract class.
 [REA]: Removed old TODO and extra space in header.
 --------------------------------------------------
-#All comments must be removed prior to commit
+#All comments must be removed prior to commit except from the 'Committing two milestones' info
