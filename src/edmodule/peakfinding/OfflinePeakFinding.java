@@ -19,11 +19,12 @@ package edmodule.peakfinding;
 import edmodule.EDMethod;
 import java.util.ArrayList;
 import java.util.List;
+import utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.04_1908_planet3
+ * @version 2016.01.05_2037_planet3
  * 
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing Microblogs for Event Exploration", CHI 2011.
  */
@@ -69,8 +70,14 @@ public class OfflinePeakFinding implements EDMethod {
     }
 
     @Override
-    public void apply() {
-        findPeakWindow();
+    public void apply() {}
+    
+    public void apply(int window) {
+        long startTime = System.currentTimeMillis();
+        List<Window<Integer, Integer>> windows = findPeakWindow();
+        long endTime = System.currentTimeMillis();
+        Utilities.printExecutionTime(startTime, endTime, OfflinePeakFinding.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        Utilities.printInfoMessage("For " + window + "-minute window, got " + windows.size() + " events.");
     }
     
     /**

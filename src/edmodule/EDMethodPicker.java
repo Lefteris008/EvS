@@ -16,11 +16,13 @@
  */
 package edmodule;
 
-import edmodule.dataset.Dataset;
+import edmodule.data.Dataset;
+import edmodule.data.EDCoWCorpus;
 import edmodule.edcow.EDCoW;
 import edmodule.lsh.LSH;
 import edmodule.peakfinding.BinsCreator;
 import edmodule.peakfinding.OfflinePeakFinding;
+import edmodule.peakfinding.Window;
 import java.util.List;
 import java.util.Scanner;
 import utilities.Config;
@@ -29,7 +31,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.04_1914_gargantua
+ * @version 2016.01.05_1725_gargantua
  */
 public class EDMethodPicker {
     
@@ -50,10 +52,11 @@ public class EDMethodPicker {
         switch(choice) {
             case 1: {
                 Dataset ds = new Dataset(config);
-                ds.createCorpus(config);
-                ds.setDocTermFreqIdList();
+                EDCoWCorpus corpus = new EDCoWCorpus(config, ds.getTweetList(), ds.getSWH());
+                corpus.createCorpus();
+                corpus.setDocTermFreqIdList();
                 
-                EDCoW edcow = new EDCoW(14, 100, ds); //Create the EDCoW object
+                EDCoW edcow = new EDCoW(14, 100, corpus); //Create the EDCoW object
                 Utilities.printInfoMessage("Selected method: " + edcow.getName());
                 Utilities.printInfoMessage("Now applying algorithm...");
                 
@@ -66,10 +69,12 @@ public class EDMethodPicker {
                 lsh.apply();
                 break;
             } case 3: {
-                List<Integer> bins = BinsCreator.createBins(1);
-                OfflinePeakFinding opf = new OfflinePeakFinding(bins, 0.125, 2, 5);
+                int window = 10;
+                List<Integer> bins = BinsCreator.createBins(config, window);
+                OfflinePeakFinding opf = new OfflinePeakFinding(bins, 0.32, 2, 5);
                 Utilities.printInfoMessage("Selected method: " + opf.getName());
                 Utilities.printInfoMessage("Now applying algorithm...");
+                opf.apply(window);
                 break;
             } default: {
                 System.out.println("No method selected. Exiting now...");

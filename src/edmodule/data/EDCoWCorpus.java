@@ -14,75 +14,59 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edmodule.dataset;
+package edmodule.data;
 
-import edmodule.edcow.frequencies.DocumentTermFrequencyItem;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.IntStream;
-import utilities.Config;
-import dsretriever.MongoHandler;
 import dsretriever.Tweet;
+import edmodule.edcow.frequencies.DocumentTermFrequencyItem;
 import edmodule.utils.Stemmers;
 import edmodule.utils.StopWordsHandlers;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.IntStream;
 import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.nlp.Tokenizer;
 import preprocessingmodule.nlp.stemming.Stemmer;
+import utilities.Config;
 import utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.21_1938_gargantua
+ * @version 2016.01.05_1723_gargantua
  */
-public final class Dataset {
+public class EDCoWCorpus {
     
-    private int numberOfTweets;
+    private final Config config;
+    private final List<Tweet> tweets;
+    
     private final StopWordsHandlers swH;
     private Integer[] numberOfDocuments;
     private List<String> terms = new ArrayList<>(); //List containing all occuring termsprivate final HashMap<String, Integer> termsMap = new HashMap<>(); //A map containing terms along with their frequency of occurance
     private final List<DocumentTermFrequencyItem> termDocFreqId = new ArrayList<>(); //A list containg triplets of tweetIDs, termIDs and their frequenciesprivate final HashMap<Integer, List<String>> docTerms = new HashMap<>(); //A map containing the tweetIDs and a list of the terms that each one of them includes
-    private final List<Tweet> tweets;
+    private int numberOfTweets = 0;
     private final HashMap<String, HashMap<String, Integer>> termsDocsWithOccurencies = new HashMap<>();
     private final HashMap<String, Integer> termIds = new HashMap<>(); //A map containing the ids of the terms (namely, their index as they are being read)
     private final HashMap<String, Integer> messageDistribution = new HashMap<>();
     private final HashMap<String, Integer> documentIndices = new HashMap<>();
-
-    /**
-     * It retrieves a dataset from the already stored MongoDB collection.
-     * @param config A Configuration object.
-     * @param sw A StopWords handler
-     */
-    public Dataset(Config config) {
-        long startTime = System.currentTimeMillis(); //Start time
-        
-        MongoHandler mongo = new MongoHandler(config);
-        mongo.connectToMongoDB(config);
- 
-        //Initialize stopwords and stemmers
-        swH = new StopWordsHandlers(config);
-        Stemmers.initStemmers();
-        
-        //Load all tweets from MongoDB Store
-        tweets = mongo.retrieveAllTweetsFromMongoDBStore(config);
-        mongo.closeMongoConnection(config);
- 
-        long endTime = System.currentTimeMillis();
-        Utilities.printExecutionTime(startTime, endTime, Dataset.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
-    }
     
     /**
-     * Creates a working corpus from a loaded dataset.
-     * More formally, it iterates through the tweets retrieved, tokenizes their text,
-     * gets the stems of every single token and updates various HashMaps and fields for
-     * future use.
+     * Public constructor.
+     * @param config A configuration object
+     * @param tweets A ArrayList containing all retrieved tweets
+     * @param swH A StopWordsHandlers object
      */
-    public final void createCorpus(Config config) {
+    public EDCoWCorpus(Config config, List<Tweet> tweets, StopWordsHandlers swH) {
+        this.config = config;
+        this.tweets = tweets;
+        this.swH = swH;
+    }
+    
+    public final void createCorpus() {
         long startTime = System.currentTimeMillis();
         
         Calendar cal;
@@ -136,7 +120,7 @@ public final class Dataset {
         setNumberOfDocuments(messageDistribution);
         
         long endTime = System.currentTimeMillis();
-        Utilities.printExecutionTime(startTime, endTime, Dataset.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        Utilities.printExecutionTime(startTime, endTime, EDCoWCorpus.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
     /**

@@ -20,7 +20,7 @@ import edmodule.edcow.event.Events;
 import ch.epfl.lis.jmod.modularity.community.Community;
 import ch.epfl.lis.networks.NetworkException;
 import edmodule.EDMethod;
-import edmodule.dataset.Dataset;
+import edmodule.data.EDCoWCorpus;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
@@ -35,7 +35,7 @@ import utilities.Utilities;
  * @email   adrien.guille@univ-lyon2.fr
  * 
  * @author  Lefteris Paraskevas (configurations in EDCoW to omit missing components)
- * @version 2015.12.21_2001_gargantua (For EDviaSA project version alignment) 
+ * @version 2016.01.05_1723_gargantua (For EDviaSA project version alignment) 
  */
 public class EDCoW implements EDMethod {
     private final int delta = 10; //6
@@ -48,17 +48,17 @@ public class EDCoW implements EDMethod {
     private final int timeSliceA;
     private final int timeSliceB;
     private int countCorpus = 0; //Total number of tweets
-    private final Dataset ds;
+    private final EDCoWCorpus corpus;
     public Events events;
     
-    public EDCoW(int timeSliceA, int timeSliceB, Dataset ds){
+    public EDCoW(int timeSliceA, int timeSliceB, EDCoWCorpus corpus){
         this.timeSliceA = timeSliceA;
         this.timeSliceB = timeSliceB;
         this.countCorpus = 0;
-        for (Integer numberOfDocument : ds.getNumberOfDocuments()) {
+        this.corpus = corpus;
+        for (Integer numberOfDocument : corpus.getNumberOfDocuments()) {
             this.countCorpus += numberOfDocument;
         }
-        this.ds = ds;
     }
 
     @Override
@@ -94,11 +94,11 @@ public class EDCoW implements EDMethod {
         eventList = new LinkedList<>();
         
         Utilities.printInfoMessage("Now calculating term frequencies...");
-        List<String> terms = ds.getTerms();
+        List<String> terms = corpus.getTerms();
         for(int i = 0; i < terms.size(); i++){
             String term = terms.get(i);
             if(term.length() > 1) { //Stopwords check removed as they are already ommitted when creating the dataset 
-                Integer[] frequency = ds.getDocumentsTermFrequency(i);
+                Integer[] frequency = corpus.getDocumentsTermFrequency(i);
                 int cf = 0;
                 for(int freq : frequency){
                     cf += freq;
@@ -127,7 +127,7 @@ public class EDCoW implements EDMethod {
     public void processWindow(int window) {
     	try{
             LinkedList<EDCoWKeyword> keyWords = new LinkedList<>();
-            Integer[] distributioni = ds.getNumberOfDocuments();
+            Integer[] distributioni = corpus.getNumberOfDocuments();
             double[] distributiond = new double[delta2];
             int startSlice = window * delta2;
             int endSlice = startSlice + delta2;
