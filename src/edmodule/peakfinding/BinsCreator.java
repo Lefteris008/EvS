@@ -27,7 +27,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.05_2037_planet3
+ * @version 2016.01.07_1819_planet3
  */
 public class BinsCreator {
     
@@ -47,7 +47,7 @@ public class BinsCreator {
         
         Dataset ds = new Dataset(config);
         PeakFindingCorpus corpus = new PeakFindingCorpus(config, ds.getTweetList(), ds.getSWH());
-        HashMap<String, Integer> binsHash = corpus.createBins(window);
+        HashMap<String, Integer> binsHash = corpus.createCorpus(window);
         List<Integer> bins = new ArrayList<>();
         binsHash.keySet().stream().forEach((bin) -> {
             bins.add(binsHash.get(bin));
@@ -55,6 +55,7 @@ public class BinsCreator {
         
         long endTime = System.currentTimeMillis();
         Utilities.printExecutionTime(startTime, endTime, BinsCreator.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        corpus.generateBinsWithKeysReference(binsHash, bins); //Generate reference for future use
         return bins;
     }
 }

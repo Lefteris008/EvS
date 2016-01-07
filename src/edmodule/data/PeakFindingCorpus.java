@@ -18,6 +18,7 @@ package edmodule.data;
 
 import dsretriever.Tweet;
 import edmodule.utils.StopWordsHandlers;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +27,7 @@ import utilities.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.05_1726_planet3  
+ * @version 2016.01.07_1819_planet3  
  */
 public class PeakFindingCorpus {
     
@@ -34,6 +35,8 @@ public class PeakFindingCorpus {
     private final List<Tweet> tweets;
     private final Config config;
     private final HashMap<String, Integer> messageDistribution = new HashMap<>();
+    private final HashMap<String, ArrayList<String>> tweetsByWindow = new HashMap<>();
+    private final HashMap<Integer, String> binsWithKeys = new HashMap<>();
     
     public PeakFindingCorpus(Config config, List<Tweet> tweets, StopWordsHandlers swH) {
         this.config = config;
@@ -52,7 +55,7 @@ public class PeakFindingCorpus {
      * For 5 hours interval --> 300.
      * @return A HashMap containing the bins.
      */
-    public final HashMap<String, Integer> createBins(int window) {
+    public final HashMap<String, Integer> createCorpus(int window) {
         int year;
         int month;
         int day;
@@ -77,10 +80,45 @@ public class PeakFindingCorpus {
 
             if(messageDistribution.containsKey(key)) {
                 messageDistribution.put(key, messageDistribution.get(key) + 1);
+                ArrayList<String> tweetsInWindow = new ArrayList<>(tweetsByWindow.get(key));
+                tweetsInWindow.add(tweet.getText());
+                tweetsByWindow.put(key, tweetsInWindow);
             } else {
                 messageDistribution.put(key, 1);
+                ArrayList<String> tweetsInWindow = new ArrayList<>();
+                tweetsInWindow.add(tweet.getText());
+                tweetsByWindow.put(key, tweetsInWindow);
             }
         }
         return messageDistribution;
     }
+    
+    /**
+     * Returns the tweet counts in every refresh window.
+     * @return A HashMap which key is the refresh window and its value is the tweet count in this window.
+     */
+    public final HashMap<String, ArrayList<String>> getTweetsByWindow() { return tweetsByWindow; }
+    
+    /**
+     * Method to generate a reference HashMap for bins and windows.
+     * More formally, it matches the index number of a certain bin with the key
+     * of the refresh window that the bin is referring to.
+     * @param binsHash A HashMap containing the keys of every window along with the tweet counts.
+     * @param bins A List containing the same information with 'binsHash' but using an index-based style.
+     */
+    public final void generateBinsWithKeysReference(HashMap<String, Integer> binsHash, List<Integer> bins) {
+        int i = 0;
+        for(String key : binsHash.keySet()) {
+            binsWithKeys.put(i, key);
+            i++;
+        }
+    }
+    
+    /**
+     * Returns the HashMap with the reference of the bins and windows.
+     * @see generateBinsWithKeysReference()
+     * @return A HashMap
+     * 
+     */
+    public final HashMap<Integer, String> getBinsWithKeysReference() { return binsWithKeys; }
 }

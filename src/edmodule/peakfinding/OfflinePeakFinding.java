@@ -24,7 +24,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.05_2037_planet3
+ * @version 2016.01.07_1820_planet3
  * 
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing Microblogs for Event Exploration", CHI 2011.
  */
@@ -34,6 +34,8 @@ public class OfflinePeakFinding implements EDMethod {
     private final int taph;
     private final int pi;
     private final List<Integer> bins;
+    private final int refreshWindow;
+    List<Window<Integer, Integer>> windows = new ArrayList<>();
     
     /**
      * Public constructor.
@@ -41,12 +43,14 @@ public class OfflinePeakFinding implements EDMethod {
      * @param a Alpha parameter to capture historical information. Values lower than 1 are recommended.
      * @param t Threshold parameter. 
      * @param p Primary parameter indicates the first bins to be considered in calculating initial mean deviance.
+     * @param refreshWindow An integer representing the refresh window of every bin.
      */
-    public OfflinePeakFinding(List<Integer> bins, double a, int t, int p) {
+    public OfflinePeakFinding(List<Integer> bins, double a, int t, int p, int refreshWindow) {
         alpha = a;
         taph = t;
         pi = p;
         this.bins = bins;
+        this.refreshWindow = refreshWindow;
     }
     
     @Override
@@ -69,27 +73,13 @@ public class OfflinePeakFinding implements EDMethod {
         return "Aggregating and Visualizing Microblogs for Event Exploration";
     }
 
-    @Override
-    public void apply() {}
-    
-    public void apply(int window) {
-        long startTime = System.currentTimeMillis();
-        List<Window<Integer, Integer>> windows = findPeakWindow();
-        long endTime = System.currentTimeMillis();
-        Utilities.printExecutionTime(startTime, endTime, OfflinePeakFinding.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
-        Utilities.printInfoMessage("For " + window + "-minute window, got " + windows.size() + " events.");
-    }
-    
     /**
      * Implements the main algorithm of paper [1].
-     * @param bins The bins containing the tweet information
-     * @param t Threshold 't'
-     * @param r Threshold 'r'
-     * @param a Threshold 'a'
-     * @return A list containing the calculated windows
      */
-    public List<Window<Integer, Integer>> findPeakWindow() {
-        List<Window<Integer, Integer>> windows = new ArrayList<>();
+    @Override
+    public void apply() {
+        long startTime = System.currentTimeMillis();
+        
         double mean = bins.get(0); //Set the first element as mean
         List<Integer> tempBins = new ArrayList<>();
         for(int i = 0; i < pi; i++) {
@@ -97,6 +87,7 @@ public class OfflinePeakFinding implements EDMethod {
         }
         double meanDev = Statistics.variance(tempBins); //Initialize only with the first 'p' bins
         Window window;
+        
         int start;
         int end = 0;
         
@@ -118,15 +109,25 @@ public class OfflinePeakFinding implements EDMethod {
                         end = i++;
                     }
                 }
-                window = new Window(start, end); //Create a new window
+                if(start > end) {
+                    int temp = end;
+                    end = start;
+                    start = temp;
+                }
+                window = new Window(start, end); //Create a new refreshWindow
                 windows.add(window); //Append it to the windows array list
             } else {
                 mean = updateMean(meanDev, bins.get(i), alpha); //Update mean
                 meanDev = updateMeanDev(mean, meanDev, bins.get(i), alpha); //Update mean deviance
             }
         }
-        return windows;
+        
+        long endTime = System.currentTimeMillis();
+        Utilities.printExecutionTime(startTime, endTime, OfflinePeakFinding.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        Utilities.printInfoMessage("For " + refreshWindow + "-minute window, got " + windows.size() + " events.");
     }
+    
+    public List<Window<Integer, Integer>> getTopicWindows() { return windows; }
     
     /**
      * Method to update the mean value.
@@ -150,5 +151,20 @@ public class OfflinePeakFinding implements EDMethod {
     public static double updateMeanDev(double oldMean, double oldMeanDev, int bin, double a) {
         double diff = Math.abs((oldMean - bin));
         return a * diff + (1-a) * oldMeanDev;
+    }
+    
+    /**
+     * Secondary method to display tweet counts in a window, after applying main algorithm.
+     */
+    public final void printNumberOfTweetsInWindow() {
+        int tweetCount;
+        for(Window<Integer, Integer> window : windows) {
+            tweetCount = 0;
+            Utilities.printInfoMessage("Window starts from bin " + window.getStart() + " and ends in bin " + window.getEnd() + ".");
+            for(int i = window.getStart(); i < window.getEnd(); i++) {
+                tweetCount += bins.get(i);
+            }
+            Utilities.printInfoMessage("It contains " + tweetCount + " tweets.");
+        }
     }
 }

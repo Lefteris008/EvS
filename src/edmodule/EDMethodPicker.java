@@ -22,7 +22,6 @@ import edmodule.edcow.EDCoW;
 import edmodule.lsh.LSH;
 import edmodule.peakfinding.BinsCreator;
 import edmodule.peakfinding.OfflinePeakFinding;
-import edmodule.peakfinding.Window;
 import java.util.List;
 import java.util.Scanner;
 import utilities.Config;
@@ -31,7 +30,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.05_1725_gargantua
+ * @version 2016.01.07_1814_gargantua
  */
 public class EDMethodPicker {
     
@@ -71,10 +70,11 @@ public class EDMethodPicker {
             } case 3: {
                 int window = 10;
                 List<Integer> bins = BinsCreator.createBins(config, window);
-                OfflinePeakFinding opf = new OfflinePeakFinding(bins, 0.32, 2, 5);
+                OfflinePeakFinding opf = new OfflinePeakFinding(bins, 0.32, 2, 5, window);
                 Utilities.printInfoMessage("Selected method: " + opf.getName());
                 Utilities.printInfoMessage("Now applying algorithm...");
-                opf.apply(window);
+                opf.apply();
+                opf.printNumberOfTweetsInWindow();
                 break;
             } default: {
                 System.out.println("No method selected. Exiting now...");
