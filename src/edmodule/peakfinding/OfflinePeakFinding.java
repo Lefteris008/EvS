@@ -24,7 +24,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.07_1820_planet3
+ * @version 2016.01.12_1436_gargantua
  * 
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing Microblogs for Event Exploration", CHI 2011.
  */
@@ -33,7 +33,7 @@ public class OfflinePeakFinding implements EDMethod {
     private final double alpha;
     private final int taph;
     private final int pi;
-    private final List<Integer> bins;
+    private final List<BinPair<String, Integer>> bins;
     private final int refreshWindow;
     List<Window<Integer, Integer>> windows = new ArrayList<>();
     
@@ -45,7 +45,7 @@ public class OfflinePeakFinding implements EDMethod {
      * @param p Primary parameter indicates the first bins to be considered in calculating initial mean deviance.
      * @param refreshWindow An integer representing the refresh window of every bin.
      */
-    public OfflinePeakFinding(List<Integer> bins, double a, int t, int p, int refreshWindow) {
+    public OfflinePeakFinding(List<BinPair<String, Integer>> bins, double a, int t, int p, int refreshWindow) {
         alpha = a;
         taph = t;
         pi = p;
@@ -80,8 +80,8 @@ public class OfflinePeakFinding implements EDMethod {
     public void apply() {
         long startTime = System.currentTimeMillis();
         
-        double mean = bins.get(0); //Set the first element as mean
-        List<Integer> tempBins = new ArrayList<>();
+        double mean = bins.get(0).getValue(); //Set the first element as mean
+        List<BinPair<String, Integer>> tempBins = new ArrayList<>();
         for(int i = 0; i < pi; i++) {
             tempBins.add(bins.get(i));
         }
@@ -92,39 +92,33 @@ public class OfflinePeakFinding implements EDMethod {
         int end = 0;
         
         for(int i=1; i < bins.size(); i++) {
-            if(( (bins.get(i) - mean) / meanDev > taph ) && (bins.get(i) > bins.get(i-1))) {
+            if(( (bins.get(i).getValue() - mean) / meanDev > taph ) && (bins.get(i).getValue() > bins.get(i-1).getValue())) {
                 start = i - 1; //Update the starting point
-                while( (i < bins.size()) && (bins.get(i) > bins.get(i-1)) ) {
-                    mean = updateMean(meanDev, bins.get(i), alpha); //Update mean
-                    meanDev = updateMeanDev(mean, meanDev, bins.get(i), alpha); //Update mean deviance
-                    i++; //Move to next iteration
+                while( (i < bins.size()) && (bins.get(i).getValue() > bins.get(i-1).getValue()) ) {
+                    mean = updateMean(meanDev, bins.get(i).getValue(), alpha); //Update mean
+                    meanDev = updateMeanDev(mean, meanDev, bins.get(i).getValue(), alpha); //Update mean deviance
+                    i++; //Move to the next iteration
                 }
-                while( (i < bins.size()) && (bins.get(i) > bins.get(start)) ) {
-                    if(( (bins.get(i) - mean) / meanDev > taph ) && (bins.get(i) > bins.get(i-1))) {
+                while( (i < bins.size()) && (bins.get(i).getValue() > bins.get(start).getValue()) ) {
+                    if(( (bins.get(i).getValue() - mean) / meanDev > taph ) && (bins.get(i).getValue() > bins.get(i-1).getValue())) {
                         end = --i;
                         break;
                     } else {
-                        mean = updateMean(meanDev, bins.get(i), alpha); //Update mean
-                        meanDev = updateMeanDev(mean, meanDev, bins.get(i), alpha); //Update mean deviance
+                        mean = updateMean(meanDev, bins.get(i).getValue(), alpha); //Update mean
+                        meanDev = updateMeanDev(mean, meanDev, bins.get(i).getValue(), alpha); //Update mean deviance
                         end = i++;
                     }
                 }
-                if(start > end) {
-                    int temp = end;
-                    end = start;
-                    start = temp;
-                }
-                window = new Window(start, end); //Create a new refreshWindow
+                window = new Window(start, end); //Create a new window
                 windows.add(window); //Append it to the windows array list
             } else {
-                mean = updateMean(meanDev, bins.get(i), alpha); //Update mean
-                meanDev = updateMeanDev(mean, meanDev, bins.get(i), alpha); //Update mean deviance
+                mean = updateMean(meanDev, bins.get(i).getValue(), alpha); //Update mean
+                meanDev = updateMeanDev(mean, meanDev, bins.get(i).getValue(), alpha); //Update mean deviance
             }
         }
         
         long endTime = System.currentTimeMillis();
         Utilities.printExecutionTime(startTime, endTime, OfflinePeakFinding.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
-        Utilities.printInfoMessage("For " + refreshWindow + "-minute window, got " + windows.size() + " events.");
     }
     
     public List<Window<Integer, Integer>> getTopicWindows() { return windows; }
@@ -154,17 +148,25 @@ public class OfflinePeakFinding implements EDMethod {
     }
     
     /**
-     * Secondary method to display tweet counts in a window, after applying main algorithm.
+     * Secondary method to display tweet counts in all non-zero events,
+     * after applying the main algorithm.
+     * @see apply() Main method.
      */
-    public final void printNumberOfTweetsInWindow() {
+    public final void printEvents() {
+        int totalEvents = windows.size(); //Initially, all windows are potential events
         int tweetCount;
         for(Window<Integer, Integer> window : windows) {
             tweetCount = 0;
-            Utilities.printInfoMessage("Window starts from bin " + window.getStart() + " and ends in bin " + window.getEnd() + ".");
             for(int i = window.getStart(); i < window.getEnd(); i++) {
-                tweetCount += bins.get(i);
+                tweetCount += bins.get(i).getValue(); //Count the tweets in window
             }
-            Utilities.printInfoMessage("It contains " + tweetCount + " tweets.");
+            if(tweetCount != 0) {
+                Utilities.printInfoMessage("Event starts from bin '" + window.getStart() + "' and ends at bin '" + window.getEnd() + "'.");
+                Utilities.printInfoMessage("Event contains " + tweetCount + " tweets.");
+            } else {
+                totalEvents--; //Reduce the number of events, if it contains 0 tweets
+            }
         }
+        Utilities.printInfoMessage("For a " + refreshWindow + "-minute window, got " + totalEvents + " events.");
     }
 }

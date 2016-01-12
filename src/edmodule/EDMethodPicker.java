@@ -20,6 +20,7 @@ import edmodule.data.Dataset;
 import edmodule.data.EDCoWCorpus;
 import edmodule.edcow.EDCoW;
 import edmodule.lsh.LSH;
+import edmodule.peakfinding.BinPair;
 import edmodule.peakfinding.BinsCreator;
 import edmodule.peakfinding.OfflinePeakFinding;
 import java.util.List;
@@ -30,7 +31,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.07_1814_gargantua
+ * @version 2016.01.12_1441_gargantua
  */
 public class EDMethodPicker {
     
@@ -55,7 +56,7 @@ public class EDMethodPicker {
                 corpus.createCorpus();
                 corpus.setDocTermFreqIdList();
                 
-                EDCoW edcow = new EDCoW(14, 100, corpus); //Create the EDCoW object
+                EDCoW edcow = new EDCoW(37, 700, corpus); //Create the EDCoW object
                 Utilities.printInfoMessage("Selected method: " + edcow.getName());
                 Utilities.printInfoMessage("Now applying algorithm...");
                 
@@ -69,12 +70,12 @@ public class EDMethodPicker {
                 break;
             } case 3: {
                 int window = 10;
-                List<Integer> bins = BinsCreator.createBins(config, window);
+                List<BinPair<String, Integer>> bins = BinsCreator.createBins(config, window);
                 OfflinePeakFinding opf = new OfflinePeakFinding(bins, 0.32, 2, 5, window);
                 Utilities.printInfoMessage("Selected method: " + opf.getName());
                 Utilities.printInfoMessage("Now applying algorithm...");
                 opf.apply();
-                opf.printNumberOfTweetsInWindow();
+                opf.printEvents();
                 break;
             } default: {
                 System.out.println("No method selected. Exiting now...");

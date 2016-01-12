@@ -39,10 +39,10 @@ import utilities.Utilities;
  */
 public class EDCoW implements EDMethod {
     private final int delta = 10; //6
-    private final int delta2 = 43; //48
-    private final int gamma = 4; //5
-    private final double minTermSupport = 0.0001; //0.0001
-    private final double maxTermSupport = 0.01; //0.01
+    private final int delta2 = 39; //48
+    private final int gamma = 5; //5
+    private final double minTermSupport = 0.005; //0.0001
+    private final double maxTermSupport = 0.5; //0.01
     private HashMap<String, Integer[]> termDocMap;
     public LinkedList<EDCoWEvent> eventList;
     private final int timeSliceA;

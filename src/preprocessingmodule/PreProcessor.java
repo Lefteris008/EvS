@@ -38,7 +38,7 @@ import samodule.SentimentAnalyzer;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.16_2101_planet3
+ * @version 2016.01.12_1449_gargantua
  */
 public class PreProcessor {
     
@@ -64,7 +64,7 @@ public class PreProcessor {
         System.out.println("1.\tTest a tweet");
         System.out.println("\tGet a specific tweet from MongoDB Store and test the preprocessing procedure.\n");
         System.out.println("2.\tApply Event Detection");
-        System.out.println("\tApply the EDCoW algorithm.\n");
+        System.out.println("\tApply your desired ED algorithm.\n");
         System.out.println("3.\tApply Event Detection combining Sentiment Analysis");
         System.out.println("\tMain option of project.\n");
         System.out.print("Your choice: ");

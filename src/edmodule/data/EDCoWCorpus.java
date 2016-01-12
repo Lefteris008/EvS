@@ -37,7 +37,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.05_1723_gargantua
+ * @version 2016.01.12_1440_gargantua
  */
 public class EDCoWCorpus {
     
@@ -100,13 +100,13 @@ public class EDCoWCorpus {
                 //Update the HashMap with the triplet Document, Token, Frequency
                 if(termsDocsWithOccurencies.containsKey(docKey)) { //Document already exists, update it
                     if(termsDocsWithOccurencies.get(docKey).containsKey(token)) { //Token already exists, update it
-                        termsDocsWithOccurencies.get(docKey).put(token, (termsDocsWithOccurencies.get(docKey).get(token) + 1));
+                        termsDocsWithOccurencies.get(docKey).put(token, (termsDocsWithOccurencies.get(docKey).get(token) + 100));
                     } else { //Token does not exist, put it
-                        termsDocsWithOccurencies.get(docKey).put(token, 1);
+                        termsDocsWithOccurencies.get(docKey).put(token, 100);
                     }
                 } else { //Document does not exist, so as the token -create it and put it
                     HashMap<String, Integer> termsWithOccurencies = new HashMap<>();
-                    termsWithOccurencies.put(token, 1);
+                    termsWithOccurencies.put(token, 100);
                     termsDocsWithOccurencies.put(docKey, termsWithOccurencies);
                 }
                 
@@ -155,10 +155,10 @@ public class EDCoWCorpus {
         //Assemble the key in YYYYMMDD_HHMM form.
         String key = String.valueOf(year) 
                 + (month < 10 ? "0" + String.valueOf(month) : String.valueOf(month)) 
-                + (day < 10 ? "0" + String.valueOf(day) : String.valueOf(day));
-                //+ "_" //Separate actual date from hour information
-                //+ (hour < 10 ? "0" + String.valueOf(hour) : String.valueOf(hour))
-                //+ String.valueOf(minute) + "0";
+                + (day < 10 ? "0" + String.valueOf(day) : String.valueOf(day))
+                + "_" //Separate actual date from hour information
+                + (hour < 10 ? "0" + String.valueOf(hour) : String.valueOf(hour))
+                + String.valueOf(minute) + "0";
         
         if(messageDistribution.containsKey(key)) {
             messageDistribution.put(key, messageDistribution.get(key) + 1);

@@ -17,9 +17,11 @@
 package edmodule.data;
 
 import dsretriever.Tweet;
+import edmodule.peakfinding.StringDateUtils;
 import edmodule.utils.StopWordsHandlers;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import utilities.Config;
@@ -27,7 +29,7 @@ import utilities.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.07_1819_planet3  
+ * @version 2016.01.12_1449_gargantua  
  */
 public class PeakFindingCorpus {
     
@@ -36,7 +38,8 @@ public class PeakFindingCorpus {
     private final Config config;
     private final HashMap<String, Integer> messageDistribution = new HashMap<>();
     private final HashMap<String, ArrayList<String>> tweetsByWindow = new HashMap<>();
-    private final HashMap<Integer, String> binsWithKeys = new HashMap<>();
+    private Date earliestDate;
+    private Date latestDate;
     
     public PeakFindingCorpus(Config config, List<Tweet> tweets, StopWordsHandlers swH) {
         this.config = config;
@@ -45,38 +48,43 @@ public class PeakFindingCorpus {
     }
     
     /**
-     * Method to create and return the bins needed for OfflinePeakFinding algorithm to operate.
-     * More formally, it creates an ArrayList of integers, containing the count of tweets in a pre-specified
-     * time interval (windows).
-     * @param window An integer indicating the time interval in which the tweets should be counted.
-     * All values in minutes. <br/>
+     * Method to create and return the windows needed for OfflinePeakFinding 
+     * algorithm to operate.
+     * More formally, it creates HashMap of Strings and Integers. Every key is
+     * a specific time window and its value is the corresponding summary of tweets
+     * in this time interval (window). Note that only non-zero windows are created.
+     * Due to the fact that a HashMap does not store its values ordered, additional
+     * configuration is required to generate all the time intervals between the
+     * earliest and the latest date of corpus if needed (assuming that the corpus
+     * has some extend of sparseness).
+     * @param window An integer indicating the time interval in which the tweets
+     * should be counted. All values in minutes. <br/>
      * E.g. For 1 minute interval --> 1. <br/>
      * For half an hour interval --> 30. <br/>
      * For 5 hours interval --> 300.
      * @return A HashMap containing the bins.
+     * @see BinsCreator BinsCreator class.
+     * @see OfflinePeakFinding OfflinePeakFinding class.
      */
-    public final HashMap<String, Integer> createCorpus(int window) {
-        int year;
-        int month;
-        int day;
-        int hour;
-        int minute;
+    public final HashMap<String, Integer> createCorpus(int window) {   
+        //Initialize variables
+        earliestDate = tweets.get(0).getDate();
+        latestDate = tweets.get(0).getDate();
         Calendar cal = Calendar.getInstance();
-        for(Tweet tweet : tweets) {
-            cal.setTime(tweet.getDate());
-            year = cal.get(Calendar.YEAR); //Current year
-            month = cal.get(Calendar.MONTH) + 1; //Zero-index based
-            day = cal.get(Calendar.DAY_OF_MONTH); //Get the current day of month
-            hour = cal.get(Calendar.HOUR_OF_DAY); //24h
-            minute = cal.get(Calendar.MINUTE) / window; //Nearest window, starting from 0
-
-            //Assemble the key in YYYYMMDD_HHMM form.
-            String key = String.valueOf(year) 
-                    + (month < 10 ? "0" + String.valueOf(month) : String.valueOf(month)) 
-                    + (day < 10 ? "0" + String.valueOf(day) : String.valueOf(day))
-                    + "_" //Separate actual date from hour information
-                    + (hour < 10 ? "0" + String.valueOf(hour) : String.valueOf(hour))
-                    + String.valueOf(minute) + "0";
+        
+        tweets.stream().forEach((tweet) -> {
+            Date tweetDate = tweet.getDate();
+            
+            //Check and update earliest/latest dates
+            if(tweetDate.before(earliestDate)) {
+                earliestDate = tweetDate;
+            }
+            if(tweetDate.after(latestDate)) {
+                latestDate = tweetDate;
+            }
+            
+            //Assemble the date key
+            String key = StringDateUtils.getDateKey(cal, tweetDate, window);
 
             if(messageDistribution.containsKey(key)) {
                 messageDistribution.put(key, messageDistribution.get(key) + 1);
@@ -89,36 +97,27 @@ public class PeakFindingCorpus {
                 tweetsInWindow.add(tweet.getText());
                 tweetsByWindow.put(key, tweetsInWindow);
             }
-        }
+        });
         return messageDistribution;
     }
     
     /**
+     * Returns the earliest date a tweet was published in the corpus.
+     * @return A Date object.
+     */
+    public final Date getEarliestDateOfCorpus() { return earliestDate; }
+    
+    /**
+     * Returns the latest date a tweet was published in the corpus.
+     * @return A Date object.
+     */
+    public final Date getLatestDateOfCorpus() { return latestDate; }
+    
+    /**
      * Returns the tweet counts in every refresh window.
-     * @return A HashMap which key is the refresh window and its value is the tweet count in this window.
+     * Only non-zero windows are returned.
+     * @return A HashMap which key is the refresh window and its value is the 
+     * tweet count in this window.
      */
     public final HashMap<String, ArrayList<String>> getTweetsByWindow() { return tweetsByWindow; }
-    
-    /**
-     * Method to generate a reference HashMap for bins and windows.
-     * More formally, it matches the index number of a certain bin with the key
-     * of the refresh window that the bin is referring to.
-     * @param binsHash A HashMap containing the keys of every window along with the tweet counts.
-     * @param bins A List containing the same information with 'binsHash' but using an index-based style.
-     */
-    public final void generateBinsWithKeysReference(HashMap<String, Integer> binsHash, List<Integer> bins) {
-        int i = 0;
-        for(String key : binsHash.keySet()) {
-            binsWithKeys.put(i, key);
-            i++;
-        }
-    }
-    
-    /**
-     * Returns the HashMap with the reference of the bins and windows.
-     * @see generateBinsWithKeysReference()
-     * @return A HashMap
-     * 
-     */
-    public final HashMap<Integer, String> getBinsWithKeysReference() { return binsWithKeys; }
 }

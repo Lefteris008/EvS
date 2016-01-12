@@ -24,7 +24,7 @@ import utilities.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.04_1916_planet3
+ * @version 2016.01.12_1436_gargantua
  */
 public class Statistics {
     
@@ -33,8 +33,10 @@ public class Statistics {
      * @param list The list with the elements to be summed
      * @return The summary of the elements
      */
-    public static int sum(List<Integer> list) {
-        return list.stream().mapToInt(Integer::intValue).sum();
+    public static int sum(List<BinPair<String, Integer>> list) {
+        int sum = 0;
+        sum = list.stream().map((list1) -> list1.getValue()).reduce(sum, Integer::sum);
+        return sum;
     }
 
     /**
@@ -42,8 +44,8 @@ public class Statistics {
      * @param list The list for which the average value will be computed
      * @return The average value of the elements of the list
      */
-    public static double average(List<Integer> list) {
-        return list.stream().mapToInt(Integer::intValue).average().getAsDouble();
+    public static double average(List<BinPair<String, Integer>> list) {
+        return sum(list) / list.size();
     }
 
     /**
@@ -51,7 +53,7 @@ public class Statistics {
      * @param list The list for which the variance of its elements will be computed
      * @return The variance of the elements of the list
      */
-    public static double variance(List<Integer> list) {
+    public static double variance(List<BinPair<String, Integer>> list) {
         
         double sumMinusAverage = sum(list) - average(list);
         double variance;

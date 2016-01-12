@@ -18,7 +18,10 @@ package edmodule.peakfinding;
 
 import edmodule.data.Dataset;
 import edmodule.data.PeakFindingCorpus;
+import edu.stanford.nlp.util.Pair;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import utilities.Config;
@@ -27,35 +30,57 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.07_1819_planet3
+ * @version 2016.01.12_1440_gargantua
  */
 public class BinsCreator {
     
     /**
      * Method to create and return the bins needed for OfflinePeakFinding algorithm to operate.
-     * More formally, it creates an ArrayList of integers, containing the count of tweets in a pre-specified
-     * time interval (windows).
-     * @param window An integer indicating the time interval in which the tweets should be counted.
-     * All values in minutes. <br/>
+     * More formally, it creates an List of BinPair objects, containing the count
+     * of tweets in pre-specified time intervals (windows).
+     * @param window An integer indicating the time interval in which the tweets
+     * should be counted.All values in minutes. <br/>
      * E.g. For 1 minute interval --> 1. <br/>
      * For half an hour interval --> 30. <br/>
      * For 5 hours interval --> 300.
-     * @return An ArrayList containing the bins.
+     * @return An List of BinPair objects containing the bins.
+     * @see StringDateUtils StringDateUtils class.
+     * @see BinPair BinPair class.
      */
-    public static List<Integer> createBins(Config config, int window) {
+    public static List<BinPair<String, Integer>> createBins(Config config, int window) {
         long startTime = System.currentTimeMillis();
         
         Dataset ds = new Dataset(config);
         PeakFindingCorpus corpus = new PeakFindingCorpus(config, ds.getTweetList(), ds.getSWH());
         HashMap<String, Integer> binsHash = corpus.createCorpus(window);
-        List<Integer> bins = new ArrayList<>();
-        binsHash.keySet().stream().forEach((bin) -> {
-            bins.add(binsHash.get(bin));
-        });
+        
+        List<BinPair<String, Integer>> bins = new ArrayList<>();
+        Calendar cal = Calendar.getInstance();
+        
+        //Get earliest and latest dates of corpus
+        String earliestKey = StringDateUtils.getDateKey(cal, corpus.getEarliestDateOfCorpus(), window);
+        String latestKey = StringDateUtils.getDateKey(cal, corpus.getLatestDateOfCorpus(), window);
+        int value;
+        
+        StringDateUtils.clearAndSetYearToMinute(cal, latestKey);
+        long endMillis = cal.getTimeInMillis();
+        StringDateUtils.clearAndSetYearToMinute(cal, earliestKey);
+        
+        //Iterate between the two dates and store all the corresponding 10-minute windows
+        for (; cal.getTimeInMillis() <= endMillis; cal.add(Calendar.MINUTE, 10)) {
+            
+            String currentKey = StringDateUtils.getDateKey(cal, cal.getTime(), window);
+            if(binsHash.containsKey(currentKey)) {
+                value = binsHash.get(currentKey);
+            } else {
+                value = 0;
+            }
+            BinPair pair = new BinPair(currentKey, value);
+            bins.add(pair);
+        }
         
         long endTime = System.currentTimeMillis();
         Utilities.printExecutionTime(startTime, endTime, BinsCreator.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
-        corpus.generateBinsWithKeysReference(binsHash, bins); //Generate reference for future use
         return bins;
     }
 }
