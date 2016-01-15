@@ -18,6 +18,7 @@ package edmodule;
 
 import edmodule.data.Dataset;
 import edmodule.data.EDCoWCorpus;
+import edmodule.data.PeakFindingCorpus;
 import edmodule.edcow.EDCoW;
 import edmodule.lsh.LSH;
 import edmodule.peakfinding.BinPair;
@@ -31,7 +32,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.12_1441_gargantua
+ * @version 2016.01.15_0249_gargantua
  */
 public class EDMethodPicker {
     
@@ -70,12 +71,14 @@ public class EDMethodPicker {
                 break;
             } case 3: {
                 int window = 10;
-                List<BinPair<String, Integer>> bins = BinsCreator.createBins(config, window);
-                OfflinePeakFinding opf = new OfflinePeakFinding(bins, 0.32, 2, 5, window);
+                Dataset ds = new Dataset(config);
+                PeakFindingCorpus corpus = new PeakFindingCorpus(config, ds.getTweetList(), ds.getSWH());
+                List<BinPair<String, Integer>> bins = BinsCreator.createBins(corpus, config, window);
+                OfflinePeakFinding opf = new OfflinePeakFinding(bins, 0.7, 2, 5, window, corpus);
                 Utilities.printInfoMessage("Selected method: " + opf.getName());
                 Utilities.printInfoMessage("Now applying algorithm...");
                 opf.apply();
-                opf.printEvents();
+                opf.printEventsStatistics();
                 break;
             } default: {
                 System.out.println("No method selected. Exiting now...");

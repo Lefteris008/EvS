@@ -23,13 +23,13 @@ import dsretriever.MongoHandler;
 import dsretriever.Utils;
 import com.mongodb.MongoException;
 import edmodule.EDMethodPicker;
+import edmodule.data.Dataset;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import preprocessingmodule.nlp.Tokenizer;
 import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.nlp.stopwords.StopWords;
@@ -108,16 +108,6 @@ public class PreProcessor {
                 break;
             } case 3: {
                 System.out.println("Not supported yet");
-                break;
-            } case 4: {
-                System.out.println("Test case\n");
-                MongoHandler mongoDB = new MongoHandler(config);
-                mongoDB.connectToMongoDB(config);
-                ArrayList<ArrayList<String>> tweets = new ArrayList<>(Utils.getTweetDataFromFile(config));
-                tweets.stream().forEach((tweet) -> {
-                    mongoDB.insertTweetIntoMongo(tweet, config);
-                });
-                mongoDB.closeMongoConnection(config);
                 break;
             } default : {
                 System.out.println("Wrong choice. Exiting now...");

@@ -128,4 +128,21 @@ public class StringDateUtils {
             StringDateUtils.getHourOfDay(dateKey),
             StringDateUtils.getMinuteOfHour(dateKey));
     }
+    
+    public final static boolean matchDate(Date date) {
+        Calendar cal = Calendar.getInstance();
+        int year;
+        int month;
+        int day;
+        cal.setTime(date);
+        year = cal.get(Calendar.YEAR); //Current year
+        month = cal.get(Calendar.MONTH) + 1; //Zero-index based
+        day = cal.get(Calendar.DAY_OF_MONTH); //Get the current day of month
+        return (year == 2012) && 
+                (month == 11) && 
+                (
+                    (day == 6) || 
+                    (day == 5)
+                );
+    }
 }

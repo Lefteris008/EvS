@@ -18,8 +18,6 @@ package edmodule.peakfinding;
 
 import edmodule.data.Dataset;
 import edmodule.data.PeakFindingCorpus;
-import edu.stanford.nlp.util.Pair;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -30,7 +28,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.12_1440_gargantua
+ * @version 2016.01.15_0250_gargantua
  */
 public class BinsCreator {
     
@@ -38,6 +36,7 @@ public class BinsCreator {
      * Method to create and return the bins needed for OfflinePeakFinding algorithm to operate.
      * More formally, it creates an List of BinPair objects, containing the count
      * of tweets in pre-specified time intervals (windows).
+     * @param config A Configuration object.
      * @param window An integer indicating the time interval in which the tweets
      * should be counted.All values in minutes. <br/>
      * E.g. For 1 minute interval --> 1. <br/>
@@ -47,11 +46,9 @@ public class BinsCreator {
      * @see StringDateUtils StringDateUtils class.
      * @see BinPair BinPair class.
      */
-    public static List<BinPair<String, Integer>> createBins(Config config, int window) {
+    public final static List<BinPair<String, Integer>> createBins(PeakFindingCorpus corpus, Config config, int window) {
         long startTime = System.currentTimeMillis();
         
-        Dataset ds = new Dataset(config);
-        PeakFindingCorpus corpus = new PeakFindingCorpus(config, ds.getTweetList(), ds.getSWH());
         HashMap<String, Integer> binsHash = corpus.createCorpus(window);
         
         List<BinPair<String, Integer>> bins = new ArrayList<>();

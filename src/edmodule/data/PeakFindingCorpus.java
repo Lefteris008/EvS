@@ -29,7 +29,7 @@ import utilities.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.12_1449_gargantua  
+ * @version 2016.01.15_0250_gargantua  
  */
 public class PeakFindingCorpus {
     
@@ -72,9 +72,11 @@ public class PeakFindingCorpus {
         latestDate = tweets.get(0).getDate();
         Calendar cal = Calendar.getInstance();
         
-        tweets.stream().forEach((tweet) -> {
+        for(Tweet tweet : tweets) {
             Date tweetDate = tweet.getDate();
-            
+            if(!StringDateUtils.matchDate(tweetDate)) {
+                continue;
+            }
             //Check and update earliest/latest dates
             if(tweetDate.before(earliestDate)) {
                 earliestDate = tweetDate;
@@ -97,8 +99,8 @@ public class PeakFindingCorpus {
                 tweetsInWindow.add(tweet.getText());
                 tweetsByWindow.put(key, tweetsInWindow);
             }
-        });
-        return messageDistribution;
+        }
+        return messageDistribution;    
     }
     
     /**

@@ -17,6 +17,7 @@
 package edmodule.peakfinding;
 
 import edmodule.EDMethod;
+import edmodule.data.PeakFindingCorpus;
 import java.util.ArrayList;
 import java.util.List;
 import utilities.Utilities;
@@ -24,7 +25,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.12_1436_gargantua
+ * @version 2016.01.15_0249_gargantua
  * 
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing Microblogs for Event Exploration", CHI 2011.
  */
@@ -35,7 +36,11 @@ public class OfflinePeakFinding implements EDMethod {
     private final int pi;
     private final List<BinPair<String, Integer>> bins;
     private final int refreshWindow;
-    List<Window<Integer, Integer>> windows = new ArrayList<>();
+    private final List<Window<Integer, Integer>> windows = new ArrayList<>();
+    private final List<Window<Integer, Integer>> actualEventWindows = new ArrayList<>();
+    private final PeakFindingCorpus corpus;
+    private int totalEvents;
+    private final List<Integer> tweetCountsInWindows = new ArrayList<>();
     
     /**
      * Public constructor.
@@ -45,12 +50,13 @@ public class OfflinePeakFinding implements EDMethod {
      * @param p Primary parameter indicates the first bins to be considered in calculating initial mean deviance.
      * @param refreshWindow An integer representing the refresh window of every bin.
      */
-    public OfflinePeakFinding(List<BinPair<String, Integer>> bins, double a, int t, int p, int refreshWindow) {
+    public OfflinePeakFinding(List<BinPair<String, Integer>> bins, double a, int t, int p, int refreshWindow, PeakFindingCorpus corpus) {
         alpha = a;
         taph = t;
         pi = p;
         this.bins = bins;
         this.refreshWindow = refreshWindow;
+        this.corpus = corpus;
     }
     
     @Override
@@ -116,12 +122,11 @@ public class OfflinePeakFinding implements EDMethod {
                 meanDev = updateMeanDev(mean, meanDev, bins.get(i).getValue(), alpha); //Update mean deviance
             }
         }
-        
+        generateActualWindows();
+        printEventsStatistics();
         long endTime = System.currentTimeMillis();
         Utilities.printExecutionTime(startTime, endTime, OfflinePeakFinding.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
-    
-    public List<Window<Integer, Integer>> getTopicWindows() { return windows; }
     
     /**
      * Method to update the mean value.
@@ -148,25 +153,52 @@ public class OfflinePeakFinding implements EDMethod {
     }
     
     /**
-     * Secondary method to display tweet counts in all non-zero events,
-     * after applying the main algorithm.
-     * @see apply() Main method.
+     * Method to generate a list with the windows that contains tweets and thus
+     * can be considered as 'actual' events.
      */
-    public final void printEvents() {
-        int totalEvents = windows.size(); //Initially, all windows are potential events
-        int tweetCount;
+    public final void generateActualWindows() {
+        totalEvents = windows.size();
+        int tweetCount = 0;
         for(Window<Integer, Integer> window : windows) {
             tweetCount = 0;
             for(int i = window.getStart(); i < window.getEnd(); i++) {
                 tweetCount += bins.get(i).getValue(); //Count the tweets in window
             }
             if(tweetCount != 0) {
-                Utilities.printInfoMessage("Event starts from bin '" + window.getStart() + "' and ends at bin '" + window.getEnd() + "'.");
-                Utilities.printInfoMessage("Event contains " + tweetCount + " tweets.");
+                tweetCountsInWindows.add(tweetCount);
+                actualEventWindows.add(window);
             } else {
                 totalEvents--; //Reduce the number of events, if it contains 0 tweets
             }
         }
-        Utilities.printInfoMessage("For a " + refreshWindow + "-minute window, got " + totalEvents + " events.");
     }
+    
+    /**
+     * Secondary method to display tweet counts in all non-zero events,
+     * after applying the main algorithm.
+     * @see apply() Main method.
+     */
+    public final void printEventsStatistics() {
+        PeakFindingEvents pfe = new PeakFindingEvents(corpus.getTweetsByWindow(), bins, actualEventWindows);
+        Utilities.printInfoMessage("For a " + refreshWindow + "-minute window, got " + totalEvents + " events.");
+        int i = 0;
+        for(Window<Integer, Integer> window : actualEventWindows) {
+            Utilities.printInfoMessage("Event starts from bin '" + window.getStart() + "' and ends at bin '" + window.getEnd() + "'.");
+            Utilities.printInfoMessage("Event contains " + tweetCountsInWindows.get(i) + " tweets.");
+            pfe.printEvent(i);
+            i++; //Go to the next index
+        }
+    }
+    
+    /**
+     * Method to return windows that have calculated by main algorithm.
+     * @return A List containing the windows.
+     */
+    public final List<Window<Integer, Integer>> getWindows() { return windows; }
+    
+    /**
+     * Method to return bins that have been previously calculated in BinsCreator class.
+     * @return A List containing BinPair objects.
+     */
+    public final List<BinPair<String, Integer>> getBins() { return bins; }
 }
