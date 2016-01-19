@@ -16,31 +16,45 @@
  */
 package edmodule.peakfinding;
 
+import dsretriever.Tweet;
+import edmodule.data.PeakFindingCorpus;
+import edmodule.utils.Stemmers;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
+import preprocessingmodule.language.LangUtils;
+import preprocessingmodule.nlp.Tokenizer;
+import preprocessingmodule.nlp.stemming.StemUtils;
+import utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.15_0249_planet3
+ * @version 2016.01.19_2130_gargantua
  */
 public class PeakFindingEvent {
     
     private final int id;
     private final Window<Integer, Integer> window;
-    private final List<String> tweets;
+    private final List<Tweet> tweets;
+    private final List<String> commonTerms = new ArrayList<>();
+    private final PeakFindingCorpus corpus;
     
     /**
      * Public constructor. It creates an event.
-     * @param name A String with the name of the event.
+     * @param id A String with the id of the event.
      * @param window A Window object with the window of the event.
      * @param tweets A List of String containing the corresponding tweets of the
      * event.
+     * @param corpus A PeakFindingCorpus object.
      */
-    public PeakFindingEvent(int id, Window<Integer, Integer> window, List<String> tweets) {
+    public PeakFindingEvent(int id, Window<Integer, Integer> window, List<Tweet> tweets, PeakFindingCorpus corpus) {
         this.id = id;
         this.window = window;
         this.tweets = new ArrayList<>(tweets);
+        this.corpus = corpus;
+        generateCommonTerms();
     }
     
     /**
@@ -59,5 +73,102 @@ public class PeakFindingEvent {
      * Get the tweets of the event.
      * @return A List of String with the event's tweets.
      */
-    public final List<String> getTweets() { return tweets; }
+    public final List<Tweet> getTweets() { return tweets; }
+    
+    /**
+     * Generates a List with the most common terms of the tweets that belong
+     * to the specific event. <br/>
+     * More formally, it parses every single tweet of the event, tokenizes it
+     * and stores the terms in a HashMap with their respective occurencies as
+     * values.
+     */
+    private void generateCommonTerms() {
+        HashMap<String, Integer> unsortedTokens = new HashMap<>();
+        tweets.stream().forEach((tweet) -> {
+            String text = tweet.getText();
+            Tokenizer tokens = new Tokenizer(corpus.getConfigHandler(), text, 
+                    corpus.getStopWordsHandlers().getSWHandlerAccordingToLanguage
+                            (LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())));
+            StemUtils.getStemsAsList(tokens.getCleanTokensAndHashtags(),
+                    Stemmers.getStemmerAccordingToLanguage(
+                            LangUtils.getLanguageISOCodeFromString(tweet.getLanguage()))).stream().forEach((token) -> {
+                                if(unsortedTokens.containsKey(token)) {
+                                    unsortedTokens.put(token, unsortedTokens.get(token) + 1); //Count it
+                                } else {
+                                    unsortedTokens.put(token, 1);
+                                }
+            });
+        });
+        sortMapByValue(unsortedTokens);
+    }
+    
+    /**
+     * Returns the five most common terms of the tweets that belong to this event.
+     * @return A List of Strings with the most common terms.
+     * @see generateCommonTerms generateCommonTerms() method.
+     */
+    public final List<String> getCommonTerms() {
+        if(!commonTerms.isEmpty()) {
+            return commonTerms;
+        } else {
+            Utilities.printInfoMessageln("No common terms have been calculated yet!");
+            Utilities.printInfoMessageln("Run " + PeakFindingEvent.class + "." + "generateCommonTerms() method first.");
+            return null;
+        }
+    }
+    
+    /**
+     * Returns the five most common terms as a single String.
+     * @return A String containing the five most common terms.
+     * @see getCommonTerms() getCommonTerms() method.
+     */
+    public final String getCommonTermsAsString() {
+        if(commonTerms.isEmpty()) {
+            Utilities.printInfoMessageln("No common terms have been calculated yet!");
+            Utilities.printInfoMessageln("Run " + PeakFindingEvent.class + "." + "generateCommonTerms() method first.");
+            return null;
+        }
+        String commonTermsString = "";
+        for(String term : commonTerms) {
+            commonTermsString = commonTermsString + term + " ";
+        }
+        return commonTermsString;
+    }
+    
+    /**
+     * Auxiliary method to sort a Map by value.
+     * @param unsortedMap The Map to be sorted.
+     * @return A sorted List of the String keys.
+     */
+    public final void sortMapByValue(HashMap<String, Integer> unsortedMap) {
+        //Initialize variables
+        Entry<String,Integer> entry;
+        String currentKey;
+        int currentValue;
+        
+        //Get the 5 greatest tokens by value
+        //If the HashMap has less than 5 elements, just sort them
+        int size = (unsortedMap.keySet().size() < 5 ? unsortedMap.size() : 5);
+        for(int i = 0; i < size; i++) {
+            entry = unsortedMap.entrySet().iterator().next();
+            currentKey = entry.getKey();
+            currentValue = entry.getValue();
+            for(String key : unsortedMap.keySet()) {
+                if(unsortedMap.get(key) > currentValue) {
+                    currentValue = unsortedMap.get(key);
+                    currentKey = key;
+                }
+            }
+            commonTerms.add(currentKey);
+            unsortedMap.remove(currentKey);
+        }
+    }
+    
+    /**
+     * Prints a specific event along with its tweets.
+     */
+    public final void printEvent() {
+        Utilities.printInfoMessageln("Event '" + getID() + "' contains the following common terms:");
+        Utilities.printInfoMessageln(getCommonTermsAsString());
+    }
 }

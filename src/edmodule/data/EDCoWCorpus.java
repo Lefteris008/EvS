@@ -30,14 +30,14 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.nlp.Tokenizer;
-import preprocessingmodule.nlp.stemming.Stemmer;
+import preprocessingmodule.nlp.stemming.StemUtils;
 import utilities.Config;
 import utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.12_1440_gargantua
+ * @version 2016.01.19_2117_gargantua
  */
 public class EDCoWCorpus {
     
@@ -94,7 +94,7 @@ public class EDCoWCorpus {
                     swH.getSWHandlerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())));
 
             //Iterate through the stemmed clean tokens/hashtags
-            for(String token : getStemsAsList(tokens.getCleanTokensAndHashtags(),
+            for(String token : StemUtils.getStemsAsList(tokens.getCleanTokensAndHashtags(),
                     Stemmers.getStemmerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())))) {
                 
                 //Update the HashMap with the triplet Document, Token, Frequency
@@ -169,28 +169,14 @@ public class EDCoWCorpus {
     }
     
     /**
-     * Transforms a list of tokens into their stems.
-     * @param tokens A String list with the tokens to be transformed.
-     * @param stemmer An EnglishStemming handle.
-     * @return A String list with the stems of the original terms.
-     */
-    public final static List<String> getStemsAsList(List<String> tokens, Stemmer stemmer) {
-        List<String> stemmedTokens = new ArrayList<>();
-        tokens.stream().forEach((token) -> {
-            stemmedTokens.add(stemmer.stem(token));
-        });
-        return stemmedTokens;
-    }
-    
-    /**
      * Returns the terms of the dataset.
      * @return A String list containing the unique terms of the dataset.
      */
     public List<String> getTerms() { 
         Set<String> termsSet = new HashSet<>();
-        for(String docKey : termsDocsWithOccurencies.keySet()) {
+        termsDocsWithOccurencies.keySet().stream().forEach((docKey) -> {
             termsSet.addAll(termsDocsWithOccurencies.get(docKey).keySet());
-        }
+        });
         terms = new ArrayList<>(termsSet); //Store them
         return terms; 
     }

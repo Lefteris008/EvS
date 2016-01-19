@@ -33,11 +33,12 @@ import preprocessingmodule.language.LanguageCodes;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.16_2101_planet3
+ * @version 2016.01.19_2114_gargantua
  */
 public final class StopWords {
     
     private final HashSet<String> stopwords = new HashSet<>();
+    private final HashSet<String> nonPrintableCharacters = new HashSet<>();
     private final Config config;
     
     /**
@@ -72,6 +73,18 @@ public final class StopWords {
                         Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
                     }
                 }
+                if (Files.isRegularFile(filePath) && 
+                        filePath.toString().contains(config.getSpecialCharFile())) {
+                    try (BufferedReader br = new BufferedReader(new FileReader(filePath.toString()))) {
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                           nonPrintableCharacters.add(line); 
+                        }
+                    } catch(IOException e) {
+                        System.out.println("No filed found in '" + config.getResourcesPath() + config.getStopwordsPath() + "\\'Place the appropriate files in classpath and re-run the project");
+                        Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
+                    }
+                }
             });       
             return true;
         } catch (IOException ex) {
@@ -88,6 +101,15 @@ public final class StopWords {
      */
     public final boolean isStopWord(String word) {
         return stopwords.contains(word.toLowerCase());
+    }
+    
+    /**
+     * Returns true if the 'nonPrintableCharacters' HashSet contains 'word'.
+     * @param word A String to be searched.
+     * @return True if 'nonPrintableCharacters' contains 'word', false otherwise.
+     */
+    public final boolean isNonPrintableCharacter(String word) {
+        return nonPrintableCharacters.contains(word.toLowerCase());
     }
     
 }

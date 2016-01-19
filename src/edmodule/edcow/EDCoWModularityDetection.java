@@ -88,7 +88,7 @@ public class EDCoWModularityDetection {
             }
         }
         nodeList = structure.getNodesOrderedByNames();
-        Utilities.printInfoMessage("Structure between slices "+startSlice+" and "+endSlice+": "+structure.getSize()+" nodes and " + structure.getNumEdges()+" edges");
+        Utilities.printInfoMessageln("Structure between slices "+startSlice+" and "+endSlice+": "+structure.getSize()+" nodes and " + structure.getNumEdges()+" edges");
 
         if(structure.getNumEdges()>0){
             // instantiate JmodNetwork

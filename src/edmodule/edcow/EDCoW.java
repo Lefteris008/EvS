@@ -93,7 +93,7 @@ public class EDCoW implements EDMethod {
         termDocMap = new HashMap<>();
         eventList = new LinkedList<>();
         
-        Utilities.printInfoMessage("Now calculating term frequencies...");
+        Utilities.printInfoMessageln("Now calculating term frequencies...");
         List<String> terms = corpus.getTerms();
         for(int i = 0; i < terms.size(); i++){
             String term = terms.get(i);
@@ -108,9 +108,9 @@ public class EDCoW implements EDMethod {
                 }
             }
         }
-        Utilities.printInfoMessage("Now calculating windows...");
+        Utilities.printInfoMessageln("Now calculating windows...");
         for(int i = 0; i < windows; i++) {
-            Utilities.printInfoMessage("Calculating window " + (i + 1) + "\n");
+            Utilities.printInfoMessageln("Calculating window " + (i + 1) + "\n");
             processWindow(i);
         }
         Collections.sort(eventList);

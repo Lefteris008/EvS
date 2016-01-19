@@ -61,7 +61,7 @@ public class EDCoWCrossCorrelationZeroTime {
             }
         }
         else {
-            Utilities.printInfoMessage("The length of sign1 and sign2 is not the same.");
+            Utilities.printInfoMessageln("The length of sign1 and sign2 is not the same.");
         }
         return (sum<0.00001)?0:sum;
     }

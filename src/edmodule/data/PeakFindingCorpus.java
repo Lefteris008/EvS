@@ -29,7 +29,7 @@ import utilities.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.15_0250_gargantua  
+ * @version 2016.01.19_2133_gargantua  
  */
 public class PeakFindingCorpus {
     
@@ -37,10 +37,16 @@ public class PeakFindingCorpus {
     private final List<Tweet> tweets;
     private final Config config;
     private final HashMap<String, Integer> messageDistribution = new HashMap<>();
-    private final HashMap<String, ArrayList<String>> tweetsByWindow = new HashMap<>();
+    private final HashMap<String, ArrayList<Tweet>> tweetsByWindow = new HashMap<>();
     private Date earliestDate;
     private Date latestDate;
     
+    /**
+     * Public constructor.
+     * @param config A Config object.
+     * @param tweets A List containing all relevant tweets for the analysis.
+     * @param swH A StopWordsHandlers object.
+     */
     public PeakFindingCorpus(Config config, List<Tweet> tweets, StopWordsHandlers swH) {
         this.config = config;
         this.swH = swH;
@@ -72,34 +78,33 @@ public class PeakFindingCorpus {
         latestDate = tweets.get(0).getDate();
         Calendar cal = Calendar.getInstance();
         
-        for(Tweet tweet : tweets) {
+        tweets.stream().forEach((tweet) -> {
             Date tweetDate = tweet.getDate();
-            if(!StringDateUtils.matchDate(tweetDate)) {
-                continue;
+            if (!(!StringDateUtils.matchDate(tweetDate))) {
+                //Check and update earliest/latest dates
+                if(tweetDate.before(earliestDate)) {
+                    earliestDate = tweetDate;
+                }
+                if(tweetDate.after(latestDate)) {
+                    latestDate = tweetDate;
+                }
+                
+                //Assemble the date key
+                String key = StringDateUtils.getDateKey(cal, tweetDate, window);
+                
+                if(messageDistribution.containsKey(key)) {
+                    messageDistribution.put(key, messageDistribution.get(key) + 1);
+                    ArrayList<Tweet> tweetsInWindow = new ArrayList<>(tweetsByWindow.get(key));
+                    tweetsInWindow.add(tweet);
+                    tweetsByWindow.put(key, tweetsInWindow);
+                } else {
+                    messageDistribution.put(key, 1);
+                    ArrayList<Tweet> tweetsInWindow = new ArrayList<>();
+                    tweetsInWindow.add(tweet);
+                    tweetsByWindow.put(key, tweetsInWindow);
+                }
             }
-            //Check and update earliest/latest dates
-            if(tweetDate.before(earliestDate)) {
-                earliestDate = tweetDate;
-            }
-            if(tweetDate.after(latestDate)) {
-                latestDate = tweetDate;
-            }
-            
-            //Assemble the date key
-            String key = StringDateUtils.getDateKey(cal, tweetDate, window);
-
-            if(messageDistribution.containsKey(key)) {
-                messageDistribution.put(key, messageDistribution.get(key) + 1);
-                ArrayList<String> tweetsInWindow = new ArrayList<>(tweetsByWindow.get(key));
-                tweetsInWindow.add(tweet.getText());
-                tweetsByWindow.put(key, tweetsInWindow);
-            } else {
-                messageDistribution.put(key, 1);
-                ArrayList<String> tweetsInWindow = new ArrayList<>();
-                tweetsInWindow.add(tweet.getText());
-                tweetsByWindow.put(key, tweetsInWindow);
-            }
-        }
+        });
         return messageDistribution;    
     }
     
@@ -121,5 +126,17 @@ public class PeakFindingCorpus {
      * @return A HashMap which key is the refresh window and its value is the 
      * tweet count in this window.
      */
-    public final HashMap<String, ArrayList<String>> getTweetsByWindow() { return tweetsByWindow; }
+    public final HashMap<String, ArrayList<Tweet>> getTweetsByWindow() { return tweetsByWindow; }
+    
+    /**
+     * Return the configuration object, already stored in the Constructor.
+     * @return A Configuration object.
+     */
+    public final Config getConfigHandler() { return config; }
+    
+    /**
+     * Return the StopWordsHandlers object, already stored in the Constructor.
+     * @return A StopWordsHandlers object.
+     */
+    public final StopWordsHandlers getStopWordsHandlers() { return swH; }
 }

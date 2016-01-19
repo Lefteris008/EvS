@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.16_2101_planet3
+ * @version 2016.01.19_2127_gargantua
  */
 public class Config {
     private static String consumerKey;
@@ -39,12 +39,14 @@ public class Config {
     private static int serverPort;
     private static String dbName;
     private static String rawTweetsCollectionName;
+    private static String peakFindingEventsFileName;
     private static int maximumTweetsRetrieved;
     private static String datasetLocation;
     private static String stopwordsLocation;
     private static String tweetDataFile;
     private static String resourcesPath;
     private static String punctuationFile;
+    private static String specialCharFile;
     private static Pattern punctuationPattern;
     private static Pattern urlPattern;
     
@@ -73,16 +75,18 @@ public class Config {
             serverPort = Integer.parseInt(prop.getProperty("ServerPort"));
             dbName = prop.getProperty("DBName");
             rawTweetsCollectionName = prop.getProperty("RawTweetsCollection");
+            peakFindingEventsFileName = prop.getProperty("PeakFindingEventsFile");
             maximumTweetsRetrieved = Integer.parseInt(prop.getProperty("MaximumTweetsRetrieved"));
             datasetLocation = prop.getProperty("DatasetLocation");
             stopwordsLocation = prop.getProperty("StopwordsLocation");
             tweetDataFile = prop.getProperty("TweetDataFile");
             resourcesPath = prop.getProperty("ResourcesPath");
             punctuationFile = prop.getProperty("PunctuationFile");
+            specialCharFile = prop.getProperty("SpecialCharFile");
             
             inputStream.close();
             
-            punctuationPattern = Pattern.compile("[^\\dA-Za-z ]");
+            punctuationPattern = Pattern.compile("[`~!@#$%^&*()_+-=:\"<>?;\',./{}|]");
             urlPattern = Pattern.compile("[hH][tT]{2}[Pp][sS]?://(\\w+(\\.\\w+?)?)+");
             
         } catch (IOException | NumberFormatException e) {
@@ -148,6 +152,12 @@ public class Config {
     public String getRawTweetsCollectionName() { return rawTweetsCollectionName; }
     
     /**
+     * Returns the name of the Peak Finding Events file.
+     * @return A String containing the name of the file.
+     */
+    public String getPeakFindingEventsFileName() { return peakFindingEventsFileName; }
+    
+    /**
      * Returns the number of the tweets that the streamer is going to retrieve before it will be shut down.
      * @return An integer containing the number of the tweets that are going to be retrieved
      */
@@ -182,6 +192,12 @@ public class Config {
      * @return A String containing the punctuation file name.
      */
     public String getPunctuationFile() { return punctuationFile; }
+    
+    /**
+     * Returns the special characters file name.
+     * @return A String containing the special characters file name.
+     */
+    public String getSpecialCharFile() { return specialCharFile; }
     
     /**
      * Returns a pre-compiled pattern for punctuation removal.

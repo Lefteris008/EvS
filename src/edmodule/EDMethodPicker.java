@@ -24,6 +24,7 @@ import edmodule.lsh.LSH;
 import edmodule.peakfinding.BinPair;
 import edmodule.peakfinding.BinsCreator;
 import edmodule.peakfinding.OfflinePeakFinding;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Scanner;
 import utilities.Config;
@@ -32,7 +33,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.15_0249_gargantua
+ * @version 2016.01.16_2116_gargantua
  */
 public class EDMethodPicker {
     
@@ -40,7 +41,7 @@ public class EDMethodPicker {
      * Pick method of Event Detection.
      * @param config A configuration object
      */
-    public static void selectEDMethod(Config config) {
+    public static void selectEDMethod(Config config) throws FileNotFoundException {
         System.out.println("\nPick a method for Event Detection");
         System.out.println("1. EDCoW");
         System.out.println("2. LSH");
@@ -58,11 +59,11 @@ public class EDMethodPicker {
                 corpus.setDocTermFreqIdList();
                 
                 EDCoW edcow = new EDCoW(37, 700, corpus); //Create the EDCoW object
-                Utilities.printInfoMessage("Selected method: " + edcow.getName());
-                Utilities.printInfoMessage("Now applying algorithm...");
+                Utilities.printInfoMessageln("Selected method: " + edcow.getName());
+                Utilities.printInfoMessageln("Now applying algorithm...");
                 
                 edcow.apply(); //Apply the algorithm
-                Utilities.printInfoMessage("Succesfully applied EDCoW algorithm");
+                Utilities.printInfoMessageln("Succesfully applied EDCoW algorithm");
                 break;
             } case 2: {
                 System.out.println("Selected method: LSH");
@@ -75,10 +76,10 @@ public class EDMethodPicker {
                 PeakFindingCorpus corpus = new PeakFindingCorpus(config, ds.getTweetList(), ds.getSWH());
                 List<BinPair<String, Integer>> bins = BinsCreator.createBins(corpus, config, window);
                 OfflinePeakFinding opf = new OfflinePeakFinding(bins, 0.7, 2, 5, window, corpus);
-                Utilities.printInfoMessage("Selected method: " + opf.getName());
-                Utilities.printInfoMessage("Now applying algorithm...");
+                Utilities.printInfoMessageln("Selected method: " + opf.getName());
+                Utilities.printInfoMessageln("Now applying algorithm...");
                 opf.apply();
-                opf.printEventsStatistics();
+                //opf.printEventsStatistics();
                 break;
             } default: {
                 System.out.println("No method selected. Exiting now...");

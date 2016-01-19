@@ -16,8 +16,12 @@
  */
 package preprocessingmodule.nlp;
 
+import edu.stanford.nlp.ling.Word;
+import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.process.TokenizerFactory;
+import java.io.FileNotFoundException;
+import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import preprocessingmodule.nlp.stopwords.StopWords;
 import utilities.Config;
@@ -25,7 +29,7 @@ import utilities.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.16_2101_planet3
+ * @version 2016.01.19_2112_gargantua
  */
 public class Tokenizer {
     
@@ -35,6 +39,7 @@ public class Tokenizer {
     private final List<String> nameHandles = new ArrayList<>();
     private final List<String> urls = new ArrayList<>();
     private final List<String> stopWords = new ArrayList<>();
+    private final List<String> symbolsAndNonPrintableChars = new ArrayList<>();
     private final Config config;
     public int numberOfTokens;
     
@@ -45,48 +50,31 @@ public class Tokenizer {
      * @param sw A StopWords handle.
      */
     public Tokenizer(Config config, String text, StopWords sw) {
+        TokenizerFactory<Word> tf = PTBTokenizer.factory();
+        
+        List<Word> tokens = tf.getTokenizer(new StringReader(text)).tokenize(); 
         this.config = config;
-        String[] temp = text.split(" "); //Split them according to white spaces
-        numberOfTokens = temp.length;
-        for (String temp1_ : temp) {
-            String temp1 = temp1_.replaceAll(String.valueOf((char) 160), " ").trim();
-            if(isHashtag(temp1)) {
-                hashtags.add(temp1); //Remove '#' character and all other punctuation
-                cleanTokensAndHashtags.add(temp1);
-            } else if(isNameHandle(temp1)) {
-                nameHandles.add(temp1.replace("@", "")); //Remove '@' character
-            } else if(isURL(temp1)) {
-                urls.add(temp1);
-            } else if(sw.isStopWord(temp1)) {
-                stopWords.add(temp1);
+        numberOfTokens = tokens.size();
+        tokens.stream().map((word) -> word.toString()).forEach((token) -> {
+            
+            if(isHashtag(token)) {
+                hashtags.add(token);
+                cleanTokensAndHashtags.add(token.replace("#", "")); //Remove '#'
+            } else if(isNameHandle(token)) {
+                nameHandles.add(token.replace("@", "")); //Remove '@' character
+            } else if(isURL(token)) {
+                urls.add(token);
+            } else if(sw.isStopWord(token)) { //Common stopwords
+                stopWords.add(token);
+            } else if(isCommonSymbol(token)) { //Common symbolsAndNonPrintableChars not caught before
+                symbolsAndNonPrintableChars.add(token);
+            } else if (sw.isNonPrintableCharacter("\\u" + Integer.toHexString(token.toCharArray()[0]).substring(1))) { //Non printable characters
+                symbolsAndNonPrintableChars.add(token);
             } else {
-                //Remove punctuation that was bound to the token and then store it
-                String[] temp_ = removeMissingPunctuationAndSeparate(temp1);
-                cleanTokens.addAll(Arrays.asList(temp_));
-                cleanTokensAndHashtags.addAll(Arrays.asList(temp_));
-                numberOfTokens += temp_.length - 1; //Entire listing already add initially
+                cleanTokens.add(token);
+                cleanTokensAndHashtags.add(token);
             }
-        }
-    }
-    
-    /**
-     * Removes punctuation bound to an input word.
-     * @param word The input word.
-     * @return A String with punctuation omitted.
-     */
-    public final String removeMissingPunctuation(String word) {
-        return config.getPunctuationPattern().matcher(word).replaceAll("");
-    }
-    
-    /**
-     * Removes punctuation bound to an input word and separates using white space.
-     * @param word The input word.
-     * @return A String array with punctuation omitted. Since the input word is
-     * split in the spot where the original punctuation was located, an array of
-     * at least two elements is returned.
-     */
-    public final String[] removeMissingPunctuationAndSeparate(String word) {
-        return config.getPunctuationPattern().matcher(word).replaceAll(" ").split(" ");
+        });
     }
     
     /**
@@ -126,6 +114,12 @@ public class Tokenizer {
     public final List<String> getURLs() { return urls; }
     
     /**
+     * Returns the symbols and non printable characters that are detected in a tweet as separate tokens.
+     * @return A list containing only the symbols and non printable characters of a tweet.
+     */
+    public final List<String> getSymbols() { return symbolsAndNonPrintableChars; }
+    
+    /**
      * Returns true if the token is a hashtag. 
      * @param token A String containing the token to be checked.
      * @return True if the token is a hashtag, false otherwise.
@@ -150,6 +144,15 @@ public class Tokenizer {
      */
     public final boolean isURL(String token) {
         return config.getURLPattern().matcher(token).find();
+    }
+    
+    /**
+     * Returns true if the token is a punctuation symbol.
+     * @param token A String containing the token to be checked.
+     * @return True if the token is a symbol, false otherwise.
+     */
+    public final boolean isCommonSymbol(String token) {
+        return config.getPunctuationPattern().matcher(token).find();
     }
     
     /**

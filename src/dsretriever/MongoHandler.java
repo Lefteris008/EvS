@@ -51,7 +51,7 @@ public class MongoHandler {
         try {
         client = new MongoClient(config.getServerName(), config.getServerPort());
         } catch (MongoClientException e) {
-            Utilities.printInfoMessage("Error connecting to client");
+            Utilities.printInfoMessageln("Error connecting to client");
             client = null;
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -66,10 +66,10 @@ public class MongoHandler {
         
         try {
             db = client.getDatabase(config.getDBName());
-            Utilities.printInfoMessage("Succesfully connected to '" + db.getName() + "' database.");
+            Utilities.printInfoMessageln("Succesfully connected to '" + db.getName() + "' database.");
             return true;
         } catch (Exception e) {
-            Utilities.printInfoMessage("There was a problem connecting to MongoDB client.");
+            Utilities.printInfoMessageln("There was a problem connecting to MongoDB client.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -86,7 +86,7 @@ public class MongoHandler {
                     .createIndex(new Document("id", 1));
             return true;
         } catch(MongoException e) {
-            Utilities.printInfoMessage("Cannot create index for collection '" + config.getRawTweetsCollectionName() + "'");
+            Utilities.printInfoMessageln("Cannot create index for collection '" + config.getRawTweetsCollectionName() + "'");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -101,10 +101,10 @@ public class MongoHandler {
         
         try {
             client.close();
-            Utilities.printInfoMessage("Database '" + config.getDBName() + "' closed.");
+            Utilities.printInfoMessageln("Database '" + config.getDBName() + "' closed.");
             return true;
         } catch (Exception e) {
-            Utilities.printInfoMessage("There was a roblem while closing the database.");
+            Utilities.printInfoMessageln("There was a roblem while closing the database.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -176,7 +176,7 @@ public class MongoHandler {
             }
             return true;
         } catch(MongoException e) {
-            Utilities.printInfoMessage("There was a problem inserting the tweet.");
+            Utilities.printInfoMessageln("There was a problem inserting the tweet.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -211,7 +211,7 @@ public class MongoHandler {
             );
         return true;
         } catch(MongoException e) {
-            Utilities.printInfoMessage("There was a problem inserting the tweet.");
+            Utilities.printInfoMessageln("There was a problem inserting the tweet.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -284,7 +284,7 @@ public class MongoHandler {
             });
             return retrievedTweets;
         } catch(MongoException e) {
-            Utilities.printInfoMessage("Cannot find documents in MongoDB Store.");
+            Utilities.printInfoMessageln("Cannot find documents in MongoDB Store.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return null;
         } 
@@ -353,7 +353,7 @@ public class MongoHandler {
 
             return tweet;
         } catch(MongoException e) {
-            Utilities.printInfoMessage("Unknown Mongo problem with tweet '" + id + "'.");
+            Utilities.printInfoMessageln("Unknown Mongo problem with tweet '" + id + "'.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return null;
         } catch(NullPointerException e) { //Tweet does not exist
@@ -372,7 +372,7 @@ public class MongoHandler {
             db.getCollection(collectionName).drop();
             return true;
         } catch (MongoException e) {
-            Utilities.printInfoMessage("There was a problem deleting collection '" + collectionName + "'");
+            Utilities.printInfoMessageln("There was a problem deleting collection '" + collectionName + "'");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -387,7 +387,7 @@ public class MongoHandler {
             db.drop();
             return true;
         } catch (MongoException e) {
-            Utilities.printInfoMessage("There was a problem deleting database '" + db.getName() + "'");
+            Utilities.printInfoMessageln("There was a problem deleting database '" + db.getName() + "'");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }

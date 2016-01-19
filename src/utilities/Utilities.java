@@ -23,7 +23,7 @@ import java.util.Calendar;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.16_2100_planet3
+ * @version 2016.01.19_2117_gargantua
  */
 public class Utilities {
     
@@ -44,10 +44,11 @@ public class Utilities {
     }
     
     /**
-     * Supplies a message to the error stream, formatting it according to a standard.
+     * Supplies a message to the error stream, formatting it according to a 
+     * standard form, appending '\n' escape character at the end.
      * @param message The message to be printed.
      */
-    public final static void printInfoMessage(String message) {
+    public final static void printInfoMessageln(String message) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Calendar cal = Calendar.getInstance();
         System.err.println("INFO: " + 
@@ -55,4 +56,16 @@ public class Utilities {
                 message);
     }
     
+    /**
+     * Supplies a message to the error stream, formatting it according to a 
+     * standard form without creating a new line.
+     * @param message The message to be printed.
+     */
+    public final static void printInfoMessage(String message) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Calendar cal = Calendar.getInstance();
+        System.err.print("INFO: " + 
+                dateFormat.format(cal.getTime()) + " " + 
+                message);
+    }
 }
