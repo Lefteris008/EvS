@@ -410,6 +410,7 @@ regardless
 regards
 relatively
 respectively
+retweet
 right
 round
 rt

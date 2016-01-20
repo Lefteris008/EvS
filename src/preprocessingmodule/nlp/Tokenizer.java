@@ -19,7 +19,6 @@ package preprocessingmodule.nlp;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.TokenizerFactory;
-import java.io.FileNotFoundException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +28,7 @@ import utilities.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.19_2112_gargantua
+ * @version 2016.01.20_1829_gargantua
  */
 public class Tokenizer {
     

@@ -17,14 +17,17 @@
 package preprocessingmodule.nlp.stemming;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.16_2117_gargantua
+ * @version 2016.01.20_1828_gargantua
  */
 public class StemUtils {
+    
+    private final HashMap<String, String> stemsMap = new HashMap<>();
     
     /**
      * Transforms a list of tokens into their stems.
@@ -32,12 +35,31 @@ public class StemUtils {
      * @param stemmer An EnglishStemming handle.
      * @return A String list with the stems of the original terms.
      */
-    public final static List<String> getStemsAsList(List<String> tokens, Stemmer stemmer) {
+    public final List<String> getStemsAsList(List<String> tokens, Stemmer stemmer) {
         List<String> stemmedTokens = new ArrayList<>();
         tokens.stream().forEach((token) -> {
             stemmedTokens.add(stemmer.stem(token));
+            stemsMap.put(stemmer.stem(token), token);
         });
         return stemmedTokens;
     }
-
-}
+    
+    /**
+     * Returns the stems/original words map.
+     * @return A HashMap containing pairs of stems, original words.
+     */
+    public final HashMap<String, String> getStemsMap() { return stemsMap; }
+    
+    /**
+     * Auxiliary method to retrieve original words from its stem.
+     * @param stem The stem for which we want the original word.
+     * @return A String with the original word.
+     */
+    public final String getOriginalWord(String stem) {
+        if(stemsMap.containsKey(stem)) {
+            return stemsMap.get(stem);
+        } else {
+            return null;
+        }
+    }
+ }

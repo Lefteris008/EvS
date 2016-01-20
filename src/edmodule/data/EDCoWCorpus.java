@@ -37,7 +37,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.19_2117_gargantua
+ * @version 2016.01.20_1828_gargantua
  */
 public class EDCoWCorpus {
     
@@ -94,7 +94,8 @@ public class EDCoWCorpus {
                     swH.getSWHandlerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())));
 
             //Iterate through the stemmed clean tokens/hashtags
-            for(String token : StemUtils.getStemsAsList(tokens.getCleanTokensAndHashtags(),
+            StemUtils stemHandler = new StemUtils();
+            for(String token : stemHandler.getStemsAsList(tokens.getCleanTokensAndHashtags(),
                     Stemmers.getStemmerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())))) {
                 
                 //Update the HashMap with the triplet Document, Token, Frequency

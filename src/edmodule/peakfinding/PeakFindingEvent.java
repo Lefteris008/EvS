@@ -31,7 +31,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.19_2130_gargantua
+ * @version 2016.01.20_1828_gargantua
  */
 public class PeakFindingEvent {
     
@@ -84,12 +84,13 @@ public class PeakFindingEvent {
      */
     private void generateCommonTerms() {
         HashMap<String, Integer> unsortedTokens = new HashMap<>();
+        StemUtils stemHandler = new StemUtils();
         tweets.stream().forEach((tweet) -> {
             String text = tweet.getText();
             Tokenizer tokens = new Tokenizer(corpus.getConfigHandler(), text, 
                     corpus.getStopWordsHandlers().getSWHandlerAccordingToLanguage
                             (LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())));
-            StemUtils.getStemsAsList(tokens.getCleanTokensAndHashtags(),
+            stemHandler.getStemsAsList(tokens.getCleanTokensAndHashtags(),
                     Stemmers.getStemmerAccordingToLanguage(
                             LangUtils.getLanguageISOCodeFromString(tweet.getLanguage()))).stream().forEach((token) -> {
                                 if(unsortedTokens.containsKey(token)) {
@@ -99,7 +100,7 @@ public class PeakFindingEvent {
                                 }
             });
         });
-        sortMapByValue(unsortedTokens);
+        sortMapByValue(unsortedTokens, stemHandler);
     }
     
     /**
@@ -140,7 +141,7 @@ public class PeakFindingEvent {
      * @param unsortedMap The Map to be sorted.
      * @return A sorted List of the String keys.
      */
-    public final void sortMapByValue(HashMap<String, Integer> unsortedMap) {
+    public final void sortMapByValue(HashMap<String, Integer> unsortedMap, StemUtils stemHandler) {
         //Initialize variables
         Entry<String,Integer> entry;
         String currentKey;
@@ -159,7 +160,7 @@ public class PeakFindingEvent {
                     currentKey = key;
                 }
             }
-            commonTerms.add(currentKey);
+            commonTerms.add(stemHandler.getOriginalWord(currentKey));
             unsortedMap.remove(currentKey);
         }
     }

@@ -75,7 +75,7 @@ public class EDMethodPicker {
                 Dataset ds = new Dataset(config);
                 PeakFindingCorpus corpus = new PeakFindingCorpus(config, ds.getTweetList(), ds.getSWH());
                 List<BinPair<String, Integer>> bins = BinsCreator.createBins(corpus, config, window);
-                OfflinePeakFinding opf = new OfflinePeakFinding(bins, 0.7, 2, 5, window, corpus);
+                OfflinePeakFinding opf = new OfflinePeakFinding(bins, 0.8, 2, 5, window, corpus);
                 Utilities.printInfoMessageln("Selected method: " + opf.getName());
                 Utilities.printInfoMessageln("Now applying algorithm...");
                 opf.apply();

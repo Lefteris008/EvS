@@ -29,7 +29,7 @@ import utilities.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.19_2133_gargantua  
+ * @version 2016.01.20_1828_gargantua  
  */
 public class PeakFindingCorpus {
     
