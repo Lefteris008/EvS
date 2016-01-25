@@ -112,8 +112,8 @@ public class PeakFindingEvent {
         if(!commonTerms.isEmpty()) {
             return commonTerms;
         } else {
-            Utilities.printInfoMessageln("No common terms have been calculated yet!");
-            Utilities.printInfoMessageln("Run " + PeakFindingEvent.class + "." + "generateCommonTerms() method first.");
+            Utilities.printMessageln("No common terms have been calculated yet!");
+            Utilities.printMessageln("Run " + PeakFindingEvent.class + "." + "generateCommonTerms() method first.");
             return null;
         }
     }
@@ -125,8 +125,8 @@ public class PeakFindingEvent {
      */
     public final String getCommonTermsAsString() {
         if(commonTerms.isEmpty()) {
-            Utilities.printInfoMessageln("No common terms have been calculated yet!");
-            Utilities.printInfoMessageln("Run " + PeakFindingEvent.class + "." + "generateCommonTerms() method first.");
+            Utilities.printMessageln("No common terms have been calculated yet!");
+            Utilities.printMessageln("Run " + PeakFindingEvent.class + "." + "generateCommonTerms() method first.");
             return null;
         }
         String commonTermsString = "";
@@ -169,7 +169,7 @@ public class PeakFindingEvent {
      * Prints a specific event along with its tweets.
      */
     public final void printEvent() {
-        Utilities.printInfoMessageln("Event '" + getID() + "' contains the following common terms:");
-        Utilities.printInfoMessageln(getCommonTermsAsString());
+        Utilities.printMessageln("Event '" + getID() + "' contains the following common terms:");
+        Utilities.printMessageln(getCommonTermsAsString());
     }
 }

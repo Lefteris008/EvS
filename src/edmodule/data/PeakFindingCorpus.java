@@ -25,16 +25,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import utilities.Config;
+import utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.20_1828_gargantua  
+ * @version 2016.01.25_1656_gargantua  
  */
 public class PeakFindingCorpus {
     
     private final StopWordsHandlers swH;
-    private final List<Tweet> tweets;
+    private List<Tweet> tweets;
     private final Config config;
     private final HashMap<String, Integer> messageDistribution = new HashMap<>();
     private final HashMap<String, ArrayList<Tweet>> tweetsByWindow = new HashMap<>();
@@ -51,6 +52,32 @@ public class PeakFindingCorpus {
         this.config = config;
         this.swH = swH;
         this.tweets = tweets;
+        removeDublicateTweets();
+    }
+    
+    /**
+     * Method to quickly remove duplicate tweets.
+     * More formally, this method hashes the tweets by its text and stores
+     * the first one to show up. Tweets that have the exact same text, were
+     * ignored. Finally, the new list replaces the 'tweets' collection.
+     */
+    private void removeDublicateTweets() {
+        Utilities.printMessageln("Removing dublicates...");
+        long startTime = System.currentTimeMillis();
+        
+        HashMap<Integer, Tweet> uniqueTweetsMap = new HashMap<>();
+        tweets.stream().filter((tweet) -> (!uniqueTweetsMap.containsKey(
+                tweet.getText().hashCode()))).forEach((tweet) -> {
+            uniqueTweetsMap.put(tweet.getText().hashCode(), tweet);
+        });
+        List<Tweet> cleanedTweets = new ArrayList<>(uniqueTweetsMap.values());
+        
+        long endTime = System.currentTimeMillis();
+        Utilities.printExecutionTime(startTime, endTime, PeakFindingCorpus.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        Utilities.printMessageln("Original size of tweets: " + tweets.size());
+        Utilities.printMessageln("New size of tweets: " + cleanedTweets.size());
+        Utilities.printMessageln("Removed " + (tweets.size() - cleanedTweets.size()) + " duplicates.");
+        tweets = new ArrayList<>(cleanedTweets);
     }
     
     /**
@@ -80,29 +107,26 @@ public class PeakFindingCorpus {
         
         tweets.stream().forEach((tweet) -> {
             Date tweetDate = tweet.getDate();
-            if (!(!StringDateUtils.matchDate(tweetDate))) {
-                //Check and update earliest/latest dates
-                if(tweetDate.before(earliestDate)) {
-                    earliestDate = tweetDate;
-                }
-                if(tweetDate.after(latestDate)) {
-                    latestDate = tweetDate;
-                }
-                
-                //Assemble the date key
-                String key = StringDateUtils.getDateKey(cal, tweetDate, window);
-                
-                if(messageDistribution.containsKey(key)) {
-                    messageDistribution.put(key, messageDistribution.get(key) + 1);
-                    ArrayList<Tweet> tweetsInWindow = new ArrayList<>(tweetsByWindow.get(key));
-                    tweetsInWindow.add(tweet);
-                    tweetsByWindow.put(key, tweetsInWindow);
-                } else {
-                    messageDistribution.put(key, 1);
-                    ArrayList<Tweet> tweetsInWindow = new ArrayList<>();
-                    tweetsInWindow.add(tweet);
-                    tweetsByWindow.put(key, tweetsInWindow);
-                }
+            if(tweetDate.before(earliestDate)) {
+                earliestDate = tweetDate;
+            }
+            if(tweetDate.after(latestDate)) {
+                latestDate = tweetDate;
+            }
+
+            //Assemble the date key
+            String key = StringDateUtils.getDateKey(cal, tweetDate, window);
+
+            if(messageDistribution.containsKey(key)) {
+                messageDistribution.put(key, messageDistribution.get(key) + 1);
+                ArrayList<Tweet> tweetsInWindow = new ArrayList<>(tweetsByWindow.get(key));
+                tweetsInWindow.add(tweet);
+                tweetsByWindow.put(key, tweetsInWindow);
+            } else {
+                messageDistribution.put(key, 1);
+                ArrayList<Tweet> tweetsInWindow = new ArrayList<>();
+                tweetsInWindow.add(tweet);
+                tweetsByWindow.put(key, tweetsInWindow);
             }
         });
         return messageDistribution;    

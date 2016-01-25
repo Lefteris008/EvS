@@ -30,7 +30,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.19_2128_gargantua
+ * @version 2016.01.25_1658_gargantua
  * 
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing Microblogs for Event Exploration", CHI 2011.
  */
@@ -129,7 +129,8 @@ public class OfflinePeakFinding implements EDMethod {
             }
         }
         generateActualWindows(); //Generate non-zero windows
-        exportEventsToFile(); //Export events to file
+        printEventsStatistics(); //Print event statistics
+        //exportEventsToFile(); //Export events to file
         
         long endTime = System.currentTimeMillis();
         Utilities.printExecutionTime(startTime, endTime, OfflinePeakFinding.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
@@ -186,19 +187,19 @@ public class OfflinePeakFinding implements EDMethod {
      * @see apply() Main method.
      */
     public final void printEventsStatistics() {
-        try {
-            PeakFindingEvents pfe = new PeakFindingEvents(corpus.getTweetsByWindow(), bins, actualEventWindows, corpus);
-            Utilities.printInfoMessageln("For a " + refreshWindow + "-minute window, got " + totalEvents + " events.");
+        //try {
+            //PeakFindingEvents pfe = new PeakFindingEvents(corpus.getTweetsByWindow(), bins, actualEventWindows, corpus);
+            Utilities.printMessageln("For a " + refreshWindow + "-minute window, got " + totalEvents + " events.");
             int i = 0;
             for(Window<Integer, Integer> window : actualEventWindows) {
-                Utilities.printInfoMessageln("Event starts from bin '" + window.getStart() + "' and ends at bin '" + window.getEnd() + "'.");
-                Utilities.printInfoMessageln("Event contains " + tweetCountsInWindows.get(i) + " tweets.");
-                pfe.getEvents().get(i).printEvent();
+                Utilities.printMessageln("Event starts from bin '" + window.getStart() + "' and ends at bin '" + window.getEnd() + "'.");
+                Utilities.printMessageln("Event contains " + tweetCountsInWindows.get(i) + " tweets.");
+                //pfe.getEvents().get(i).printEvent();
                 i++; //Go to the next index
             }
-        } catch(FileNotFoundException e) {
-            Logger.getLogger(OfflinePeakFinding.class.getName()).log(Level.SEVERE, null, e);
-        }
+        //} catch(FileNotFoundException e) {
+            //Logger.getLogger(OfflinePeakFinding.class.getName()).log(Level.SEVERE, null, e);
+        //}
     }
     
     /**

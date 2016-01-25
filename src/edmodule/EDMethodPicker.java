@@ -33,7 +33,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.16_2116_gargantua
+ * @version 2016.01.25_1655_gargantua
  */
 public class EDMethodPicker {
     
@@ -58,26 +58,23 @@ public class EDMethodPicker {
                 corpus.createCorpus();
                 corpus.setDocTermFreqIdList();
                 
-                EDCoW edcow = new EDCoW(37, 700, corpus); //Create the EDCoW object
-                Utilities.printInfoMessageln("Selected method: " + edcow.getName());
-                Utilities.printInfoMessageln("Now applying algorithm...");
-                
+                EDCoW edcow = new EDCoW(4, 11, 5, 0.001, 0.1, 1, 155, corpus); //Create the EDCoW object
+                Utilities.printMessageln("Selected method: " + edcow.getName());
+                Utilities.printMessageln("Started applying algorithm...");
                 edcow.apply(); //Apply the algorithm
-                Utilities.printInfoMessageln("Succesfully applied EDCoW algorithm");
+                Utilities.printMessageln("Succesfully applied EDCoW algorithm");
                 break;
             } case 2: {
-                System.out.println("Selected method: LSH");
-                LSH lsh = new LSH();
-                lsh.apply();
+                Utilities.printMessageln("LSH not implemented yet!");
                 break;
             } case 3: {
                 int window = 10;
                 Dataset ds = new Dataset(config);
                 PeakFindingCorpus corpus = new PeakFindingCorpus(config, ds.getTweetList(), ds.getSWH());
                 List<BinPair<String, Integer>> bins = BinsCreator.createBins(corpus, config, window);
-                OfflinePeakFinding opf = new OfflinePeakFinding(bins, 0.8, 2, 5, window, corpus);
-                Utilities.printInfoMessageln("Selected method: " + opf.getName());
-                Utilities.printInfoMessageln("Now applying algorithm...");
+                OfflinePeakFinding opf = new OfflinePeakFinding(bins, 0.999, 1, 5, window, corpus);
+                Utilities.printMessageln("Selected method: " + opf.getName());
+                Utilities.printMessageln("Now applying algorithm...");
                 opf.apply();
                 //opf.printEventsStatistics();
                 break;

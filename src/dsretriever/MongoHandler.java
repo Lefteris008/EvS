@@ -36,7 +36,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.16_2059_planet3
+ * @version 2016.01.25_1655_gargantua
  */
 public class MongoHandler {
     
@@ -51,7 +51,7 @@ public class MongoHandler {
         try {
         client = new MongoClient(config.getServerName(), config.getServerPort());
         } catch (MongoClientException e) {
-            Utilities.printInfoMessageln("Error connecting to client");
+            Utilities.printMessageln("Error connecting to client");
             client = null;
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -66,10 +66,10 @@ public class MongoHandler {
         
         try {
             db = client.getDatabase(config.getDBName());
-            Utilities.printInfoMessageln("Succesfully connected to '" + db.getName() + "' database.");
+            Utilities.printMessageln("Succesfully connected to '" + db.getName() + "' database.");
             return true;
         } catch (Exception e) {
-            Utilities.printInfoMessageln("There was a problem connecting to MongoDB client.");
+            Utilities.printMessageln("There was a problem connecting to MongoDB client.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -86,7 +86,7 @@ public class MongoHandler {
                     .createIndex(new Document("id", 1));
             return true;
         } catch(MongoException e) {
-            Utilities.printInfoMessageln("Cannot create index for collection '" + config.getRawTweetsCollectionName() + "'");
+            Utilities.printMessageln("Cannot create index for collection '" + config.getRawTweetsCollectionName() + "'");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -101,10 +101,10 @@ public class MongoHandler {
         
         try {
             client.close();
-            Utilities.printInfoMessageln("Database '" + config.getDBName() + "' closed.");
+            Utilities.printMessageln("Database '" + config.getDBName() + "' closed.");
             return true;
         } catch (Exception e) {
-            Utilities.printInfoMessageln("There was a roblem while closing the database.");
+            Utilities.printMessageln("There was a roblem while closing the database.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -176,7 +176,7 @@ public class MongoHandler {
             }
             return true;
         } catch(MongoException e) {
-            Utilities.printInfoMessageln("There was a problem inserting the tweet.");
+            Utilities.printMessageln("There was a problem inserting the tweet.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -211,7 +211,7 @@ public class MongoHandler {
             );
         return true;
         } catch(MongoException e) {
-            Utilities.printInfoMessageln("There was a problem inserting the tweet.");
+            Utilities.printMessageln("There was a problem inserting the tweet.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -232,59 +232,61 @@ public class MongoHandler {
             iterable.forEach(new Block<Document>() {
                 @Override
                 public void apply(final Document tweetDoc) {
-                    //Get tweet ID
-                    long id = tweetDoc.getLong("id");
-                    Document user = tweetDoc.get("user", Document.class); //Get the embedded document
+                    if(tweetDoc.getString("lang").equals("en")) {
+                        //Get tweet ID
+                        long id = tweetDoc.getLong("id");
+                        Document user = tweetDoc.get("user", Document.class); //Get the embedded document
 
-                    //User details
-                    String username = user.getString("name"); //Name
-                    
-                    //Tweet text, date and language
-                    String text = tweetDoc.getString("text");
-                    Date date = tweetDoc.getDate("created_at");
-                    String language = tweetDoc.getString("lang");
+                        //User details
+                        String username = user.getString("name"); //Name
 
-                    //Coordinates
-                    Document coordinates = tweetDoc.get("coordinates", Document.class);
-                    double latitude = -1;
-                    double longitude = -1;
-                    if(coordinates != null) {
-                        try {
-                            List<Double> coords = coordinates.get("coordinates", ArrayList.class);
-                            latitude = coords.get(0);
-                            longitude = coords.get(1);
-                        } catch(ClassCastException e) { //Case where data where incorrectly casted as integers
-                            List<Integer> coords = coordinates.get("coordinates", ArrayList.class);
-                            latitude = coords.get(0);
-                            longitude = coords.get(1);
+                        //Tweet text, date and language
+                        String text = tweetDoc.getString("text");
+                        Date date = tweetDoc.getDate("created_at");
+                        String language = tweetDoc.getString("lang");
+
+                        //Coordinates
+                        Document coordinates = tweetDoc.get("coordinates", Document.class);
+                        double latitude = -1;
+                        double longitude = -1;
+                        if(coordinates != null) {
+                            try {
+                                List<Double> coords = coordinates.get("coordinates", ArrayList.class);
+                                latitude = coords.get(0);
+                                longitude = coords.get(1);
+                            } catch(ClassCastException e) { //Case where data where incorrectly casted as integers
+                                List<Integer> coords = coordinates.get("coordinates", ArrayList.class);
+                                latitude = coords.get(0);
+                                longitude = coords.get(1);
+                            }
                         }
+
+                        //Number of retweets and favorites
+                        int numberOfRetweets = tweetDoc.getInteger("retweet_count");
+                        int numberOfFavorites = tweetDoc.getInteger("favorite_count");
+                        boolean isFavorited = tweetDoc.getBoolean("favorited");
+                        boolean isRetweeted = tweetDoc.getBoolean("retweeted");
+
+                        //Retweet status
+                        boolean isRetweet;
+                        try {
+                            tweetDoc.get("retweeted_status", Document.class);
+                            isRetweet = true;
+                        } catch(NullPointerException e) {
+                            isRetweet = false;
+                        }
+
+                        Tweet tweet = new Tweet(id, username, text, date, latitude, 
+                                longitude, numberOfRetweets, numberOfFavorites, isRetweet, isFavorited, 
+                                isRetweeted, language);
+
+                        retrievedTweets.add(tweet);
                     }
-
-                    //Number of retweets and favorites
-                    int numberOfRetweets = tweetDoc.getInteger("retweet_count");
-                    int numberOfFavorites = tweetDoc.getInteger("favorite_count");
-                    boolean isFavorited = tweetDoc.getBoolean("favorited");
-                    boolean isRetweeted = tweetDoc.getBoolean("retweeted");
-
-                    //Retweet status
-                    boolean isRetweet;
-                    try {
-                        tweetDoc.get("retweeted_status", Document.class);
-                        isRetweet = true;
-                    } catch(NullPointerException e) {
-                        isRetweet = false;
-                    }
-
-                    Tweet tweet = new Tweet(id, username, text, date, latitude, 
-                            longitude, numberOfRetweets, numberOfFavorites, isRetweet, isFavorited, 
-                            isRetweeted, language);
-
-                    retrievedTweets.add(tweet);
                 }
             });
             return retrievedTweets;
         } catch(MongoException e) {
-            Utilities.printInfoMessageln("Cannot find documents in MongoDB Store.");
+            Utilities.printMessageln("Cannot find documents in MongoDB Store.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return null;
         } 
@@ -353,7 +355,7 @@ public class MongoHandler {
 
             return tweet;
         } catch(MongoException e) {
-            Utilities.printInfoMessageln("Unknown Mongo problem with tweet '" + id + "'.");
+            Utilities.printMessageln("Unknown Mongo problem with tweet '" + id + "'.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return null;
         } catch(NullPointerException e) { //Tweet does not exist
@@ -372,7 +374,7 @@ public class MongoHandler {
             db.getCollection(collectionName).drop();
             return true;
         } catch (MongoException e) {
-            Utilities.printInfoMessageln("There was a problem deleting collection '" + collectionName + "'");
+            Utilities.printMessageln("There was a problem deleting collection '" + collectionName + "'");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -387,7 +389,7 @@ public class MongoHandler {
             db.drop();
             return true;
         } catch (MongoException e) {
-            Utilities.printInfoMessageln("There was a problem deleting database '" + db.getName() + "'");
+            Utilities.printMessageln("There was a problem deleting database '" + db.getName() + "'");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }

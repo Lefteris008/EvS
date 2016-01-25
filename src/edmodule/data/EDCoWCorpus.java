@@ -37,12 +37,12 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.20_1828_gargantua
+ * @version 2016.01.25_1701_gargantua
  */
 public class EDCoWCorpus {
     
     private final Config config;
-    private final List<Tweet> tweets;
+    private List<Tweet> tweets;
     
     private final StopWordsHandlers swH;
     private Integer[] numberOfDocuments;
@@ -64,8 +64,37 @@ public class EDCoWCorpus {
         this.config = config;
         this.tweets = tweets;
         this.swH = swH;
+        removeDublicateTweets();
     }
     
+    /**
+     * Method to quickly remove duplicate tweets.
+     * More formally, this method hashes the tweets by its text and stores
+     * the first one to show up. Tweets that have the exact same text, were
+     * ignored. Finally, the new list replaces the 'tweets' collection.
+     */
+    private void removeDublicateTweets() {
+        Utilities.printMessageln("Removing dublicates...");
+        long startTime = System.currentTimeMillis();
+        
+        HashMap<Integer, Tweet> uniqueTweetsMap = new HashMap<>();
+        tweets.stream().filter((tweet) -> (!uniqueTweetsMap.containsKey(
+                tweet.getText().hashCode()))).forEach((tweet) -> {
+            uniqueTweetsMap.put(tweet.getText().hashCode(), tweet);
+        });
+        List<Tweet> cleanedTweets = new ArrayList<>(uniqueTweetsMap.values());
+        
+        long endTime = System.currentTimeMillis();
+        Utilities.printExecutionTime(startTime, endTime, PeakFindingCorpus.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        Utilities.printMessageln("Original size of tweets: " + tweets.size());
+        Utilities.printMessageln("New size of tweets: " + cleanedTweets.size());
+        Utilities.printMessageln("Removed " + (tweets.size() - cleanedTweets.size()) + " duplicates.");
+        tweets = new ArrayList<>(cleanedTweets);
+    }
+    
+    /**
+     * Main method that creates a working corpus for EDCoW algorithm.
+     */
     public final void createCorpus() {
         long startTime = System.currentTimeMillis();
         
@@ -101,13 +130,14 @@ public class EDCoWCorpus {
                 //Update the HashMap with the triplet Document, Token, Frequency
                 if(termsDocsWithOccurencies.containsKey(docKey)) { //Document already exists, update it
                     if(termsDocsWithOccurencies.get(docKey).containsKey(token)) { //Token already exists, update it
-                        termsDocsWithOccurencies.get(docKey).put(token, (termsDocsWithOccurencies.get(docKey).get(token) + 100));
+                        termsDocsWithOccurencies.get(docKey).put(token, 
+                                (termsDocsWithOccurencies.get(docKey).get(token) + 1));
                     } else { //Token does not exist, put it
-                        termsDocsWithOccurencies.get(docKey).put(token, 100);
+                        termsDocsWithOccurencies.get(docKey).put(token, 1);
                     }
                 } else { //Document does not exist, so as the token -create it and put it
                     HashMap<String, Integer> termsWithOccurencies = new HashMap<>();
-                    termsWithOccurencies.put(token, 100);
+                    termsWithOccurencies.put(token, 1);
                     termsDocsWithOccurencies.put(docKey, termsWithOccurencies);
                 }
                 

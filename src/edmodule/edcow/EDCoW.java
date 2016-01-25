@@ -23,7 +23,6 @@ import edmodule.EDMethod;
 import edmodule.data.EDCoWCorpus;
 import java.io.IOException;
 import java.util.*;
-import java.util.Map.Entry;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,23 +34,80 @@ import utilities.Utilities;
  * @email   adrien.guille@univ-lyon2.fr
  * 
  * @author  Lefteris Paraskevas (configurations in EDCoW to omit missing components)
- * @version 2016.01.05_1723_gargantua (For EDviaSA project version alignment) 
+ * @version 2016.01.25_1700_gargantua (For EDviaSA project version alignment) 
  */
 public class EDCoW implements EDMethod {
-    private final int delta = 10; //6
-    private final int delta2 = 39; //48
-    private final int gamma = 5; //5
-    private final double minTermSupport = 0.005; //0.0001
-    private final double maxTermSupport = 0.5; //0.01
+    private final int delta; //6
+    private final int delta2;
+    private final int gamma; //5
+    private final double minTermSupport; //0.0001
+    private final double maxTermSupport; //0.01
     private HashMap<String, Integer[]> termDocMap;
-    public LinkedList<EDCoWEvent> eventList;
+    private LinkedList<EDCoWEvent> eventList;
     private final int timeSliceA;
     private final int timeSliceB;
     private int countCorpus = 0; //Total number of tweets
     private final EDCoWCorpus corpus;
     public Events events;
     
-    public EDCoW(int timeSliceA, int timeSliceB, EDCoWCorpus corpus){
+    /**
+     * Default constructor with minimum parameters. <br/>
+     * Delta is set to 6, gamma is set to 5, minimum term support is set to
+     * 0.0001 and maximum term support is set to 0.01. If you wish to change the
+     * aforementioned values use the {@link #EDCoW(int, int, int, double, double,
+     * int, int, EDCoWCorpus) second constructor}.
+     * @param delta2 Delta2 value. <br/>
+     * Prime divisors of the number of documents are required as values. It must
+     * be cross-referenced with the number of documents. More specifically, the
+     * outcome of the division between the number of documents and this metric
+     * should result the number of total windows.
+     * @param timeSliceA Beginning timeslice.
+     * @param timeSliceB Ending timeslice.
+     * @param corpus An EDCoWCorpus object.
+     */
+    public EDCoW(int delta2, int timeSliceA, int timeSliceB, EDCoWCorpus corpus) {
+        this.delta = 6;
+        this.delta2 = delta2;
+        this.gamma = 5;
+        this.minTermSupport = 0.0001;
+        this.maxTermSupport = 0.01;
+        this.timeSliceA = timeSliceA;
+        this.timeSliceB = timeSliceB;
+        this.corpus = corpus;
+    }
+    
+    /**
+     * Default constructor with the full set of parameters.
+     * @param delta1 Delta value (suggested 6). <br/>
+     * It directly affects the number of events. Increasing this value, reduces
+     * the number of them and vice versa.
+     * @param delta2 Delta2 value. <br/>
+     * Prime divisors of the number of documents are required as values. It must
+     * be cross-referenced with the number of documents. More specifically, the
+     * outcome of the division between the number of documents and this metric
+     * should result the number of total windows.
+     * @param gamma Gamma value (suggested 5). <br/>
+     * It affects the quality of the uncovered events. Values greater than 15,
+     * seem to increase the number of the uncovered events.
+     * @param minTermSupport Minimum term support value (suggested 0.0001). <br/>
+     * Changing this value would result in altering the lower bound below which
+     * a term should not be included in the keywords list of an event.
+     * @param maxTermSupport Maximum term support value (suggested 0.01). <br/>
+     * Changing this value would result in altering the upper bound above which
+     * a term should not be included in the keywords list of an event.
+     * @param timeSliceA Starting timeslice.
+     * @param timeSliceB Ending timeslice.
+     * @param corpus An EDCoWCorpus object.
+     * @see #EDCoW(int, int, int, EDCoWCorpus) EDCoW() minimum constructor.
+     */
+    public EDCoW(int delta1, int delta2, int gamma, double minTermSupport, 
+            double maxTermSupport, int timeSliceA, int timeSliceB, 
+            EDCoWCorpus corpus) {
+        this.delta = delta1;
+        this.delta2 = delta2;
+        this.gamma = gamma;
+        this.minTermSupport = minTermSupport;
+        this.maxTermSupport = maxTermSupport;
         this.timeSliceA = timeSliceA;
         this.timeSliceB = timeSliceB;
         this.countCorpus = 0;
@@ -87,13 +143,12 @@ public class EDCoW implements EDMethod {
         
         double minTermOccur = minTermSupport * countCorpus; //Min support * Message count corpus
         double maxTermOccur = maxTermSupport * countCorpus; //Max support * Message count corpus
-        //Deltas and gammas already configured
     
         int windows = (timeSliceB - timeSliceA) / delta2;
         termDocMap = new HashMap<>();
         eventList = new LinkedList<>();
         
-        Utilities.printInfoMessageln("Now calculating term frequencies...");
+        Utilities.printMessageln("Calculating term frequencies...");
         List<String> terms = corpus.getTerms();
         for(int i = 0; i < terms.size(); i++){
             String term = terms.get(i);
@@ -108,9 +163,9 @@ public class EDCoW implements EDMethod {
                 }
             }
         }
-        Utilities.printInfoMessageln("Now calculating windows...");
+        Utilities.printMessageln("Calculating windows...");
         for(int i = 0; i < windows; i++) {
-            Utilities.printInfoMessageln("Calculating window " + (i + 1) + "\n");
+            Utilities.printMessageln("Calculating window " + (i + 1) + "\n");
             processWindow(i);
         }
         Collections.sort(eventList);
@@ -124,6 +179,11 @@ public class EDCoW implements EDMethod {
         Utilities.printExecutionTime(startTime, endTime, EDCoW.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
+    /**
+     * Method to run the algorithm and analyze terms and frequencies in a
+     * specific window.
+     * @param window The window index (0, 1, 2 etc).
+     */
     public void processWindow(int window) {
     	try{
             LinkedList<EDCoWKeyword> keyWords = new LinkedList<>();
@@ -134,14 +194,14 @@ public class EDCoW implements EDMethod {
             for(int i = startSlice; i < endSlice; i++){
                 distributiond[i-startSlice] = (double) distributioni[i]; 
             }
-            for(Entry<String, Integer[]> entry : termDocMap.entrySet()) {
+            termDocMap.entrySet().stream().forEach((entry) -> {
                 Integer frequencyf[] = entry.getValue();
                 double frequencyd[] = new double[delta2];
                 for(int i = startSlice; i < endSlice; i++){
                     frequencyd[i-startSlice] = (double) frequencyf[i];
                 }
                 keyWords.add(new EDCoWKeyword(entry.getKey(), frequencyd, delta, distributiond));
-            }
+            });
             double[] autoCorrelationValues = new double[keyWords.size()];
             for(int i = 0; i < keyWords.size(); i++){
                 autoCorrelationValues[i] = keyWords.get(i).getAutoCorrelation();
@@ -151,20 +211,14 @@ public class EDCoW implements EDMethod {
 
             // Removing trivial keywords based on theta1
             LinkedList<EDCoWKeyword> keyWordsList1 = new LinkedList<>();
-            for(EDCoWKeyword k : keyWords) {
-                if(k.getAutoCorrelation() > theta1) {
-                    keyWordsList1.add(k);
-                }
-            }
-//            keyWords.stream().filter((k) -> (k.getAutoCorrelation() > theta1)).forEach((k) -> {
-//                keyWordsList1.add(k);
-//            });     
-            for(EDCoWKeyword kw1 : keyWordsList1) {
+            keyWords.stream().filter((k) -> (k.getAutoCorrelation() > theta1)).forEach((k) -> {
+                keyWordsList1.add(k);
+            });
+            
+            keyWordsList1.stream().forEach((kw1) -> {
                 kw1.computeCrossCorrelation(keyWordsList1);
-            }
-//            keyWordsList1.stream().forEach((kw1) -> {
-//                kw1.computeCrossCorrelation(keyWordsList1);
-//            });
+            });
+            
             double[][] bigMatrix = new double[keyWordsList1.size()][keyWordsList1.size()];
             for(int i=0; i < keyWordsList1.size(); i++){
                 bigMatrix[i] = keyWordsList1.get(i).getCrossCorrelation();
@@ -181,18 +235,14 @@ public class EDCoW implements EDMethod {
 
             double thresholdE = 0.1;
             ArrayList<Community> finalArrCom = modularity.getCommunitiesFiltered(thresholdE);
-            for(Community c : finalArrCom) {
-                 System.out.println(c.getCommunitySize());
-                 modularity.saveEventFromCommunity(c);
-            }
+            finalArrCom.stream().map((c) -> {
+                System.out.println(c.getCommunitySize());
+                return c;
+                }).forEach((c) -> {
+                    modularity.saveEventFromCommunity(c);
+                });
             eventList.addAll(modularity.getEvents());
-//            finalArrCom.stream().map((c) -> {
-//                System.out.println(c.getCommunitySize());
-//                return c;
-//                }).forEach((c) -> {
-//                    modularity.saveEventFromCommunity(c);
-//                });
-//            eventList.addAll(modularity.getEvents());
+            
         } catch (NullPointerException e) {
             //Do nothing
         } catch (IOException | NetworkException e) {

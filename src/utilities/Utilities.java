@@ -48,7 +48,7 @@ public class Utilities {
      * standard form, appending '\n' escape character at the end.
      * @param message The message to be printed.
      */
-    public final static void printInfoMessageln(String message) {
+    public final static void printMessageln(String message) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Calendar cal = Calendar.getInstance();
         System.err.println("INFO: " + 
