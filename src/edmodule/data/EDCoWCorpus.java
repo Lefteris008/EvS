@@ -18,6 +18,8 @@ package edmodule.data;
 
 import dsretriever.Tweet;
 import edmodule.edcow.frequencies.DocumentTermFrequencyItem;
+import edmodule.utils.BinPair;
+import edmodule.peakfinding.StringDateUtils;
 import edmodule.utils.Stemmers;
 import edmodule.utils.StopWordsHandlers;
 import java.util.ArrayList;
@@ -37,7 +39,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.25_1701_gargantua
+ * @version 2016.01.25_1934_gargantua
  */
 public class EDCoWCorpus {
     
@@ -46,6 +48,7 @@ public class EDCoWCorpus {
     
     private final StopWordsHandlers swH;
     private Integer[] numberOfDocuments;
+    private final List<BinPair<String, Integer>> bins = new ArrayList<>();
     private List<String> terms = new ArrayList<>(); //List containing all occuring termsprivate final HashMap<String, Integer> termsMap = new HashMap<>(); //A map containing terms along with their frequency of occurance
     private final List<DocumentTermFrequencyItem> termDocFreqId = new ArrayList<>(); //A list containg triplets of tweetIDs, termIDs and their frequenciesprivate final HashMap<Integer, List<String>> docTerms = new HashMap<>(); //A map containing the tweetIDs and a list of the terms that each one of them includes
     private int numberOfTweets = 0;
@@ -53,6 +56,9 @@ public class EDCoWCorpus {
     private final HashMap<String, Integer> termIds = new HashMap<>(); //A map containing the ids of the terms (namely, their index as they are being read)
     private final HashMap<String, Integer> messageDistribution = new HashMap<>();
     private final HashMap<String, Integer> documentIndices = new HashMap<>();
+    
+    private Date earliestDate;
+    private Date latestDate;
     
     /**
      * Public constructor.
@@ -98,6 +104,10 @@ public class EDCoWCorpus {
     public final void createCorpus() {
         long startTime = System.currentTimeMillis();
         
+        //Initialize variables
+        earliestDate = tweets.get(0).getDate();
+        latestDate = tweets.get(0).getDate();
+        
         Calendar cal;
         String docKey;
         int termCount = 0;
@@ -107,6 +117,13 @@ public class EDCoWCorpus {
         cal = Calendar.getInstance();
 
         for(Tweet tweet : tweets) {            
+            Date tweetDate = tweet.getDate();
+            if(tweetDate.before(earliestDate)) {
+                earliestDate = tweetDate;
+            }
+            if(tweetDate.after(latestDate)) {
+                latestDate = tweetDate;
+            }
             
             //Count the tweet, update the distribution, get the docKey
             //and update the corresponding HashMap
@@ -148,7 +165,7 @@ public class EDCoWCorpus {
                 }
             }
         }
-        setNumberOfDocuments(messageDistribution);
+        setNumberOfDocuments(10, messageDistribution);
         
         long endTime = System.currentTimeMillis();
         Utilities.printExecutionTime(startTime, endTime, EDCoWCorpus.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
@@ -266,16 +283,56 @@ public class EDCoWCorpus {
         return frqs;
     }
     
+//    /**
+//     * Sets an integer array of numberOfDocuments size that contains
+//     * the tweets distribution of the user-defined window.
+//     * @param numberOfDocuments A HashMap containing the tweets distribution.
+//     */
+//    public void setNumberOfDocuments(HashMap<String, Integer> distribution) {
+//        numberOfDocuments = new Integer[distribution.size()];
+//        int i = 0;
+//        for(String key : distribution.keySet()) {
+//            numberOfDocuments[i] = distribution.get(key);
+//            i++;
+//        }
+//    }
+    
     /**
      * Sets an integer array of numberOfDocuments size that contains
      * the tweets distribution of the user-defined window.
+     * @param window An integer representing the refresh window.
      * @param numberOfDocuments A HashMap containing the tweets distribution.
      */
-    public void setNumberOfDocuments(HashMap<String, Integer> distribution) {
-        numberOfDocuments = new Integer[distribution.size()];
+    private void setNumberOfDocuments(int window, HashMap<String, Integer> distribution) {
+        
+        Calendar cal = Calendar.getInstance();
+        
+        //Get earliest and latest dates of corpus
+        String earliestKey = StringDateUtils.getDateKey(cal, getEarliestDateOfCorpus(), window);
+        String latestKey = StringDateUtils.getDateKey(cal, getLatestDateOfCorpus(), window);
+        int value;
+        
+        StringDateUtils.clearAndSetYearToMinute(cal, latestKey);
+        long endMillis = cal.getTimeInMillis();
+        StringDateUtils.clearAndSetYearToMinute(cal, earliestKey);
+        
+        //Iterate between the two dates and store all the corresponding 10-minute windows
+        for (; cal.getTimeInMillis() <= endMillis; cal.add(Calendar.MINUTE, window)) {
+            
+            String currentKey = StringDateUtils.getDateKey(cal, cal.getTime(), window);
+            if(distribution.containsKey(currentKey)) {
+                value = distribution.get(currentKey);
+            } else {
+                value = 0;
+            }
+            BinPair pair = new BinPair(currentKey, value);
+            bins.add(pair);
+        }
+        
+        numberOfDocuments = new Integer[bins.size()];
         int i = 0;
-        for(String key : distribution.keySet()) {
-            numberOfDocuments[i] = distribution.get(key);
+        for(BinPair<String, Integer> bin : bins) {
+            numberOfDocuments[i] = bin.getValue();
             i++;
         }
     }
@@ -295,4 +352,16 @@ public class EDCoWCorpus {
     public int getNumberOfTweets() {
         return numberOfTweets;
     }
+    
+    /**
+     * Returns the earliest date a tweet was published in the corpus.
+     * @return A Date object.
+     */
+    public final Date getEarliestDateOfCorpus() { return earliestDate; }
+    
+    /**
+     * Returns the latest date a tweet was published in the corpus.
+     * @return A Date object.
+     */
+    public final Date getLatestDateOfCorpus() { return latestDate; }
 }

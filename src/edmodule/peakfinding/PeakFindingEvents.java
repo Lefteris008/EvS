@@ -16,6 +16,7 @@
  */
 package edmodule.peakfinding;
 
+import edmodule.utils.BinPair;
 import dsretriever.Tweet;
 import edmodule.data.PeakFindingCorpus;
 import java.io.FileNotFoundException;

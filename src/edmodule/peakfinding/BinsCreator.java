@@ -16,7 +16,7 @@
  */
 package edmodule.peakfinding;
 
-import edmodule.data.Dataset;
+import edmodule.utils.BinPair;
 import edmodule.data.PeakFindingCorpus;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -28,7 +28,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.15_0250_gargantua
+ * @version 2016.01.25_1935_gargantua
  */
 public class BinsCreator {
     

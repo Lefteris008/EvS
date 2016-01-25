@@ -20,8 +20,7 @@ import edmodule.data.Dataset;
 import edmodule.data.EDCoWCorpus;
 import edmodule.data.PeakFindingCorpus;
 import edmodule.edcow.EDCoW;
-import edmodule.lsh.LSH;
-import edmodule.peakfinding.BinPair;
+import edmodule.utils.BinPair;
 import edmodule.peakfinding.BinsCreator;
 import edmodule.peakfinding.OfflinePeakFinding;
 import java.io.FileNotFoundException;
@@ -33,7 +32,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.25_1655_gargantua
+ * @version 2016.01.25_1935_gargantua
  */
 public class EDMethodPicker {
     
@@ -58,7 +57,7 @@ public class EDMethodPicker {
                 corpus.createCorpus();
                 corpus.setDocTermFreqIdList();
                 
-                EDCoW edcow = new EDCoW(4, 11, 5, 0.001, 0.1, 1, 155, corpus); //Create the EDCoW object
+                EDCoW edcow = new EDCoW(4, 7, 26, 0.001, 0.1, 1, 155, corpus); //Create the EDCoW object
                 Utilities.printMessageln("Selected method: " + edcow.getName());
                 Utilities.printMessageln("Started applying algorithm...");
                 edcow.apply(); //Apply the algorithm
