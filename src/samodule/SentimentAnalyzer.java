@@ -30,7 +30,7 @@ import java.util.Properties;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015_12_03_1656_planet2
+ * @version 2016.01.31_1921
  */
 public class SentimentAnalyzer {
     private static StanfordCoreNLP pipeline;

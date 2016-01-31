@@ -19,7 +19,7 @@ package edmodule.utils;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.12_1438_gargantua
+ * @version 2016.01.31_1921
  */
 public class BinPair<B,V> {
     private final B bin;

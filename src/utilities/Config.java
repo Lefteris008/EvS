@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.19_2127_gargantua
+ * @version 2016.01.31_1921
  */
 public class Config {
     private static String consumerKey;
@@ -47,6 +47,7 @@ public class Config {
     private static String resourcesPath;
     private static String punctuationFile;
     private static String specialCharFile;
+    private static String groundTruthDataFile;
     private static Pattern punctuationPattern;
     private static Pattern urlPattern;
     
@@ -81,6 +82,7 @@ public class Config {
             stopwordsLocation = prop.getProperty("StopwordsLocation");
             tweetDataFile = prop.getProperty("TweetDataFile");
             resourcesPath = prop.getProperty("ResourcesPath");
+            groundTruthDataFile = prop.getProperty("GroundTruthDataFile");
             punctuationFile = prop.getProperty("PunctuationFile");
             specialCharFile = prop.getProperty("SpecialCharFile");
             
@@ -198,6 +200,12 @@ public class Config {
      * @return A String containing the special characters file name.
      */
     public String getSpecialCharFile() { return specialCharFile; }
+    
+    /**
+     * Returns the ground data file location.
+     * @return A String containing the ground truth data file name.
+     */
+    public String getGroundTruthDataFile() { return groundTruthDataFile; }
     
     /**
      * Returns a pre-compiled pattern for punctuation removal.

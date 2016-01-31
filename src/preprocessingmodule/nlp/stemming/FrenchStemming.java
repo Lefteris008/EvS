@@ -22,7 +22,7 @@ import org.tartarus.snowball.ext.FrenchStemmer;
  *
  * @author  Adrien GUILLE, Laboratoire ERIC, Université Lumière Lyon 2
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1553_planet1
+ * @version 2016.01.31_1921
  */
 public class FrenchStemming implements Stemmer {
     FrenchStemmer frStemmer;

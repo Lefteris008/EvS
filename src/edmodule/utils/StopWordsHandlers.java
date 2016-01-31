@@ -23,7 +23,7 @@ import preprocessingmodule.nlp.stopwords.StopWords;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.06_1936_planet3
+ * @version 2016.01.31_1921
  */
 public class StopWordsHandlers {
     

@@ -19,7 +19,7 @@ package edmodule;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.05_2026_planet3
+ * @version 2016.01.31_1921
  */
 public interface EDMethod {
     
@@ -53,5 +53,5 @@ public interface EDMethod {
     /**
      * Main method that starts the execution of the Event Detection algorithm.
      */
-    public abstract void apply();
+    public abstract void apply() throws Exception;
 }

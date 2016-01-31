@@ -21,7 +21,7 @@ import edmodule.EDMethod;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.05_2023_planet3
+ * @version 2016.01.31_1921
  */
 public class LSH implements EDMethod {
   

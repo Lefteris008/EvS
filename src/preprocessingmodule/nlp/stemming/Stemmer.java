@@ -19,7 +19,7 @@ package preprocessingmodule.nlp.stemming;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1545_planet1
+ * @version 2016.01.31_1921
  */
 public interface Stemmer {
     public String stem(String word);

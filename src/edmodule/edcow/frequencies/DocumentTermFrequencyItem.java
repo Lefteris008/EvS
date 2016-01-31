@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Created by Farrokh on 8/27/2015.
  * Changes by Lefteris Paraskevas
- * @version 2015.12.23_1558_gargantua
+ * @version 2016.01.31_1921
  */
 public class DocumentTermFrequencyItem implements Serializable {
     public int doc_id;

@@ -30,7 +30,7 @@ import preprocessingmodule.nlp.stemming.Stemmer;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.25_2335_planet2
+ * @version 2016.01.31_1921
  */
 public class Stemmers {
     

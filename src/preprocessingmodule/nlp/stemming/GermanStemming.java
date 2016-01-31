@@ -21,7 +21,7 @@ import org.tartarus.snowball.ext.GermanStemmer;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1557_planet1
+ * @version 2016.01.31_1921
  */
 public class GermanStemming implements Stemmer {
     GermanStemmer deStemmer;

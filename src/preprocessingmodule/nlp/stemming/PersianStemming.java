@@ -22,7 +22,7 @@ import org.apache.lucene.analysis.fa.PersianNormalizer;
  *
  * @author  Farrokh GHAMSARY, Techlimed
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1551_planet1
+ * @version 2016.01.31_1921
  */
 public class PersianStemming implements Stemmer {
     

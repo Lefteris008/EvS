@@ -20,7 +20,7 @@ package preprocessingmodule.nlp;
  *
  * @author  Rosetta Code (http://rosettacode.org/wiki/Levenshtein_distance#Java)
  * @author  Lefteris Paraskevas
- * @version 2016.01.25_1656_gargantua
+ * @version 2016.01.31_1921
  */
 public class Levenshtein {
     

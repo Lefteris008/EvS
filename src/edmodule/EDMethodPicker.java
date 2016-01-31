@@ -23,6 +23,7 @@ import edmodule.edcow.EDCoW;
 import edmodule.utils.BinPair;
 import edmodule.peakfinding.BinsCreator;
 import edmodule.peakfinding.OfflinePeakFinding;
+import evaluator.EDCoWEvaluator;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Scanner;
@@ -32,7 +33,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.25_1935_gargantua
+ * @version 2016.01.31_1921
  */
 public class EDMethodPicker {
     
@@ -53,15 +54,29 @@ public class EDMethodPicker {
         switch(choice) {
             case 1: {
                 Dataset ds = new Dataset(config);
-                EDCoWCorpus corpus = new EDCoWCorpus(config, ds.getTweetList(), ds.getSWH());
+                EDCoWCorpus corpus = new EDCoWCorpus(config, ds.getTweetList(), ds.getSWH(), 10);
+                
                 corpus.createCorpus();
                 corpus.setDocTermFreqIdList();
+                int delta = 4, delta2 = 11, gamma = 26;
+                double minTermSupport = 0.001, maxTermSupport = 0.1;
                 
-                EDCoW edcow = new EDCoW(4, 7, 26, 0.001, 0.1, 1, 155, corpus); //Create the EDCoW object
-                Utilities.printMessageln("Selected method: " + edcow.getName());
-                Utilities.printMessageln("Started applying algorithm...");
-                edcow.apply(); //Apply the algorithm
-                Utilities.printMessageln("Succesfully applied EDCoW algorithm");
+                for(delta = 4; delta < 30; delta++) {
+                    EDCoW edcow = new EDCoW(delta, delta2, gamma, minTermSupport, 
+                            maxTermSupport, 1, 155, corpus); //Create the EDCoW object
+
+                    edcow.apply(); //Apply the algorithm
+
+                    EDCoWEvaluator eval = new EDCoWEvaluator(delta, delta2, 
+                            gamma, 1, 155, minTermSupport, maxTermSupport, 
+                            edcow.eventList, config, corpus.getStemsHandler());
+                    eval.evaluate();
+                    
+                    Utilities.printMessageln("Total events found: " + edcow.eventList.size());
+                    Utilities.printMessageln("Delta: " + delta);
+                    Utilities.printMessageln("Total recall: " + eval.getRecall());
+                    Utilities.printMessageln("Total precision: " + eval.getPrecision());
+                }
                 break;
             } case 2: {
                 Utilities.printMessageln("LSH not implemented yet!");

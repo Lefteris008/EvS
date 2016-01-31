@@ -36,7 +36,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.25_1655_gargantua
+ * @version 2016.01.31_1921
  */
 public class MongoHandler {
     
@@ -66,7 +66,7 @@ public class MongoHandler {
         
         try {
             db = client.getDatabase(config.getDBName());
-            Utilities.printMessageln("Succesfully connected to '" + db.getName() + "' database.");
+            Utilities.printMessageln("Successfully connected to '" + db.getName() + "' database.");
             return true;
         } catch (Exception e) {
             Utilities.printMessageln("There was a problem connecting to MongoDB client.");
@@ -104,7 +104,7 @@ public class MongoHandler {
             Utilities.printMessageln("Database '" + config.getDBName() + "' closed.");
             return true;
         } catch (Exception e) {
-            Utilities.printMessageln("There was a roblem while closing the database.");
+            Utilities.printMessageln("There was a problem while closing the database.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }

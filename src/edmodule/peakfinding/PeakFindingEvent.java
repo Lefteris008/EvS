@@ -31,7 +31,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.20_1828_gargantua
+ * @version 2016.01.31_1921
  */
 public class PeakFindingEvent {
     

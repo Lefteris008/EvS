@@ -21,7 +21,7 @@ import java.util.HashMap;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.02_1617_planet1
+ * @version 2016.01.31_1921
  */
 public class Frequencies {
     

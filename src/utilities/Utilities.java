@@ -23,7 +23,7 @@ import java.util.Calendar;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.19_2117_gargantua
+ * @version 2016.01.31_1921
  */
 public class Utilities {
     

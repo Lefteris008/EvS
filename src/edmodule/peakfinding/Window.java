@@ -19,7 +19,7 @@ package edmodule.peakfinding;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.04_1916_planet3
+ * @version 2016.01.31_1921
  * @param <Start>
  * @param <End>
  */

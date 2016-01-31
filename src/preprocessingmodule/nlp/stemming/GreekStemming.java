@@ -21,7 +21,7 @@ import org.apache.lucene.analysis.el.GreekStemmer;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.17_1548_planet1
+ * @version 2016.01.31_1921
  */
 public class GreekStemming implements Stemmer {
     GreekStemmer grStemmer;

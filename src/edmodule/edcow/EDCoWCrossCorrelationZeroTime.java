@@ -43,7 +43,7 @@ import utilities.Utilities;
  *      @author siniwitt
  * 
  * @author  Lefteris Paraskevas
- * @version 2015.12.23_1612_gargantua
+ * @version 2016.01.31_1921
  */
 public class EDCoWCrossCorrelationZeroTime {       	
 	

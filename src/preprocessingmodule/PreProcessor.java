@@ -23,9 +23,7 @@ import dsretriever.MongoHandler;
 import dsretriever.Utils;
 import com.mongodb.MongoException;
 import edmodule.EDMethodPicker;
-import edmodule.data.Dataset;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -38,7 +36,7 @@ import samodule.SentimentAnalyzer;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.12_1449_gargantua
+ * @version 2016.01.31_1921
  */
 public class PreProcessor {
     

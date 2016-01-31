@@ -22,7 +22,7 @@ import org.apache.lucene.analysis.ar.ArabicStemmer;
  *
  * @author  Farrokh GHAMSARY, Techlimed
  * @author  Lefteris Paraskevas
- * @versio  2015.11.17_1546_planet1
+ * @version 2016.01.31_1921
  */
 public class ArabicStemming implements Stemmer {
     ArabicStemmer arabicStemmer;

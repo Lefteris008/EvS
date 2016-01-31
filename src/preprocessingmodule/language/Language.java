@@ -19,7 +19,7 @@ package preprocessingmodule.language;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.18_planet1
+ * @version 2016.01.31_1921
  */
 public enum Language {
     english,

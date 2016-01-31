@@ -21,7 +21,7 @@ import org.tartarus.snowball.ext.EnglishStemmer;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.11.18_2034_planet1
+ * @version 2016.01.31_1917
  */
 public class EnglishStemming implements Stemmer {
     

@@ -39,13 +39,13 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.25_1934_gargantua
+ * @version 2016.01.31_1921
  */
 public class EDCoWCorpus {
     
     private final Config config;
     private List<Tweet> tweets;
-    
+    private int refreshWindow;
     private final StopWordsHandlers swH;
     private Integer[] numberOfDocuments;
     private final List<BinPair<String, Integer>> bins = new ArrayList<>();
@@ -56,7 +56,7 @@ public class EDCoWCorpus {
     private final HashMap<String, Integer> termIds = new HashMap<>(); //A map containing the ids of the terms (namely, their index as they are being read)
     private final HashMap<String, Integer> messageDistribution = new HashMap<>();
     private final HashMap<String, Integer> documentIndices = new HashMap<>();
-    
+    private final StemUtils stemHandler = new StemUtils();
     private Date earliestDate;
     private Date latestDate;
     
@@ -66,10 +66,11 @@ public class EDCoWCorpus {
      * @param tweets A ArrayList containing all retrieved tweets
      * @param swH A StopWordsHandlers object
      */
-    public EDCoWCorpus(Config config, List<Tweet> tweets, StopWordsHandlers swH) {
+    public EDCoWCorpus(Config config, List<Tweet> tweets, StopWordsHandlers swH, int refreshWindow) {
         this.config = config;
         this.tweets = tweets;
         this.swH = swH;
+        this.refreshWindow = refreshWindow;
         removeDublicateTweets();
     }
     
@@ -128,7 +129,7 @@ public class EDCoWCorpus {
             //Count the tweet, update the distribution, get the docKey
             //and update the corresponding HashMap
             numberOfTweets++;
-            docKey = updateMessageDistribution(cal, tweet.getDate(), 10);
+            docKey = updateMessageDistribution(cal, tweet.getDate(), refreshWindow);
             if(!documentIndices.containsKey(docKey)) {
                 documentIndices.put(docKey, documentCount);
                 documentCount++;
@@ -140,7 +141,7 @@ public class EDCoWCorpus {
                     swH.getSWHandlerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())));
 
             //Iterate through the stemmed clean tokens/hashtags
-            StemUtils stemHandler = new StemUtils();
+            
             for(String token : stemHandler.getStemsAsList(tokens.getCleanTokensAndHashtags(),
                     Stemmers.getStemmerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())))) {
                 
@@ -364,4 +365,10 @@ public class EDCoWCorpus {
      * @return A Date object.
      */
     public final Date getLatestDateOfCorpus() { return latestDate; }
+    
+    /**
+     * Returns a pre-configured stems handler object.
+     * @return A stemUtils object.
+     */
+    public final StemUtils getStemsHandler() { return stemHandler; }
 }

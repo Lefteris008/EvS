@@ -18,10 +18,8 @@ package edmodule.edcow;
 
 import edmodule.edcow.event.Events;
 import ch.epfl.lis.jmod.modularity.community.Community;
-import ch.epfl.lis.networks.NetworkException;
 import edmodule.EDMethod;
 import edmodule.data.EDCoWCorpus;
-import java.io.IOException;
 import java.util.*;
 
 import java.util.logging.Level;
@@ -34,7 +32,7 @@ import utilities.Utilities;
  * @email   adrien.guille@univ-lyon2.fr
  * 
  * @author  Lefteris Paraskevas (configurations in EDCoW to omit missing components)
- * @version 2016.01.25_1700_gargantua (For EDviaSA project version alignment) 
+ * @version 2016.01.31_1921 (For EDviaSA project version alignment) 
  */
 public class EDCoW implements EDMethod {
     private final int delta; //6
@@ -43,7 +41,7 @@ public class EDCoW implements EDMethod {
     private final double minTermSupport; //0.0001
     private final double maxTermSupport; //0.01
     private HashMap<String, Integer[]> termDocMap;
-    private LinkedList<EDCoWEvent> eventList;
+    public LinkedList<EDCoWEvent> eventList;
     private final int timeSliceA;
     private final int timeSliceB;
     private int countCorpus = 0; //Total number of tweets
@@ -166,7 +164,11 @@ public class EDCoW implements EDMethod {
         Utilities.printMessageln("Calculating windows...");
         for(int i = 0; i < windows; i++) {
             Utilities.printMessageln("Calculating window " + (i + 1) + "\n");
-            processWindow(i);
+            try {
+                processWindow(i);
+            } catch (Exception ex) {
+                Logger.getLogger(EDCoW.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         Collections.sort(eventList);
         events = new Events();
@@ -184,8 +186,8 @@ public class EDCoW implements EDMethod {
      * specific window.
      * @param window The window index (0, 1, 2 etc).
      */
-    public void processWindow(int window) {
-    	try{
+    public void processWindow(int window) throws Exception {
+    	//try{
             LinkedList<EDCoWKeyword> keyWords = new LinkedList<>();
             Integer[] distributioni = corpus.getNumberOfDocuments();
             double[] distributiond = new double[delta2];
@@ -243,12 +245,12 @@ public class EDCoW implements EDMethod {
                 });
             eventList.addAll(modularity.getEvents());
             
-        } catch (NullPointerException e) {
+        //} catch (NullPointerException e) {
             //Do nothing
-        } catch (IOException | NetworkException e) {
-            Logger.getLogger(EDCoW.class.getName()).log(Level.SEVERE, null, e);
-        } catch (Exception e) {
-            Logger.getLogger(EDCoW.class.getName()).log(Level.SEVERE, null, e);
-        }
+        //} catch (IOException | NetworkException e) {
+            //Logger.getLogger(EDCoW.class.getName()).log(Level.SEVERE, null, e);
+        //} catch (Exception e) {
+            //Logger.getLogger(EDCoW.class.getName()).log(Level.SEVERE, null, e);
+        //}
     }
 }

@@ -25,7 +25,7 @@ import utilities.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.12_1436_gargantua
+ * @version 2016.01.31_1921
  */
 public class Statistics {
     

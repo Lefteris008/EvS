@@ -21,7 +21,7 @@ import java.util.Date;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2015.12.16_2100_planet3
+ * @version 2016.01.31_1921
  */
 public class Tweet {
     
