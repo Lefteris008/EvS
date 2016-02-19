@@ -36,12 +36,13 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.02.19_1657
  */
 public class MongoHandler {
     
-    public static MongoClient client;
-    public static MongoDatabase db;
+    private static MongoClient client;
+    private static MongoDatabase db;
+    private Config config;
     
     /**
      * Constructor, creates a connection with the MongoDB instance
@@ -49,7 +50,8 @@ public class MongoHandler {
      */
     public MongoHandler(Config config) {
         try {
-        client = new MongoClient(config.getServerName(), config.getServerPort());
+            this.config = config;
+            client = new MongoClient(this.config.getServerName(), this.config.getServerPort());
         } catch (MongoClientException e) {
             Utilities.printMessageln("Error connecting to client");
             client = null;
@@ -59,10 +61,9 @@ public class MongoHandler {
     
     /**
      * Create a connection to the MongoDB database
-     * @param config A configuration object.
      * @return True if the process succeeds, false otherwise.
      */
-    public final boolean connectToMongoDB(Config config) {
+    public final boolean connectToMongoDB() {
         
         try {
             db = client.getDatabase(config.getDBName());
@@ -76,11 +77,26 @@ public class MongoHandler {
     }
     
     /**
-     * Creates an index on the 'id' field of the tweet collection
-     * @param config A configuration object.
+     * Create a connection to the secondary MongoDB.
      * @return True if the process succeeds, false otherwise.
      */
-    public final boolean createIndex(Config config) {
+    public final boolean connectToSecondaryDB() {
+         try {
+            db = client.getDatabase(config.getSecondaryDBName());
+            Utilities.printMessageln("Successfully connected to '" + db.getName() + "' database.");
+            return true;
+        } catch (Exception e) {
+            Utilities.printMessageln("There was a problem connecting to MongoDB client.");
+            Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
+            return false;
+        }
+    }
+    
+    /**
+     * Creates an index on the 'id' field of the tweet collection
+     * @return True if the process succeeds, false otherwise.
+     */
+    public final boolean createIndex() {
         try {
             db.getCollection(config.getRawTweetsCollectionName())
                     .createIndex(new Document("id", 1));
@@ -94,14 +110,13 @@ public class MongoHandler {
     
     /**
      * Closes an open connection with the MongoDB client
-     * @param config A configuration object
      * @return True if the process succeeds, false otherwise.
      */
-    public final boolean closeMongoConnection(Config config) {
+    public final boolean closeMongoConnection() {
         
         try {
             client.close();
-            Utilities.printMessageln("Database '" + config.getDBName() + "' closed.");
+            Utilities.printMessageln("Database '" + db.getName() + "' closed.");
             return true;
         } catch (Exception e) {
             Utilities.printMessageln("There was a problem while closing the database.");
@@ -126,11 +141,10 @@ public class MongoHandler {
      * @param config A configuration object
      * @return True if the process succeeds, false otherwise
      */
-    public final boolean insertTweetIntoMongo(ArrayList<String> tweet, Config config) {
+    public final boolean insertTweetIntoMongo(ArrayList<String> tweet) {
         try {
             if("0".equals(tweet.get(2))) {
-                db.getCollection(config.getRawTweetsCollectionName()).insertOne(
-                    new Document()
+                db.getCollection(config.getRawTweetsCollectionName()).insertOne(new Document()
                         .append("id", Long.parseLong(tweet.get(0))) //Tweet ID
                         .append("user", new Document() //Embedded document
                             .append("name", tweet.get(1))
@@ -151,8 +165,7 @@ public class MongoHandler {
 //                        )
                 );
             } else {
-                db.getCollection(config.getRawTweetsCollectionName()).insertOne(
-                    new Document()
+                db.getCollection(config.getRawTweetsCollectionName()).insertOne(new Document()
                         .append("id", Long.parseLong(tweet.get(0))) //Tweet ID
                         .append("user", new Document() //Embedded document
                             .append("name", tweet.get(1))
@@ -185,16 +198,14 @@ public class MongoHandler {
     /**
      * Store a tweet retrieved previously by using the Twitter API.
      * @param status The tweet along with its additional information (location, date etc)
-     * @param config A configuration object
      * @param event The ground truth event, for which the tweet is actually referring to
      * @return True if the process succeeds, false otherwise
      * @deprecated Since Wave3
      * @see insertTweetToMongo()
      */
-    public final boolean insertTweetIntoMongoDB(Status status, Config config, String event) {
+    public final boolean insertTweetIntoMongoDB(Status status, String event) {
         try {
-            db.getCollection(config.getRawTweetsCollectionName()).insertOne(
-                new Document()
+            db.getCollection(config.getRawTweetsCollectionName()).insertOne(new Document()
                     .append("id", status.getId()) //Tweet ID
                     .append("user", status.getUser().getName()) //Username
                     .append("text", status.getText()) //Actual tweet
@@ -219,10 +230,9 @@ public class MongoHandler {
     
     /**
      * Retrieves all stored retrievedTweets in MongoDB Store.
-     * @param config A configuration object
      * @return A List containing all retrieved retrievedTweets
      */
-    public final List<Tweet> retrieveAllTweetsFromMongoDBStore(Config config) {
+    public final List<Tweet> retrieveAllTweetsFromMongoDBStore() {
         
         List<Tweet> retrievedTweets = new ArrayList<>();
         MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
@@ -236,7 +246,7 @@ public class MongoHandler {
                         //Get tweet ID
                         long id = tweetDoc.getLong("id");
                         Document user = tweetDoc.get("user", Document.class); //Get the embedded document
-
+                        
                         //User details
                         String username = user.getString("name"); //Name
 
@@ -266,19 +276,27 @@ public class MongoHandler {
                         int numberOfFavorites = tweetDoc.getInteger("favorite_count");
                         boolean isFavorited = tweetDoc.getBoolean("favorited");
                         boolean isRetweeted = tweetDoc.getBoolean("retweeted");
+                        long retweetId;
 
                         //Retweet status
                         boolean isRetweet;
                         try {
-                            tweetDoc.get("retweeted_status", Document.class);
+                            Document retweetStatus = tweetDoc.get("retweeted_status", 
+                                    Document.class);
                             isRetweet = true;
+                            try {
+                                retweetId = retweetStatus.getLong("id");
+                            } catch(ClassCastException e) {
+                                retweetId = retweetStatus.getInteger("id");
+                            }
                         } catch(NullPointerException e) {
                             isRetweet = false;
+                            retweetId = -1;
                         }
 
                         Tweet tweet = new Tweet(id, username, text, date, latitude, 
                                 longitude, numberOfRetweets, numberOfFavorites, isRetweet, isFavorited, 
-                                isRetweeted, language);
+                                isRetweeted, language, retweetId, 0);
 
                         retrievedTweets.add(tweet);
                     }
@@ -294,12 +312,11 @@ public class MongoHandler {
     
     /**
      * This method parses the MongoDB store and returns the tweet that matches the String 'id'.
-     * @param config A configuration object
      * @param id The id of the document to be retrieved
      * @return A Tweet object containing all the information found in the document that matched the String 'id'
      * @deprecated Subsumed by retrieveAllTweetsFromMongoDBStore() method.
      */
-    public final Tweet getATweetByIdFromMongoDBStore(Config config, long id) {
+    public final Tweet getATweetByIdFromMongoDBStore(long id) {
         MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
         try {
             FindIterable<Document> iterable = collection.find(new Document("id", id));
@@ -342,16 +359,19 @@ public class MongoHandler {
             
             //Retweet status
             boolean isRetweet;
+            long retweetId;
             try {
-                tweetDoc.get("retweeted_status", Document.class);
+                Document retweetStatus = tweetDoc.get("retweeted_status", Document.class);
                 isRetweet = true;
+                retweetId = retweetStatus.getLong("id");
             } catch(NullPointerException e) {
                 isRetweet = false;
+                retweetId = -1;
             }
 
             Tweet tweet = new Tweet(id_, username, text, date, latitude, 
                     longitude, numberOfRetweets, numberOfFavorites, isRetweet, isFavorited, 
-                    isRetweeted, language);
+                    isRetweeted, language, retweetId, 0);
 
             return tweet;
         } catch(MongoException e) {
@@ -363,6 +383,56 @@ public class MongoHandler {
         }
     }
     
+    /**
+     * Updates an existing tweet with the sentiment information.
+     * @param id The id of the tweet to be updated
+     * @param sentiment An integer representing the sentiment polarity of the tweet.
+     */
+    public final void updateTweetWithSentiment(long id, int sentiment) {
+        MongoCollection<Document> collection = db.getCollection(config
+                .getRawTweetsCollectionName());
+        try {
+            collection.updateOne(new Document("id", id),
+                                 new Document("$set", 
+                                         new Document("sentiment", sentiment)));
+        } catch(NullPointerException e) {
+            Utilities.printMessageln("There is no tweet with id '" + id + "'.");
+            Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+    
+    /**
+     * Determines whether a tweet exists in the MongoDB Store.
+     * @param id The id of the tweet to be searched.
+     * @return True if the tweet exists, false otherwise.
+     */
+    public final boolean tweetExists(long id) {
+        MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
+        try {
+            collection.find(new Document("id", id));
+            return true;
+        } catch(NullPointerException e) { //Tweet does not exist
+            return false;
+        }
+    }
+    
+    /**
+     * Checks whether a tweet is already annotated with its sentiment.
+     * @param id The ID of the tweet to be checked for.
+     * @return True if the tweet is sentiment annotated, false otherwise.
+     */
+    public final boolean tweetHasSentiment(long id) {
+        MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
+        int sentiment;
+        FindIterable<Document> iterable = collection.find(new Document("id", id));
+        Document tweetDoc = iterable.first();
+        try {
+            sentiment = tweetDoc.getInteger("sentiment");
+            return true;
+        } catch(NullPointerException e) { //Tweet does not exist
+            return false;
+        }
+    }
     /**
      * Method to delete a collection.
      * @param collectionName The collection to be deleted from the DB

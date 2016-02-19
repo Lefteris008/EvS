@@ -39,6 +39,8 @@ public class Config {
     private static int serverPort;
     private static String dbName;
     private static String rawTweetsCollectionName;
+    private static String secondaryDBName;
+    private static String edcowEventsFileName;
     private static String peakFindingEventsFileName;
     private static int maximumTweetsRetrieved;
     private static String datasetLocation;
@@ -65,7 +67,8 @@ public class Config {
             } else {
                 throw new FileNotFoundException("Property file '" + propFileName + "' not found in the classpath");
             }
-
+            inputStream.close();
+            
             //Get the property values and store them
             consumerKey = prop.getProperty("ConsumerKey");
             consumerSecret = prop.getProperty("ConsumerSecret");
@@ -75,7 +78,9 @@ public class Config {
             serverName = prop.getProperty("ServerName");
             serverPort = Integer.parseInt(prop.getProperty("ServerPort"));
             dbName = prop.getProperty("DBName");
+            secondaryDBName = prop.getProperty("SecondaryDBName");
             rawTweetsCollectionName = prop.getProperty("RawTweetsCollection");
+            edcowEventsFileName = prop.getProperty("EDCoWEventsFile");
             peakFindingEventsFileName = prop.getProperty("PeakFindingEventsFile");
             maximumTweetsRetrieved = Integer.parseInt(prop.getProperty("MaximumTweetsRetrieved"));
             datasetLocation = prop.getProperty("DatasetLocation");
@@ -85,9 +90,6 @@ public class Config {
             groundTruthDataFile = prop.getProperty("GroundTruthDataFile");
             punctuationFile = prop.getProperty("PunctuationFile");
             specialCharFile = prop.getProperty("SpecialCharFile");
-            
-            inputStream.close();
-            
             punctuationPattern = Pattern.compile("[`~!@#$%^&*()_+-=:\"<>?;\',./{}|]");
             urlPattern = Pattern.compile("[hH][tT]{2}[Pp][sS]?://(\\w+(\\.\\w+?)?)+");
             
@@ -148,10 +150,22 @@ public class Config {
     public String getDBName() { return dbName; }
     
     /**
+     * Returns the name of the secondary DB of raw tweets.
+     * @return A String containing the name of the collection.
+     */
+    public String getSecondaryDBName() { return secondaryDBName; }
+    
+    /**
      * Returns the name of the collection of the raw tweets.
      * @return A string containing the name of the collection
      */
     public String getRawTweetsCollectionName() { return rawTweetsCollectionName; }
+    
+    /**
+     * Returns the name of the EDCoW Events file.
+     * @return A String containing the name of the file.
+     */
+    public String getEDCoWEventFileName() { return edcowEventsFileName; }
     
     /**
      * Returns the name of the Peak Finding Events file.

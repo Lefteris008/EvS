@@ -19,7 +19,7 @@ package preprocessingmodule.language;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.02.19_1713
  */
 public class LangUtils {
     
@@ -55,7 +55,7 @@ public class LangUtils {
      * @param isoCode A String containing the ISO code.
      * @return A LanguageCodes enumeration.
      */
-    public final static LanguageCodes getLanguageISOCodeFromString(String isoCode) {
+    public final static LanguageCodes getLangISOFromString(String isoCode) {
         switch (isoCode) {
             case "ar":
                 return LanguageCodes.ar;

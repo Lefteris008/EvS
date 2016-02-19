@@ -14,28 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edmodule.peakfinding;
+package edmodule.peakfinding.event;
 
 import edmodule.utils.BinPair;
 import dsretriever.Tweet;
 import edmodule.data.PeakFindingCorpus;
+import edmodule.peakfinding.Window;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import preprocessingmodule.nlp.stemming.StemUtils;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.02.19_1712
  */
-public class PeakFindingEvents {
+public class Events {
     
     private final HashMap<String, ArrayList<Tweet>> tweetsByWindow;
     private final List<BinPair<String, Integer>> bins;
     private final List<Window<Integer, Integer>> eventWindows;
     private final ArrayList<ArrayList<Tweet>> eventsTweets = new ArrayList<>();
-    private final List<PeakFindingEvent> events = new ArrayList<>();
+    private final List<Event> events = new ArrayList<>();
     private final PeakFindingCorpus corpus;
     
     /**
@@ -46,8 +48,10 @@ public class PeakFindingEvents {
      * @param eventWindows A List of Window objects, containing the generated eventsTweets.
      * @param corpus A PeakFindingCorpus object.
      */
-    public PeakFindingEvents(HashMap<String, ArrayList<Tweet>> tweetsByWindow, 
-            List<BinPair<String, Integer>> bins, List<Window<Integer, Integer>> eventWindows, PeakFindingCorpus corpus) throws FileNotFoundException {
+    public Events(HashMap<String, ArrayList<Tweet>> tweetsByWindow, 
+            List<BinPair<String, Integer>> bins, 
+            List<Window<Integer, Integer>> eventWindows, 
+            PeakFindingCorpus corpus, StemUtils stemsHandler) throws FileNotFoundException {
         this.tweetsByWindow = new HashMap<>(tweetsByWindow);
         this.bins = new ArrayList<>(bins);
         this.eventWindows = new ArrayList<>(eventWindows);
@@ -88,7 +92,7 @@ public class PeakFindingEvents {
         });
         int i = 0;
         for(Window<Integer, Integer> window : eventWindows) {
-            PeakFindingEvent event = new PeakFindingEvent(i, window, eventsTweets.get(i), corpus);
+            Event event = new Event(i, window, eventsTweets.get(i), corpus);
             events.add(event);
             i++;
         }
@@ -96,7 +100,7 @@ public class PeakFindingEvents {
     
     /**
      * Returns the actual events. 
-     * @return A List with PeakFindingEvent object.
+     * @return A List with Event object.
      */
-    public final List<PeakFindingEvent> getEvents() { return events; }
+    public final List<Event> getEvents() { return events; }
 }

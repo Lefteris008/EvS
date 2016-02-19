@@ -16,6 +16,7 @@
  */
 package edmodule.peakfinding;
 
+import edmodule.utils.StringDateUtils;
 import edmodule.utils.BinPair;
 import edmodule.data.PeakFindingCorpus;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.02.19_1711
  */
 public class BinsCreator {
     
@@ -37,7 +38,7 @@ public class BinsCreator {
      * More formally, it creates an List of BinPair objects, containing the count
      * of tweets in pre-specified time intervals (windows).
      * @param config A Configuration object.
-     * @param window An integer indicating the time interval in which the tweets
+     * @param refreshWindow An integer indicating the time interval in which the tweets
      * should be counted.All values in minutes. <br/>
      * E.g. For 1 minute interval --> 1. <br/>
      * For half an hour interval --> 30. <br/>
@@ -46,17 +47,17 @@ public class BinsCreator {
      * @see StringDateUtils StringDateUtils class.
      * @see BinPair BinPair class.
      */
-    public final static List<BinPair<String, Integer>> createBins(PeakFindingCorpus corpus, Config config, int window) {
+    public final static List<BinPair<String, Integer>> createBins(PeakFindingCorpus corpus, Config config, int refreshWindow) {
         long startTime = System.currentTimeMillis();
         
-        HashMap<String, Integer> binsHash = corpus.createCorpus(window);
+        HashMap<String, Integer> binsHash = corpus.createCorpus(refreshWindow);
         
         List<BinPair<String, Integer>> bins = new ArrayList<>();
         Calendar cal = Calendar.getInstance();
         
         //Get earliest and latest dates of corpus
-        String earliestKey = StringDateUtils.getDateKey(cal, corpus.getEarliestDateOfCorpus(), window);
-        String latestKey = StringDateUtils.getDateKey(cal, corpus.getLatestDateOfCorpus(), window);
+        String earliestKey = StringDateUtils.getDateKey(cal, corpus.getEarliestDateOfCorpus(), refreshWindow);
+        String latestKey = StringDateUtils.getDateKey(cal, corpus.getLatestDateOfCorpus(), refreshWindow);
         int value;
         
         StringDateUtils.clearAndSetYearToMinute(cal, latestKey);
@@ -66,7 +67,7 @@ public class BinsCreator {
         //Iterate between the two dates and store all the corresponding 10-minute windows
         for (; cal.getTimeInMillis() <= endMillis; cal.add(Calendar.MINUTE, 10)) {
             
-            String currentKey = StringDateUtils.getDateKey(cal, cal.getTime(), window);
+            String currentKey = StringDateUtils.getDateKey(cal, cal.getTime(), refreshWindow);
             if(binsHash.containsKey(currentKey)) {
                 value = binsHash.get(currentKey);
             } else {

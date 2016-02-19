@@ -39,6 +39,9 @@ import java.util.LinkedList;
 /**
  *   @author yue HE, Falitokiniaina RABEARISON, Département Informatique et Statistiques, Université Lumière Lyon 2
  *   @author Adrien GUILLE, Laboratoire ERIC, Université Lumière Lyon 2
+ * 
+ * @author  Lefteris Paraskevas
+ * @version 2016.02.19_1710
  */
 public class EDCoWEvent implements Comparable<EDCoWEvent>{
     public LinkedList<String> keywords;
@@ -56,7 +59,7 @@ public class EDCoWEvent implements Comparable<EDCoWEvent>{
         keywords = new LinkedList<>();
     }
     
-    public String getKeywordsAsString(){
+    public String getKeywordsIDsAsString(){
         String str = "";
         for(String keyword : keywords){
             str += keyword+" ";

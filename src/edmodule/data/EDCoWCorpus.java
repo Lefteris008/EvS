@@ -19,7 +19,7 @@ package edmodule.data;
 import dsretriever.Tweet;
 import edmodule.edcow.frequencies.DocumentTermFrequencyItem;
 import edmodule.utils.BinPair;
-import edmodule.peakfinding.StringDateUtils;
+import edmodule.utils.StringDateUtils;
 import edmodule.utils.Stemmers;
 import edmodule.utils.StopWordsHandlers;
 import java.util.ArrayList;
@@ -39,13 +39,13 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.02.19_1709
  */
 public class EDCoWCorpus {
     
     private final Config config;
     private List<Tweet> tweets;
-    private int refreshWindow;
+    private final int refreshWindow;
     private final StopWordsHandlers swH;
     private Integer[] numberOfDocuments;
     private final List<BinPair<String, Integer>> bins = new ArrayList<>();
@@ -53,6 +53,7 @@ public class EDCoWCorpus {
     private final List<DocumentTermFrequencyItem> termDocFreqId = new ArrayList<>(); //A list containg triplets of tweetIDs, termIDs and their frequenciesprivate final HashMap<Integer, List<String>> docTerms = new HashMap<>(); //A map containing the tweetIDs and a list of the terms that each one of them includes
     private int numberOfTweets = 0;
     private final HashMap<String, HashMap<String, Integer>> termsDocsWithOccurencies = new HashMap<>();
+    private final HashMap<String, ArrayList<String>> idsDocs = new HashMap<>();
     private final HashMap<String, Integer> termIds = new HashMap<>(); //A map containing the ids of the terms (namely, their index as they are being read)
     private final HashMap<String, Integer> messageDistribution = new HashMap<>();
     private final HashMap<String, Integer> documentIndices = new HashMap<>();
@@ -129,7 +130,7 @@ public class EDCoWCorpus {
             //Count the tweet, update the distribution, get the docKey
             //and update the corresponding HashMap
             numberOfTweets++;
-            docKey = updateMessageDistribution(cal, tweet.getDate(), refreshWindow);
+            docKey = updateMessageDistribution(cal, tweet.getDate());
             if(!documentIndices.containsKey(docKey)) {
                 documentIndices.put(docKey, documentCount);
                 documentCount++;
@@ -137,13 +138,14 @@ public class EDCoWCorpus {
             
             //Get the tweet's text and tokenize it
             String text = tweet.getText();
+            String id = String.valueOf(tweet.getID());
             Tokenizer tokens = new Tokenizer(config, text, 
-                    swH.getSWHandlerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())));
+                    swH.getSWHandlerAccordingToLanguage(LangUtils.getLangISOFromString(tweet.getLanguage())));
 
             //Iterate through the stemmed clean tokens/hashtags
             
             for(String token : stemHandler.getStemsAsList(tokens.getCleanTokensAndHashtags(),
-                    Stemmers.getStemmerAccordingToLanguage(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())))) {
+                    Stemmers.getStemmer(LangUtils.getLangISOFromString(tweet.getLanguage())))) {
                 
                 //Update the HashMap with the triplet Document, Token, Frequency
                 if(termsDocsWithOccurencies.containsKey(docKey)) { //Document already exists, update it
@@ -159,14 +161,24 @@ public class EDCoWCorpus {
                     termsDocsWithOccurencies.put(docKey, termsWithOccurencies);
                 }
                 
+                
+                
                 //Generate a HashMap containig the index IDs of the terms
                 if(!termIds.containsKey(token)) {
                     termIds.put(token, termCount);
                     termCount++;
                 }
             }
+            //Store the tweet ID too
+            if(idsDocs.containsKey(docKey)) {
+                idsDocs.get(docKey).add(id);
+            } else {
+                ArrayList<String> temp = new ArrayList<>();
+                temp.add(id);
+                idsDocs.put(docKey, temp);
+            }
         }
-        setNumberOfDocuments(10, messageDistribution);
+        setNumberOfDocuments(messageDistribution);
         
         long endTime = System.currentTimeMillis();
         Utilities.printExecutionTime(startTime, endTime, EDCoWCorpus.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
@@ -188,26 +200,27 @@ public class EDCoWCorpus {
      * For December 6th, 2014 10:07 PM, the generated key would be 20141206_2200
      * For January 21st, 2015 10:27 AM, the generated key would be 20150121_1020
      */
-    public final String updateMessageDistribution(Calendar cal, Date date, int refreshWindow) {
-        int year;
-        int month;
-        int day;
-        int hour;
-        int minute;
-        cal.setTime(date);
-        year = cal.get(Calendar.YEAR); //Current year
-        month = cal.get(Calendar.MONTH) + 1; //Zero-index based
-        day = cal.get(Calendar.DAY_OF_MONTH); //Get the current day of month
-        hour = cal.get(Calendar.HOUR_OF_DAY); //24h
-        minute = cal.get(Calendar.MINUTE) / refreshWindow; //Nearest 10-minute window, starting from 0
-        
-        //Assemble the key in YYYYMMDD_HHMM form.
-        String key = String.valueOf(year) 
-                + (month < 10 ? "0" + String.valueOf(month) : String.valueOf(month)) 
-                + (day < 10 ? "0" + String.valueOf(day) : String.valueOf(day))
-                + "_" //Separate actual date from hour information
-                + (hour < 10 ? "0" + String.valueOf(hour) : String.valueOf(hour))
-                + String.valueOf(minute) + "0";
+    public final String updateMessageDistribution(Calendar cal, Date date) {
+//        int year;
+//        int month;
+//        int day;
+//        int hour;
+//        int minute;
+//        cal.setTime(date);
+//        year = cal.get(Calendar.YEAR); //Current year
+//        month = cal.get(Calendar.MONTH) + 1; //Zero-index based
+//        day = cal.get(Calendar.DAY_OF_MONTH); //Get the current day of month
+//        hour = cal.get(Calendar.HOUR_OF_DAY); //24h
+//        minute = cal.get(Calendar.MINUTE) / refreshWindow; //Nearest 10-minute window, starting from 0
+//        
+//        //Assemble the key in YYYYMMDD_HHMM form.
+//        String key = String.valueOf(year) 
+//                + (month < 10 ? "0" + String.valueOf(month) : String.valueOf(month)) 
+//                + (day < 10 ? "0" + String.valueOf(day) : String.valueOf(day))
+//                + "_" //Separate actual date from hour information
+//                + (hour < 10 ? "0" + String.valueOf(hour) : String.valueOf(hour))
+//                + String.valueOf(minute) + "0";
+        String key = StringDateUtils.getDateKey(cal, date, refreshWindow);
         
         if(messageDistribution.containsKey(key)) {
             messageDistribution.put(key, messageDistribution.get(key) + 1);
@@ -301,16 +314,15 @@ public class EDCoWCorpus {
     /**
      * Sets an integer array of numberOfDocuments size that contains
      * the tweets distribution of the user-defined window.
-     * @param window An integer representing the refresh window.
      * @param numberOfDocuments A HashMap containing the tweets distribution.
      */
-    private void setNumberOfDocuments(int window, HashMap<String, Integer> distribution) {
+    private void setNumberOfDocuments(HashMap<String, Integer> distribution) {
         
         Calendar cal = Calendar.getInstance();
         
         //Get earliest and latest dates of corpus
-        String earliestKey = StringDateUtils.getDateKey(cal, getEarliestDateOfCorpus(), window);
-        String latestKey = StringDateUtils.getDateKey(cal, getLatestDateOfCorpus(), window);
+        String earliestKey = StringDateUtils.getDateKey(cal, getEarliestDateOfCorpus(), refreshWindow);
+        String latestKey = StringDateUtils.getDateKey(cal, getLatestDateOfCorpus(), refreshWindow);
         int value;
         
         StringDateUtils.clearAndSetYearToMinute(cal, latestKey);
@@ -318,9 +330,9 @@ public class EDCoWCorpus {
         StringDateUtils.clearAndSetYearToMinute(cal, earliestKey);
         
         //Iterate between the two dates and store all the corresponding 10-minute windows
-        for (; cal.getTimeInMillis() <= endMillis; cal.add(Calendar.MINUTE, window)) {
+        for (; cal.getTimeInMillis() <= endMillis; cal.add(Calendar.MINUTE, refreshWindow)) {
             
-            String currentKey = StringDateUtils.getDateKey(cal, cal.getTime(), window);
+            String currentKey = StringDateUtils.getDateKey(cal, cal.getTime(), refreshWindow);
             if(distribution.containsKey(currentKey)) {
                 value = distribution.get(currentKey);
             } else {
@@ -371,4 +383,38 @@ public class EDCoWCorpus {
      * @return A stemUtils object.
      */
     public final StemUtils getStemsHandler() { return stemHandler; }
+    
+    /**
+     * Method to convert a timeslice used in EDCoW analysis into its date.
+     * @param timeSlice An integer representing the timeslice of the analysis.
+     * @return A String representing the date of the timeslice.
+     */
+    public final String getDateFromTimeSlice(int timeSlice) {
+        return bins.get(timeSlice).getBin();
+    }
+    
+    /**
+     * Method to get all tweet IDs in a specific window [start, end).
+     * @param start A String with starting point of the window, assembled in YYYYMMDD_HHMM fashion.
+     * @param end A String with ending point of the window, assembled in YYYYMMDD_HHMM fashion.
+     * @return The tweet IDs separated by white spaces.
+     */
+    public final String getIDsOfWindowAsString(String start, String end) {
+        Calendar cal = Calendar.getInstance();
+        StringBuilder ids = new StringBuilder();
+        
+        StringDateUtils.clearAndSetYearToMinute(cal, end);
+        long endMillis = cal.getTimeInMillis();
+        StringDateUtils.clearAndSetYearToMinute(cal, start);
+        
+        //Iterate between the two dates and store all the corresponding 10-minute windows
+        for (; cal.getTimeInMillis() <= endMillis; cal.add(Calendar.MINUTE, refreshWindow)) {
+            
+            String currentKey = StringDateUtils.getDateKey(cal, cal.getTime(), refreshWindow);
+            idsDocs.get(currentKey).stream().forEach((id) -> {
+                ids.append(id).append(" ");
+            }); //ids.append(idsDocs.get(currentKey));
+        }
+        return ids.toString();
+    }
 }

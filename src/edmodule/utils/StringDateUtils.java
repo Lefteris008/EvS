@@ -14,20 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edmodule.peakfinding;
+package edmodule.utils;
 
+import dsretriever.Utils;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.02.19_1712
  */
 public class StringDateUtils {
     
     /**
-     * Method to return a String date key, assembled in YYYYMMDD_HHMM.
+     * Method to return a String date key, assembled in YYYYMMDD_HHMM. <br/>
      * More formally, the key is constructed by a given date and is mapped
      * to the nearest minute refresh window ('window' variable). <br/>
      * E.g. for 10-minute refresh window, the key is mapped to the nearest 10-minute. <br/>
@@ -127,6 +134,22 @@ public class StringDateUtils {
             StringDateUtils.getDayOfMonth(dateKey),
             StringDateUtils.getHourOfDay(dateKey),
             StringDateUtils.getMinuteOfHour(dateKey));
+    }
+    
+    /**
+     * Returns a complete Date object from a
+     * @param date
+     * @return 
+     */
+    public final static Date getDateFromString(String date) {
+        try {
+            DateFormat format = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.ENGLISH);
+            return format.parse(date);
+        } catch(ParseException e) {
+            System.err.println("Input String was malformed.");
+            Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, e);
+            return null;
+        }
     }
     
     public final static boolean matchDate(Date date) {

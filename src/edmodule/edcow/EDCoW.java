@@ -20,6 +20,7 @@ import edmodule.edcow.event.Events;
 import ch.epfl.lis.jmod.modularity.community.Community;
 import edmodule.EDMethod;
 import edmodule.data.EDCoWCorpus;
+import edmodule.edcow.event.Event;
 import java.util.*;
 
 import java.util.logging.Level;
@@ -32,7 +33,7 @@ import utilities.Utilities;
  * @email   adrien.guille@univ-lyon2.fr
  * 
  * @author  Lefteris Paraskevas (configurations in EDCoW to omit missing components)
- * @version 2016.01.31_1921 (For EDviaSA project version alignment) 
+ * @version 2016.02.19_1709 (For EDviaSA project version alignment) 
  */
 public class EDCoW implements EDMethod {
     private final int delta; //6
@@ -41,7 +42,7 @@ public class EDCoW implements EDMethod {
     private final double minTermSupport; //0.0001
     private final double maxTermSupport; //0.01
     private HashMap<String, Integer[]> termDocMap;
-    public LinkedList<EDCoWEvent> eventList;
+    private LinkedList<EDCoWEvent> eventList;
     private final int timeSliceA;
     private final int timeSliceB;
     private int countCorpus = 0; //Total number of tweets
@@ -172,9 +173,22 @@ public class EDCoW implements EDMethod {
         }
         Collections.sort(eventList);
         events = new Events();
+        
         eventList.stream().forEach((event) -> {
-            //events.list.add(new Event(event.getKeywordsAsString(),AppParameters.dataset.corpus.convertTimeSliceToDay((int)event.startSlice)+","+AppParameters.dataset.corpus.convertTimeSliceToDay((int)event.endSlice)));
+            //try {
+                events.list.add(new Event(
+                        event.getKeywordsIDsAsString(), 
+                        corpus.getDateFromTimeSlice(
+                                (int)event.startSlice) + "," 
+                                + corpus.getDateFromTimeSlice((int)event.endSlice - 1), 
+                        corpus.getIDsOfWindowAsString(
+                                corpus.getDateFromTimeSlice((int)event.startSlice), 
+                                corpus.getDateFromTimeSlice((int)event.endSlice - 1))));
+//            } catch(ArrayIndexOutOfBoundsException e) {
+//                System.out.println("");
+//            }
         });
+        
         events.setFullList();
         
         long endTime = System.currentTimeMillis();
@@ -192,7 +206,7 @@ public class EDCoW implements EDMethod {
             Integer[] distributioni = corpus.getNumberOfDocuments();
             double[] distributiond = new double[delta2];
             int startSlice = window * delta2;
-            int endSlice = startSlice + delta2;
+            int endSlice = startSlice + delta2 - 1;
             for(int i = startSlice; i < endSlice; i++){
                 distributiond[i-startSlice] = (double) distributioni[i]; 
             }

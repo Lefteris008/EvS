@@ -16,14 +16,23 @@
  */
 package utilities;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.02.19_1657
  */
 public class Utilities {
     
@@ -47,6 +56,7 @@ public class Utilities {
      * Supplies a message to the error stream, formatting it according to a 
      * standard form, appending '\n' escape character at the end.
      * @param message The message to be printed.
+     * @see printMessage() printMessage() method.
      */
     public final static void printMessageln(String message) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -58,14 +68,40 @@ public class Utilities {
     
     /**
      * Supplies a message to the error stream, formatting it according to a 
-     * standard form without creating a new line.
+     * standard form, without creating a new line.
      * @param message The message to be printed.
+     * @see printMessageln() printMessageln() method.
      */
-    public final static void printInfoMessage(String message) {
+    public final static void printMessage(String message) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Calendar cal = Calendar.getInstance();
         System.err.print("INFO: " + 
                 dateFormat.format(cal.getTime()) + " " + 
                 message);
+    }
+    
+    /**
+     * Exports a List of Strings to a standard UTF-8 file.
+     * @param filePath The directory along with the name of the file.
+     * @param lines A List containing the lines of the file as Strings.
+     * @param appendToFile If true the contents of 'lines' are going to be appended
+     * to the end of the file. False always replaces file's contents.
+     * @return True if the process succeeds, false otherwise.
+     */
+    public final static boolean exportToFileUTF_8(String filePath, List<String> lines, boolean appendToFile) {
+        Path file = Paths.get(filePath);
+        try {
+            if(appendToFile) {
+                Files.write(file, lines, Charset.forName("UTF-8"), StandardOpenOption.APPEND);
+            } else {
+                Files.write(file, lines, Charset.forName("UTF-8"));
+            }
+            printMessageln("Successfully exported to file.");
+            return true;
+        } catch (IOException e) {
+            printMessageln("There was a problem exporting to file.");
+            Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
+            return false;
+        }
     }
 }

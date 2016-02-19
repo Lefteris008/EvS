@@ -21,7 +21,7 @@ import java.util.Date;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.02.19_1707
  */
 public class Tweet {
     
@@ -37,11 +37,13 @@ public class Tweet {
     private final boolean favorited;
     private final boolean retweeted;
     private final String language;
+    private final long retweetId;
+    private final int sentiment;
     
     public Tweet(long id, String username, String text, Date date, 
             double latitude, double longitude, int numberOfRetweets, 
             int numberOfFavorites, boolean retweet, boolean favorited, 
-            boolean retweeted, String language) {
+            boolean retweeted, String language, long retweetId, int sentiment) {
         
         this.id = id;
         this.username = username;
@@ -55,6 +57,8 @@ public class Tweet {
         this.favorited = favorited;
         this.retweeted = retweeted;
         this.language = language;
+        this.retweetId = retweetId;
+        this.sentiment = sentiment;
     }
     
     /**
@@ -128,6 +132,37 @@ public class Tweet {
      * @return A String containing the abbreviation of the tweet's language.
      */
     public String getLanguage() { return language; }
+    
+    /**
+     * Returns the original ID of the retweet or -1 if there isn't any.
+     * @return An integer with the original ID of the retweet or -1.
+     */
+    public long getOriginalIDOfRetweet() { return retweetId; }
+    
+    /**
+     * Returns the sentiment of a tweet.
+     * @return An integer in the range of 0 to 5, with the lower the more negative.
+     */
+    public int getSentiment() { return sentiment; }
+    
+    /**
+     * Method to return a 64-bit hash code for the tweet, based on its text.
+     * @return A long representing the hash code.
+     */
+    public long getCustomHashCode() {
+        long hash = 0;
+        long h = hash;
+        char[] value = text.toCharArray();
+        if (h == 0 && value.length > 0) {
+            char val[] = value;
+
+            for (int i = 0; i < value.length; i++) {
+                h = 63 * h + val[i];
+            }
+            hash = h;
+        }
+        return h;
+    }
         
     /**
      * Prints the tweet metadata along with its text.

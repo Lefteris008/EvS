@@ -36,7 +36,7 @@ import preprocessingmodule.PreProcessor;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.02.19_1708
  */
 public class Utils {
     
@@ -176,7 +176,7 @@ public class Utils {
      */
     public final static Date stringToDate(String date, ArrayList<String> tweet) {
         try {
-            DateFormat format = new SimpleDateFormat("h:m a - d MMM yyyy", Locale.ENGLISH);
+            DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
             return format.parse(date);
         } catch(ParseException e) {
             System.err.println("Input String was malformed.");

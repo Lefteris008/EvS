@@ -24,20 +24,24 @@ import java.io.Serializable;
 
 /**
  *
- *   @author Adrien GUILLE, Laboratoire ERIC, Université Lumière Lyon 2
+ * @author  Adrien GUILLE, Laboratoire ERIC, Université Lumière Lyon 2
+ * @author  Lefteris Paraskevas
+ * @version 2016.02.19_1710
  */
 public class Event implements Serializable {
     private SimpleStringProperty textualDescription;
     private SimpleStringProperty temporalDescription;
+    private SimpleStringProperty physicalDescription;
     private SimpleDoubleProperty score;
 
-    public Event(String text, String temp) {
-        this(text, temp, 0);
+    public Event(String text, String temp, String physical) {
+        this(text, temp, physical, 0);
     }
 
-    public Event(String text, String temp, double score) {
+    public Event(String text, String temp, String physical, double score) {
         textualDescription = new SimpleStringProperty(text);
         temporalDescription = new SimpleStringProperty(temp);
+        physicalDescription = new SimpleStringProperty(physical);
         this.score = new SimpleDoubleProperty(score);
     }
 
@@ -47,6 +51,18 @@ public class Event implements Serializable {
 
     public String getTemporalDescription() {
         return temporalDescription.get();
+    }
+    
+    public String getPhysicalDescription() {
+        return physicalDescription.get();
+    }
+    
+    public String getTemporalDescriptionLowerBound() {
+        return temporalDescription.getValue().split(",")[0];
+    }
+    
+    public String getTemporalDescriptionUpperBound() {
+        return temporalDescription.getValue().split(",")[1];
     }
 
     public void setTextualDescription(String newText) {

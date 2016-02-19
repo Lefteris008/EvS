@@ -16,8 +16,9 @@
  */
 package edmodule.data;
 
+import dsretriever.MongoHandler;
 import dsretriever.Tweet;
-import edmodule.peakfinding.StringDateUtils;
+import edmodule.utils.StringDateUtils;
 import edmodule.utils.StopWordsHandlers;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -25,12 +26,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import utilities.Config;
-import utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.02.19_1709
  */
 public class PeakFindingCorpus {
     
@@ -52,34 +52,22 @@ public class PeakFindingCorpus {
         this.config = config;
         this.swH = swH;
         this.tweets = tweets;
-        removeDublicateTweets();
+        removeRetweets();
     }
     
-    /**
-     * Method to quickly remove duplicate tweets.
-     * More formally, this method hashes the tweets by its text and stores
-     * the first one to show up. Tweets that have the exact same text, were
-     * ignored. Finally, the new list replaces the 'tweets' collection.
-     */
-    private void removeDublicateTweets() {
-        Utilities.printMessageln("Removing dublicates...");
-        long startTime = System.currentTimeMillis();
-        
-        HashMap<Integer, Tweet> uniqueTweetsMap = new HashMap<>();
-        tweets.stream().filter((tweet) -> (!uniqueTweetsMap.containsKey(
-                tweet.getText().hashCode()))).forEach((tweet) -> {
-            uniqueTweetsMap.put(tweet.getText().hashCode(), tweet);
-        });
-        List<Tweet> cleanedTweets = new ArrayList<>(uniqueTweetsMap.values());
-        
-        long endTime = System.currentTimeMillis();
-        Utilities.printExecutionTime(startTime, endTime, PeakFindingCorpus.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
-        Utilities.printMessageln("Original size of tweets: " + tweets.size());
-        Utilities.printMessageln("New size of tweets: " + cleanedTweets.size());
-        Utilities.printMessageln("Removed " + (tweets.size() - cleanedTweets.size()) + " duplicates.");
-        tweets = new ArrayList<>(cleanedTweets);
+    private void removeRetweets() {
+        MongoHandler mongo = new MongoHandler(config);
+        mongo.connectToMongoDB();
+        for(int i = 0; i < tweets.size(); i++) {
+            Tweet tweet = tweets.get(i);
+            
+            //If the tweet is a retweet and the source of it exists, remove it
+            if(tweet.isRetweet() && mongo.tweetExists(tweet.getOriginalIDOfRetweet())) {
+                tweets.remove(tweet);
+            }
+        }
+        mongo.closeMongoConnection();
     }
-    
     /**
      * Method to create and return the windows needed for OfflinePeakFinding 
      * algorithm to operate.

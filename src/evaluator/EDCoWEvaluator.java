@@ -16,15 +16,16 @@
  */
 package evaluator;
 
-import edmodule.edcow.EDCoWEvent;
+import edmodule.edcow.event.Event;
+import edmodule.edcow.event.Events;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +36,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.02.19_1712
  */
 public class EDCoWEvaluator {
     private final int delta;
@@ -45,12 +46,14 @@ public class EDCoWEvaluator {
     private final int timeSliceB;
     private final double minTermSupport;
     private final double maxTermSupport;
-    private final LinkedList<EDCoWEvent> eventList;
+    private final List<Event> eventList;
     private final Config config;
-    private final HashMap<Integer, HashSet<String>> groundTruthEvents = new HashMap<>();
+    private final HashMap<Integer, HashSet<String>> groundTruthTermsPerEvent = new HashMap<>();
+    private final HashMap<Integer, HashSet<String>> groundTruthIDsPerEvent = new HashMap<>();
     private final StemUtils stemsHandler;
     private final List<Double> precisionByEvent = new ArrayList<>();
     private final List<Double> recallByEvent = new ArrayList<>();
+    private final HashSet<Integer> assignedEvents = new HashSet<>();
     
     /**
      * Public constructor.
@@ -66,7 +69,7 @@ public class EDCoWEvaluator {
      */
     public EDCoWEvaluator(int delta, int delta2, int gamma, int timeSliceA, 
             int timeSliceB, double minTermSupport, double maxTermSupport, 
-            LinkedList<EDCoWEvent> eventList, Config config, StemUtils stemsHandler) {
+            Events events, Config config, StemUtils stemsHandler) {
         this.delta = delta;
         this.delta2 = delta2;
         this.gamma = gamma;
@@ -74,7 +77,7 @@ public class EDCoWEvaluator {
         this.timeSliceB = timeSliceB;
         this.minTermSupport = minTermSupport;
         this.maxTermSupport = maxTermSupport;
-        this.eventList = eventList;
+        this.eventList = events.list;
         this.config = config;
         this.stemsHandler = stemsHandler;
         loadGroundTruthDataset();
@@ -90,16 +93,19 @@ public class EDCoWEvaluator {
                 config.getResourcesPath() + config.getGroundTruthDataFile()))) {
             String line;
             String[] terms;
+            String[] ids;
             int i = 1;
             while ((line = br.readLine()) != null) {
-//               String[] temp = line.split("\t");
-//               terms = temp[2].split(",");
                terms = line.split("\t")[2].split(",");
+               ids = line.split("\t")[3].split(",");
                HashSet<String> termSet = new HashSet<>();
+               HashSet<String> idsSet = new HashSet<>();
                for(String term : terms) {
                    termSet.add(term.toLowerCase());
                }
-               groundTruthEvents.put(i, termSet);
+               groundTruthTermsPerEvent.put(i, termSet);
+               idsSet.addAll(Arrays.asList(ids));
+               groundTruthIDsPerEvent.put(i, idsSet);
                i++;
             }
         } catch (FileNotFoundException e) {
@@ -116,55 +122,93 @@ public class EDCoWEvaluator {
      * data into a file, along with other useful metrics.
      */
     public void evaluate() {
-        LinkedList<String> calculatedKeywords;
+        List<String> calculatedKeywords;
+        List<String> ids;
         HashSet<String> groundTruthKeywords;
         int groundTruthKeywordSize;
         int matchedItems;
         double recall;
         double precision;
         int eventKey;
-        for(EDCoWEvent event : eventList) {
+        for(Event event : eventList) {
             matchedItems = 0;
-            recall = 0;
-            precision = 0;
-            calculatedKeywords = new LinkedList<>(event.keywords);
+            ids = new ArrayList<>(Arrays.asList(
+                    event.getPhysicalDescription().split(" ")));
             eventKey = -1;
-            for(String keyoword : calculatedKeywords) {
-                eventKey = findEventByTerm(stemsHandler.getOriginalWord(keyoword)
-                        .toLowerCase());
+            for(String id : ids) {
+                eventKey = findEventById(id);
                 if(eventKey != -1) {
                     break;
                 }
             }
+            calculatedKeywords = new ArrayList<>(
+                    Arrays.asList(event.getTextualDescription().split(" ")));
             if(eventKey != -1) {
-                Utilities.printMessageln("Found: " + eventKey);
-                groundTruthKeywords = new HashSet<>(groundTruthEvents.get(eventKey));
+                Utilities.printMessageln("Event found: " + eventKey);
+                
+                //Get the ground truth keywords and compare them 1 by 1
+                groundTruthKeywords = new HashSet<>(groundTruthTermsPerEvent.get(eventKey));
                 groundTruthKeywordSize = groundTruthKeywords.size();
                 for(String keyword : calculatedKeywords) {
-                    if(groundTruthKeywords.contains(stemsHandler
-                            .getOriginalWord(keyword).toLowerCase())) {
-                        matchedItems++;
+                    if(matchedItems != groundTruthKeywordSize) {
+                        for(String groundTruthKeyword : groundTruthKeywords) {
+                            if(stemsHandler.getOriginalWord(keyword).contains(groundTruthKeyword.toLowerCase())) {
+                                matchedItems++;
+                            }
+                        }
+                    } else {
+                        break; //We matched all terms, so break iteration
                     }
                 }
-                recall = matchedItems / groundTruthKeywordSize;
-                precision = matchedItems / calculatedKeywords.size();
-                recallByEvent.add(recall);
-                precisionByEvent.add(precision);
+                recall = (double) matchedItems / (double) groundTruthKeywordSize;
+                precision = (double) matchedItems / (double) calculatedKeywords.size();
+                Utilities.printMessageln("Out of " + calculatedKeywords.size() + " items:");
+                Utilities.printMessageln("Matched " + matchedItems + " out of " 
+                        + groundTruthKeywordSize + " ground truth terms.");
+                Utilities.printMessageln("Recall: " + recall);
+                Utilities.printMessageln("Precision: " + precision);
             } else {
                 Utilities.printMessageln("Event not found");
+                recall = 0;
+                precision = 0;
             }
-        } 
+            recallByEvent.add(recall);
+            precisionByEvent.add(precision);
+        }
+        
     }
     
     /**
-     * Returns the index of the matched event from the groundTruthEvents map.
+     * Returns the index of the matched event from the groundTruthTermsPerEvent map.
      * @param term A String representing the term.
      * @return An integer representing the actual event index or -1 if not found.
      */
     private int findEventByTerm(String term) {
-        for(Integer key : groundTruthEvents.keySet()) {
-            HashSet<String> termSet = new HashSet<>(groundTruthEvents.get(key));
-            if(termSet.contains(term)) {
+        for(Integer key : groundTruthTermsPerEvent.keySet()) {
+            HashSet<String> termSet = new HashSet<>(groundTruthTermsPerEvent.get(key));
+            for(String _term : termSet) {
+                if(term.contains(_term.toLowerCase()) && !assignedEvents.contains(key)) {
+                    assignedEvents.add(key);
+                    return key;
+                }
+            }
+//            if(termSet.contains(term)) {
+//                return key;
+//            }
+        }
+        return -1;
+    }
+    
+    /**
+     * Find a ground truth event by a tweet ID.
+     * @param id The tweet ID to be searched for.
+     * @return The retrieved event key from the analysis.
+     */
+    private int findEventById(String id) {
+        for(Integer key : groundTruthIDsPerEvent.keySet()) {
+            HashSet<String> idsSet = new HashSet<>(groundTruthIDsPerEvent.get(key));
+            if(idsSet.contains(id) && !assignedEvents.contains(key)) {
+                assignedEvents.add(key);
                 return key;
             }
         }
@@ -176,7 +220,7 @@ public class EDCoWEvaluator {
      * @return A double containing the total recall of the calculated dataset
      * compared with the ground truth data.
      */
-    public final double getRecall() {
+    public final double getTotalRecall() {
         double totalRecall = 0;
         totalRecall = recallByEvent.stream().mapToDouble((recall) -> recall)
                 .reduce(totalRecall, (accumulator, _item) -> accumulator + _item);
@@ -188,10 +232,18 @@ public class EDCoWEvaluator {
      * @return A double containing the total precision of the calculated dataset
      * compared with the ground truth data.
      */
-    public final double getPrecision() {
+    public final double getTotalPrecision() {
         double totalPrecision = 0;
         totalPrecision = precisionByEvent.stream().mapToDouble((precision) -> precision)
                 .reduce(totalPrecision, (accumulator, _item) -> accumulator + _item);
         return totalPrecision;
+    }
+    
+    public final double getRecall(int index) {
+        return recallByEvent.get(index);
+    }
+    
+    public final double getPrecision(int index) {
+        return precisionByEvent.get(index);
     }
 }

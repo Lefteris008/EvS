@@ -32,11 +32,12 @@ import preprocessingmodule.nlp.Tokenizer;
 import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.nlp.stopwords.StopWords;
 import samodule.SentimentAnalyzer;
+import utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.02.19_1657
  */
 public class PreProcessor {
     
@@ -49,10 +50,9 @@ public class PreProcessor {
     public final static void main(String[] args) throws IOException {
         
         if(!showMongoLogging) {
-            
             //Stop reporting logging information
             Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
-            mongoLogger.setLevel(Level.SEVERE); 
+            mongoLogger.setLevel(Level.SEVERE);
         }
 
         int choice;
@@ -75,14 +75,14 @@ public class PreProcessor {
                 MongoHandler mongoDB = new MongoHandler(config);
                 try {
                     //Establish the connection
-                    mongoDB.connectToMongoDB(config);
+                    mongoDB.connectToMongoDB();
 
                     System.out.print("Type in the ID you want to search for: ");
                     long id = keyboard.nextLong();
 
                     //Get tweet and print its data
                     System.out.println("Test search for tweet with ID: '"+ id + "'");
-                    Tweet tweet = mongoDB.getATweetByIdFromMongoDBStore(config, id);
+                    Tweet tweet = mongoDB.getATweetByIdFromMongoDBStore(id);
                     tweet.printTweetData();
 
                     //Sentiment part
@@ -92,14 +92,14 @@ public class PreProcessor {
 
                     //Preprocess part
                     StopWords sw = new StopWords(config);
-                    sw.loadStopWords(LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())); //Load stopwords
+                    sw.loadStopWords(LangUtils.getLangISOFromString(tweet.getLanguage())); //Load stopwords
                     Tokenizer tk = new Tokenizer(config, tweet.getText(), sw);
                     tk.textTokenizingTester();
                     break;
                 } catch(MongoException e) {
                     System.out.println("Error: Can't establish a connection with MongoDB");
                     Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
-                    mongoDB.closeMongoConnection(config); //Close DB
+                    mongoDB.closeMongoConnection(); //Close DB
                 } 
             } case 2: {
                 EDMethodPicker.selectEDMethod(config);
@@ -107,6 +107,31 @@ public class PreProcessor {
             } case 3: {
                 System.out.println("Not supported yet");
                 break;
+            } case 4: {
+                MongoHandler mongo = new MongoHandler(config);
+                mongo.connectToMongoDB();
+                List<Tweet> tweets = mongo.retrieveAllTweetsFromMongoDBStore();
+                Utilities.printMessageln("Starting calculating sentiment annotations...");
+                countSentimentAnnotatedTweets(mongo, tweets);
+                mongo.closeMongoConnection();
+                break;
+            } case 5: {
+                MongoHandler mongo = new MongoHandler(config);
+                mongo.connectToMongoDB();
+                List<Tweet> tweets = mongo.retrieveAllTweetsFromMongoDBStore();
+                removeRetweets(mongo, tweets);
+                int sentiment;
+                
+                Utilities.printMessageln("Starting calculating sentiment.");
+                SentimentAnalyzer.initAnalyzer(true);
+                for(Tweet tweet : tweets) {
+                    if(!mongo.tweetHasSentiment(tweet.getID())) {
+                        sentiment = SentimentAnalyzer.getSentimentOfSentence(tweet.getText());
+                        mongo.updateTweetWithSentiment(tweet.getID(), sentiment);
+                    }
+                }
+                SentimentAnalyzer.postActions(true);
+                mongo.closeMongoConnection();
             } default : {
                 System.out.println("Wrong choice. Exiting now...");
             }
@@ -137,4 +162,30 @@ public class PreProcessor {
     public final static void retrieveByStreamingAPI(Config config, MongoHandler mongoDB, String[] keywords) {
         new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords, mongoDB, config); //Run the streamer
     }
+    
+    private static void removeRetweets(MongoHandler mongo, List<Tweet> tweets) {
+        Utilities.printMessageln("Removing tweets...");
+        int initialSize = tweets.size();
+        for(int i = 0; i < tweets.size(); i++) {
+            Tweet tweet = tweets.get(i);
+            
+            //If the tweet is a retweet and the source of it exists, remove it
+            if(tweet.isRetweet() && mongo.tweetExists(tweet.getOriginalIDOfRetweet())) {
+                tweets.remove(tweet);
+            }
+        }
+        Utilities.printMessageln("Removed " + (initialSize - tweets.size()) + " tweets.");
+    }
+    
+    private static void countSentimentAnnotatedTweets(MongoHandler mongo, List<Tweet> tweets) {
+        int counter = 0;
+        for(Tweet tweet : tweets) {
+            if(mongo.tweetHasSentiment(tweet.getID())) {
+                counter++;
+            }
+        }
+        Utilities.printMessageln("Total sentiment annotated tweets: " + counter);
+    }
+    
+    
 }

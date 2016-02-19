@@ -14,47 +14,56 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edmodule.peakfinding;
+package edmodule.peakfinding.event;
 
 import dsretriever.Tweet;
 import edmodule.data.PeakFindingCorpus;
+import edmodule.peakfinding.Window;
 import edmodule.utils.Stemmers;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.nlp.Tokenizer;
 import preprocessingmodule.nlp.stemming.StemUtils;
+import samodule.SentimentAnalyzer;
 import utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.02.19_1711
  */
-public class PeakFindingEvent {
+public class Event {
     
     private final int id;
     private final Window<Integer, Integer> window;
-    private final List<Tweet> tweets;
+    private final List<Tweet> tweetsOfEvent;
     private final List<String> commonTerms = new ArrayList<>();
+    private HashSet<String> allTerms;
     private final PeakFindingCorpus corpus;
+    private StemUtils stemsHandler;
+    private int mainSentiment;
     
     /**
      * Public constructor. It creates an event.
      * @param id A String with the id of the event.
      * @param window A Window object with the window of the event.
-     * @param tweets A List of String containing the corresponding tweets of the
-     * event.
+     * @param tweetsOfEvent A List of String containing the corresponding tweetsOfEvent of the
+ event.
      * @param corpus A PeakFindingCorpus object.
      */
-    public PeakFindingEvent(int id, Window<Integer, Integer> window, List<Tweet> tweets, PeakFindingCorpus corpus) {
+    public Event(int id, Window<Integer, Integer> window, List<Tweet> tweetsOfEvent, 
+            PeakFindingCorpus corpus) {
         this.id = id;
         this.window = window;
-        this.tweets = new ArrayList<>(tweets);
+        this.tweetsOfEvent = new ArrayList<>(tweetsOfEvent);
         this.corpus = corpus;
+        this.stemsHandler =  new StemUtils();
         generateCommonTerms();
+        calculateMainSentimentOfEvent();
     }
     
     /**
@@ -69,42 +78,67 @@ public class PeakFindingEvent {
      */
     public final Window<Integer, Integer> getWindow() { return window; }
     
+    private void calculateMainSentimentOfEvent() {
+        int positiveCounter = 0;
+        int negativeCounter = 0;
+        int returnedSentiment;
+        SentimentAnalyzer.initAnalyzer(true);
+        for(Tweet tweet : tweetsOfEvent) {
+            returnedSentiment = SentimentAnalyzer
+                    .getSentimentOfSentence(tweet.getText());
+            if(returnedSentiment < 2) {
+                negativeCounter++;
+            } else if(returnedSentiment > 2) {
+                positiveCounter++;
+            }
+        }
+        SentimentAnalyzer.postActions(true);
+        if(negativeCounter > positiveCounter) {
+            mainSentiment = 0;
+        } else if(positiveCounter > negativeCounter) {
+            mainSentiment = 1;
+        } else {
+            mainSentiment = -1;
+        }
+    }
     /**
-     * Get the tweets of the event.
-     * @return A List of String with the event's tweets.
+     * Get the tweetsOfEvent of the event.
+     * @return A List of String with the event's tweetsOfEvent.
      */
-    public final List<Tweet> getTweets() { return tweets; }
+    public final List<Tweet> getTweetsOfEvent() { return tweetsOfEvent; }
     
     /**
-     * Generates a List with the most common terms of the tweets that belong
-     * to the specific event. <br/>
+     * Generates a List with the most common terms of the tweetsOfEvent that belong
+ to the specific event. <br/>
      * More formally, it parses every single tweet of the event, tokenizes it
      * and stores the terms in a HashMap with their respective occurencies as
      * values.
      */
     private void generateCommonTerms() {
         HashMap<String, Integer> unsortedTokens = new HashMap<>();
-        StemUtils stemHandler = new StemUtils();
-        tweets.stream().forEach((tweet) -> {
+        
+        tweetsOfEvent.stream().forEach((tweet) -> {
             String text = tweet.getText();
             Tokenizer tokens = new Tokenizer(corpus.getConfigHandler(), text, 
                     corpus.getStopWordsHandlers().getSWHandlerAccordingToLanguage
-                            (LangUtils.getLanguageISOCodeFromString(tweet.getLanguage())));
-            stemHandler.getStemsAsList(tokens.getCleanTokensAndHashtags(),
-                    Stemmers.getStemmerAccordingToLanguage(
-                            LangUtils.getLanguageISOCodeFromString(tweet.getLanguage()))).stream().forEach((token) -> {
+                            (LangUtils.getLangISOFromString(tweet.getLanguage())));
+            stemsHandler.getStemsAsList(tokens.getCleanTokensAndHashtags(),
+                    Stemmers.getStemmer(LangUtils.getLangISOFromString(
+                            tweet.getLanguage())))
+                            .stream().forEach((token) -> {
                                 if(unsortedTokens.containsKey(token)) {
                                     unsortedTokens.put(token, unsortedTokens.get(token) + 1); //Count it
                                 } else {
                                     unsortedTokens.put(token, 1);
                                 }
-            });
+                            });
         });
-        sortMapByValue(unsortedTokens, stemHandler);
+        allTerms = new HashSet<>(unsortedTokens.keySet());
+        sortMapByValue(unsortedTokens, stemsHandler);
     }
     
     /**
-     * Returns the five most common terms of the tweets that belong to this event.
+     * Returns the five most common terms of the tweetsOfEvent that belong to this event.
      * @return A List of Strings with the most common terms.
      * @see generateCommonTerms generateCommonTerms() method.
      */
@@ -113,11 +147,28 @@ public class PeakFindingEvent {
             return commonTerms;
         } else {
             Utilities.printMessageln("No common terms have been calculated yet!");
-            Utilities.printMessageln("Run " + PeakFindingEvent.class + "." + "generateCommonTerms() method first.");
+            Utilities.printMessageln("Run " + Event.class + "." + "generateCommonTerms() method first.");
             return null;
         }
     }
     
+    /**
+     * 
+     * @return 
+     */
+    public final HashSet<String> getAllTerms() { return allTerms; } 
+    
+    /**
+     * 
+     * @return 
+     */
+    public final List<String> getTweetIDs() {
+        List<String> ids = new ArrayList<>();
+        for(Tweet tweet : tweetsOfEvent) {
+            ids.add(String.valueOf(tweet.getID()));
+        }
+        return ids;
+    }
     /**
      * Returns the five most common terms as a single String.
      * @return A String containing the five most common terms.
@@ -126,7 +177,7 @@ public class PeakFindingEvent {
     public final String getCommonTermsAsString() {
         if(commonTerms.isEmpty()) {
             Utilities.printMessageln("No common terms have been calculated yet!");
-            Utilities.printMessageln("Run " + PeakFindingEvent.class + "." + "generateCommonTerms() method first.");
+            Utilities.printMessageln("Run " + Event.class + "." + "generateCommonTerms() method first.");
             return null;
         }
         String commonTermsString = "";
@@ -149,7 +200,7 @@ public class PeakFindingEvent {
         
         //Get the 5 greatest tokens by value
         //If the HashMap has less than 5 elements, just sort them
-        int size = (unsortedMap.keySet().size() < 5 ? unsortedMap.size() : 5);
+        int size = (unsortedMap.keySet().size() < 10 ? unsortedMap.size() : 10);
         for(int i = 0; i < size; i++) {
             entry = unsortedMap.entrySet().iterator().next();
             currentKey = entry.getKey();
@@ -166,10 +217,16 @@ public class PeakFindingEvent {
     }
     
     /**
-     * Prints a specific event along with its tweets.
+     * Prints a specific event along with its tweetsOfEvent.
      */
     public final void printEvent() {
         Utilities.printMessageln("Event '" + getID() + "' contains the following common terms:");
         Utilities.printMessageln(getCommonTermsAsString());
     }
+    
+    public final StemUtils getStemsHandler() { return stemsHandler; }
+    
+    public final int getWindowLowerBound() { return window.getStart(); }
+    
+    public final int getWindowUpperBound() { return window.getEnd(); }
 }

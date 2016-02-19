@@ -30,7 +30,7 @@ import preprocessingmodule.nlp.stemming.Stemmer;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.02.19_1712
  */
 public class Stemmers {
     
@@ -62,7 +62,7 @@ public class Stemmers {
      * @param isoCode A LanguageCodes enumeration containing the ISO code of the text's language.
      * @return A Stemmer
      */
-    public static Stemmer getStemmerAccordingToLanguage(LanguageCodes isoCode) {
+    public static Stemmer getStemmer(LanguageCodes isoCode) {
         if(isoCode.equals(LanguageCodes.ar)) {
             return arStem;
         } else if(isoCode.equals(LanguageCodes.de)) {

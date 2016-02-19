@@ -28,6 +28,9 @@ import javafx.collections.ObservableList;
 /**
  *
  *   @author Adrien GUILLE, Laboratoire ERIC, Université Lumière Lyon 2
+ * 
+ * @author  Lefteris Paraskevas
+ * @version 2016.02.19_1711
  */
 public class Events implements Serializable {
     public LinkedList<Event> list = new LinkedList<>();

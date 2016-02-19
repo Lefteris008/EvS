@@ -27,7 +27,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.02.19_1709
  */
 public final class Dataset {
     
@@ -43,15 +43,15 @@ public final class Dataset {
         long startTime = System.currentTimeMillis(); //Start time
         
         MongoHandler mongo = new MongoHandler(config);
-        mongo.connectToMongoDB(config);
+        mongo.connectToMongoDB();
  
         //Initialize stopwords and stemmers
         swH = new StopWordsHandlers(config);
         Stemmers.initStemmers();
         
         //Load all tweets from MongoDB Store
-        tweets = mongo.retrieveAllTweetsFromMongoDBStore(config);
-        mongo.closeMongoConnection(config);
+        tweets = mongo.retrieveAllTweetsFromMongoDBStore();
+        mongo.closeMongoConnection();
  
         long endTime = System.currentTimeMillis();
         Utilities.printExecutionTime(startTime, endTime, Dataset.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
