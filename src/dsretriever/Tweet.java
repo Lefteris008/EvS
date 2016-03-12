@@ -21,12 +21,13 @@ import java.util.Date;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.02.19_1707
+ * @version 2016.03.12_1711
  */
 public class Tweet {
     
     private final long id;
     private final String username;
+    private final long userId;
     private final String text;
     private final Date date;
     private final double latitude;
@@ -38,15 +39,20 @@ public class Tweet {
     private final boolean retweeted;
     private final String language;
     private final long retweetId;
-    private final int sentiment;
+    private final int stanfordSentiment;
+    private final int positiveEmoticonFlag;
+    private final int negativeEmoticonFlag;
+    private final int wekaSentiment;
     
-    public Tweet(long id, String username, String text, Date date, 
+    public Tweet(long id, String username, long userId, String text, Date date, 
             double latitude, double longitude, int numberOfRetweets, 
             int numberOfFavorites, boolean retweet, boolean favorited, 
-            boolean retweeted, String language, long retweetId, int sentiment) {
+            boolean retweeted, String language, long retweetId, int stanfordSentiment,
+            int positiveEmoticonFlag, int negativeEmoticonFlag, int wekaSentiment) {
         
         this.id = id;
         this.username = username;
+        this.userId = userId;
         this.text = text;
         this.date = date;
         this.latitude = latitude;
@@ -58,7 +64,10 @@ public class Tweet {
         this.retweeted = retweeted;
         this.language = language;
         this.retweetId = retweetId;
-        this.sentiment = sentiment;
+        this.stanfordSentiment = stanfordSentiment;
+        this.positiveEmoticonFlag = positiveEmoticonFlag;
+        this.negativeEmoticonFlag = negativeEmoticonFlag;
+        this.wekaSentiment = wekaSentiment;
     }
     
     /**
@@ -72,6 +81,12 @@ public class Tweet {
      * @return A String containing the username.
      */
     public String getUsername() { return username; }
+    
+    /**
+     * Returns the ID of the user who published the tweet.
+     * @return A long representing the ID of the publisher of the tweet.
+     */
+    public long getUserId() { return userId; }
     
     /**
      * Returns the actual text of the tweet.
@@ -140,10 +155,32 @@ public class Tweet {
     public long getOriginalIDOfRetweet() { return retweetId; }
     
     /**
-     * Returns the sentiment of a tweet.
-     * @return An integer in the range of 0 to 5, with the lower the more negative.
+     * Returns the stanfordSentiment of a tweet which was predicted by the Stanford 
+     * Sentiment Treebank.
+     * @return An integer in the range of 0 to 5. The more the return value 
+     * approach zero, the more negative the stanfordSentiment.
      */
-    public int getSentiment() { return sentiment; }
+    public int getStanfordSentiment() { return stanfordSentiment; }
+    
+    /**
+     * Returns the stanfordSentiment of a tweet, which was predicted by Weka.
+     * @return An integer that indicates the predicted stanfordSentiment. 0 indicates
+     * a negative stanfordSentiment, 1 a neutral, 2 a positive one while -1 indicates
+     * an irrelevant stanfordSentiment polarity.
+     */
+    public int getWekaSentiment() { return wekaSentiment; }
+    
+    /**
+     * Returns a flag that indicates whether a tweet contains a positive emoticon.
+     * @return 0 when the tweet does not contain a positive emoticon, 1 otherwise.
+     */
+    public int getPositiveEmoticonFlag() { return positiveEmoticonFlag; }
+
+    /**
+     * Returns a flag that indicates whether a tweet contains a negative emoticon.
+     * @return 0 when the tweet does not contain a negative emoticon, 1 otherwise.
+     */
+    public int getNegativeEmoticonFlag() { return negativeEmoticonFlag; }
     
     /**
      * Method to return a 64-bit hash code for the tweet, based on its text.

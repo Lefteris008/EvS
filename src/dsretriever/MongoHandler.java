@@ -36,7 +36,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.02.19_1657
+ * @version 2016.03.12_1710
  */
 public class MongoHandler {
     
@@ -249,6 +249,12 @@ public class MongoHandler {
                         
                         //User details
                         String username = user.getString("name"); //Name
+                        long userId; //User ID
+                        try {
+                            userId = user.getLong("id");
+                        } catch(ClassCastException e) {
+                            userId = user.getInteger("id");
+                        }
 
                         //Tweet text, date and language
                         String text = tweetDoc.getString("text");
@@ -293,11 +299,35 @@ public class MongoHandler {
                             isRetweet = false;
                             retweetId = -1;
                         }
-
-                        Tweet tweet = new Tweet(id, username, text, date, latitude, 
-                                longitude, numberOfRetweets, numberOfFavorites, isRetweet, isFavorited, 
-                                isRetweeted, language, retweetId, 0);
-
+                        int stanfordSentiment;
+                        try {
+                            stanfordSentiment = tweetDoc.getInteger("sentiment1");
+                        } catch(NullPointerException e) {
+                            stanfordSentiment = -1;
+                        }
+                        
+                        int wekaSentiment;
+                        try {
+                            wekaSentiment = tweetDoc.getInteger("sentimentPrediction");
+                        } catch(NullPointerException e) {
+                            wekaSentiment = -10;
+                        }
+                        
+                        int posEmot, negEmot;
+                        try {
+                            posEmot = tweetDoc.getInteger("posEmot");
+                            negEmot = tweetDoc.getInteger("negEmot");
+                        } catch(NullPointerException e) {
+                            posEmot = 0;
+                            negEmot = 0;
+                        }
+                        
+                        Tweet tweet = new Tweet(id, username, userId, text, date, latitude, 
+                                longitude, numberOfRetweets, numberOfFavorites,
+                                isRetweet, isFavorited, isRetweeted, language,
+                                retweetId, stanfordSentiment, posEmot, negEmot,
+                                wekaSentiment);
+                        
                         retrievedTweets.add(tweet);
                     }
                 }
@@ -369,9 +399,9 @@ public class MongoHandler {
                 retweetId = -1;
             }
 
-            Tweet tweet = new Tweet(id_, username, text, date, latitude, 
+            Tweet tweet = new Tweet(id_, username, 0, text, date, latitude, 
                     longitude, numberOfRetweets, numberOfFavorites, isRetweet, isFavorited, 
-                    isRetweeted, language, retweetId, 0);
+                    isRetweeted, language, retweetId, 0, 0, 0, 0);
 
             return tweet;
         } catch(MongoException e) {
@@ -384,9 +414,9 @@ public class MongoHandler {
     }
     
     /**
-     * Updates an existing tweet with the sentiment information.
+     * Updates an existing tweet with the stanfordSentiment information.
      * @param id The id of the tweet to be updated
-     * @param sentiment An integer representing the sentiment polarity of the tweet.
+     * @param sentiment An integer representing the stanfordSentiment polarity of the tweet.
      */
     public final void updateTweetWithSentiment(long id, int sentiment) {
         MongoCollection<Document> collection = db.getCollection(config
@@ -394,7 +424,35 @@ public class MongoHandler {
         try {
             collection.updateOne(new Document("id", id),
                                  new Document("$set", 
-                                         new Document("sentiment", sentiment)));
+                                         new Document("sentimentPrediction", sentiment)));
+        } catch(NullPointerException e) {
+            Utilities.printMessageln("There is no tweet with id '" + id + "'.");
+            Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+    
+    /**
+     * Updates an existing tweet with emoticon information.<br/>
+     * More formally, the method adds two new attributes namely 'posEmot' and
+     * 'negEmot' that indicate whether or not a given tweet has any positive or
+     * negative emoticon, with zero indicating total absence and one indicating
+     * at least one of each kind.
+     * @param id The id of the tweet to be updated
+     * @param positiveEmoticon An integer representing whether the tweet has any
+     * positive emoticon in its text.
+     * @param negativeEmoticon An integer representing whether the tweet has any
+     * negative emoticon in its text.
+     */
+    public final void updateTweetWithEmoticonInfo(long id, int positiveEmoticon, int negativeEmoticon) {
+        MongoCollection<Document> collection = db.getCollection(config
+                .getRawTweetsCollectionName());
+        try {
+            collection.updateOne(new Document("id", id),
+                                 new Document("$set", 
+                                         new Document("posEmot", positiveEmoticon)));
+            collection.updateOne(new Document("id", id),
+                                 new Document("$set", 
+                                         new Document("negEmot", negativeEmoticon)));
         } catch(NullPointerException e) {
             Utilities.printMessageln("There is no tweet with id '" + id + "'.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
@@ -417,9 +475,9 @@ public class MongoHandler {
     }
     
     /**
-     * Checks whether a tweet is already annotated with its sentiment.
+     * Checks whether a tweet is already annotated with its stanfordSentiment.
      * @param id The ID of the tweet to be checked for.
-     * @return True if the tweet is sentiment annotated, false otherwise.
+     * @return True if the tweet is stanfordSentiment annotated, false otherwise.
      */
     public final boolean tweetHasSentiment(long id) {
         MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
@@ -463,5 +521,45 @@ public class MongoHandler {
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
+    }
+    
+    /**
+     * Removes all retweets that are found in the MongoDB Store for which their
+     * original tweet is also stored in the DB.<br/>
+     * More formally, it parses all stored tweets and checks whether a specific
+     * tweet is also a retweet. When this condition is true, the method tries to
+     * find whether the tweet that these retweets are originated from, also exists
+     * in the store and if so, the retweet is removed from the collection.
+     * <br/>
+     * *WARNING:* This process is "one-way", meaning that once initiated the 
+     * retweets that are going to be removed cannot be restored back.
+     */
+    public void removeRetweets() {
+        Utilities.printMessageln("Starting process of removing...");
+        List<Tweet> tweets = retrieveAllTweetsFromMongoDBStore();
+        MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
+        List<Tweet> tweetsToBeRemoved = new ArrayList<>();
+        int initialSize = tweets.size();
+        
+        Utilities.printMessageln("Gathering retweets...");
+        //Gather the retweets
+        for(int i = 0; i < tweets.size(); i++) {
+            Tweet tweet = tweets.get(i);
+            
+            //If the tweet is a retweet and the source of it exists, remove it
+            if(tweet.isRetweet() && tweetExists(tweet.getOriginalIDOfRetweet())) {
+                tweetsToBeRemoved.add(tweet);
+                tweets.remove(tweet);
+            }
+        }
+        
+        Utilities.printMessageln("Removing retweets from Store...");
+        //Remove them
+        for(Tweet tweet : tweetsToBeRemoved) {
+            collection.deleteMany(new Document("id", tweet.getID()));
+        }
+        Utilities.printMessageln("Retweets were successfully removed.");
+        Utilities.printMessageln("Total size of removed retweets: " 
+                + tweetsToBeRemoved.size());
     }
 }

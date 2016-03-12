@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.03.12_1712
  */
 public class Config {
     private static String consumerKey;
@@ -47,11 +47,16 @@ public class Config {
     private static String stopwordsLocation;
     private static String tweetDataFile;
     private static String resourcesPath;
+    private static String emoticonsPath;
+    private static String sentimentFilesPath;
     private static String punctuationFile;
     private static String specialCharFile;
     private static String groundTruthDataFile;
     private static Pattern punctuationPattern;
     private static Pattern urlPattern;
+    
+    private static String positiveEmoticonsFile;
+    private static String negativeEmoticonsFile;
     
     public Config() throws IOException {
         
@@ -87,11 +92,16 @@ public class Config {
             stopwordsLocation = prop.getProperty("StopwordsLocation");
             tweetDataFile = prop.getProperty("TweetDataFile");
             resourcesPath = prop.getProperty("ResourcesPath");
+            emoticonsPath = prop.getProperty("EmoticonsPath");
+            sentimentFilesPath = prop.getProperty("SentimentPath");
             groundTruthDataFile = prop.getProperty("GroundTruthDataFile");
             punctuationFile = prop.getProperty("PunctuationFile");
             specialCharFile = prop.getProperty("SpecialCharFile");
             punctuationPattern = Pattern.compile("[`~!@#$%^&*()_+-=:\"<>?;\',./{}|]");
             urlPattern = Pattern.compile("[hH][tT]{2}[Pp][sS]?://(\\w+(\\.\\w+?)?)+");
+            
+            positiveEmoticonsFile = prop.getProperty("PositiveEmoticons");
+            negativeEmoticonsFile = prop.getProperty("NegativeEmoticons");
             
         } catch (IOException | NumberFormatException e) {
             if(inputStream != null) {
@@ -100,7 +110,7 @@ public class Config {
             Logger.getLogger(Config.class.getName()).log(Level.SEVERE, null, e);
         }
     }
-    
+
     /**
      * Returns the Consumer Key to the application
      * @return A string consisting of 25 characters 
@@ -130,6 +140,18 @@ public class Config {
      * @return The filename of the search terms file, usually in the form 'search_terms.txt'
      */
     public String getSearchTermsFile() { return searchTermsFile; }
+    
+    /**
+     * Returns the filename of the positive emoticons file.
+     * @return A String containing the positive emoticons filename.
+     */
+    public static String getPositiveEmoticonsFile() { return positiveEmoticonsFile; }
+
+    /**
+     * Returns the filename of the negative emoticons file.
+     * @return A String containing the negative emoticons filename.
+     */
+    public static String getNegativeEmoticonsFile() { return negativeEmoticonsFile; }
     
     /**
      * Returns the name of the server the MongoDB instance is running.
@@ -187,9 +209,21 @@ public class Config {
     
     /**
      * Returns the directory in which the stopwords files are stored.
-     * @return A String containing the path of the stopwords files location
+     * @return A String containing the path of the stopwords files location.
      */
     public String getStopwordsPath() { return stopwordsLocation; }
+    
+    /**
+     * Returns the directory in which the emoticons file are stored.
+     * @return A String containing the path of the emoticons files location.
+     */
+    public static String getEmoticonsPath() { return emoticonsPath; }
+    
+    /**
+     * Returns the directory in which the sentiment files are stored.
+     * @return A String containing the path of the sentiment files location.
+     */
+    public static String getSentimentFilesPath() { return sentimentFilesPath; }
     
     /**
      * Returns the name of file that contains tweet information.

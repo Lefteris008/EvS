@@ -28,7 +28,7 @@ import utilities.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.03.12_1712
  */
 public class Tokenizer {
     
@@ -43,8 +43,26 @@ public class Tokenizer {
     public int numberOfTokens;
     
     /**
+     * Constructor with minimum parameters. It only tokenizes a given String
+     * without removing stopwords, name handles etc.
+     * @param config A Config object.
+     * @param text The text to be tokenized.
+     */
+    public Tokenizer(Config config, String text) {
+        this.config = config;
+        TokenizerFactory<Word> tf = PTBTokenizer.factory();
+        List<Word> tokens = tf.getTokenizer(new StringReader(text)).tokenize();
+        for(Word token : tokens) {
+            cleanTokens.add(token.toString());
+        }
+//        String[] tokens = text.split(" ");
+//        cleanTokens.addAll(Arrays.asList(tokens));
+    }
+    
+    /**
      * Public constructor. It tokenizes a given String and separates hashtags,
      * name handles, URLs and stopwords and stores them into different lists.
+     * @param config A Config object.
      * @param text The text to be tokenized.
      * @param sw A StopWords handle.
      */

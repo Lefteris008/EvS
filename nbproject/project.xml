@@ -13,7 +13,10 @@
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>al</word>
+            <word>Config</word>
             <word>datasets'</word>
+            <word>emoticon</word>
+            <word>emoticons</word>
             <word>favorited</word>
             <word>gargantua</word>
             <word>hashmap</word>
@@ -32,6 +35,7 @@
             <word>term's</word>
             <word>tokenized</word>
             <word>Tokenizes</word>
+            <word>Treebank</word>
             <word>tweet's</word>
             <word>tweets</word>
             <word>txt</word>

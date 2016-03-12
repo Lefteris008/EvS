@@ -30,7 +30,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.02.19_1711
+ * @version 2016.03.12_1711
  * 
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing Microblogs for Event Exploration", CHI 2011.
  */
@@ -134,6 +134,9 @@ public class OfflinePeakFinding implements EDMethod {
         generateActualWindows(); //Generate non-zero windows
         Events pfe = new Events(corpus.getTweetsByWindow(), bins, actualEventWindows, corpus, stemsHandler);
         eventList = new ArrayList<>(pfe.getEvents());
+        for(Event event : eventList) {
+            event.printEventStatistics();
+        }
         long endTime = System.currentTimeMillis();
         Utilities.printExecutionTime(startTime, endTime, OfflinePeakFinding.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
