@@ -30,7 +30,7 @@ import utilities.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.02.19_1709
+ * @version 2016.03.16_1212
  */
 public class PeakFindingCorpus {
     
@@ -133,10 +133,9 @@ public class PeakFindingCorpus {
     public final Date getLatestDateOfCorpus() { return latestDate; }
     
     /**
-     * Returns the tweet counts in every refresh window.
-     * Only non-zero windows are returned.
+     * Returns all tweets grouped by refreshed window.
      * @return A HashMap which key is the refresh window and its value is the 
-     * tweet count in this window.
+     * tweets in this window.
      */
     public final HashMap<String, ArrayList<Tweet>> getTweetsByWindow() { return tweetsByWindow; }
     

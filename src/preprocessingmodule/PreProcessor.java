@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 import preprocessingmodule.nlp.Tokenizer;
 import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.nlp.stopwords.StopWords;
+import evs.EvS;
 import samodule.EmoticonsAnnotator;
 import samodule.SentimentAnalyzer;
 import samodule.SentimentAnnotator;
@@ -49,7 +50,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.12_1711
+ * @version 2016.03.16_1214
  */
 public class PreProcessor {
     
@@ -117,12 +118,13 @@ public class PreProcessor {
                 EDMethodPicker.selectEDMethod(config);
                 break;
             } case 3: {
-                System.out.println("Not supported yet");
+                EvS saVed = new EvS(config);
+                
                 break;
             } case 4: {
                 MongoHandler mongo = new MongoHandler(config);
                 mongo.connectToMongoDB();
-                List<Tweet> tweets = mongo.retrieveAllTweetsFromMongoDBStore();
+                List<Tweet> tweets = mongo.retrieveAllTweetsFiltered();
                 Utilities.printMessageln("Starting calculating sentiment annotations...");
                 countSentimentAnnotatedTweets(mongo, tweets);
                 mongo.closeMongoConnection();
@@ -130,26 +132,25 @@ public class PreProcessor {
             } case 5: {
                 MongoHandler mongo = new MongoHandler(config);
                 mongo.connectToMongoDB();
-                List<Tweet> tweets = mongo.retrieveAllTweetsFromMongoDBStore();
-                List<Integer> sentiments = getSentiment();
+                List<Tweet> tweets = mongo.retrieveAllTweetsFiltered();
                 int i = 0;
                 Utilities.printMessageln("Starting calculating sentiment.");
-                //SentimentAnalyzer.initAnalyzer(true);
+                SentimentAnalyzer.initAnalyzer(true);
+                int sentiment;
                 for(Tweet tweet : tweets) {
-                    //if(!mongo.tweetHasSentiment(tweet.getID())) {
-                        //sentiment = SentimentAnalyzer.getSentimentOfSentence(tweet.getText());
-                        mongo.updateTweetWithSentiment(tweet.getID(), sentiments.get(i));
-                    //}
-                        i++;
+                    if(!mongo.tweetHasSentiment(tweet.getID(), "sentiment")) {
+                        sentiment = SentimentAnalyzer.getSentimentOfSentence(tweet.getText());
+                        mongo.updateSentiment(tweet.getID(), sentiment, "sentiment");
+                    }
                 }
-                //SentimentAnalyzer.postActions(true);
+                SentimentAnalyzer.postActions(true);
                 mongo.closeMongoConnection();
                 break;
             } case 6: {
                 List<String> lines = new ArrayList<>();
                 MongoHandler mongo = new MongoHandler(config);
                 mongo.connectToMongoDB();
-                List<Tweet> tweets = new ArrayList<>(mongo.retrieveAllTweetsFromMongoDBStore());
+                List<Tweet> tweets = new ArrayList<>(mongo.retrieveAllTweetsFiltered());
                 mongo.closeMongoConnection();
                 int posEmot, negEmot;
                 for(Tweet tweet : tweets) {
@@ -165,7 +166,7 @@ public class PreProcessor {
             } case 7 : {
                 MongoHandler mongo = new MongoHandler(config);
                 mongo.connectToMongoDB();
-                List<Tweet> tweets = new ArrayList<>(mongo.retrieveAllTweetsFromMongoDBStore());
+                List<Tweet> tweets = new ArrayList<>(mongo.retrieveAllTweetsFiltered());
                 EmoticonsAnnotator emAn = new EmoticonsAnnotator(config);
                 int negativeEmoticon, positiveEmoticon;
                 Utilities.printMessageln("Calculating emoticon info.");
@@ -206,7 +207,7 @@ public class PreProcessor {
             } case 9: {
                 MongoHandler mongo = new MongoHandler(config);
                 mongo.connectToMongoDB();
-                List<Tweet> tweets = mongo.retrieveAllTweetsFromMongoDBStore();
+                List<Tweet> tweets = mongo.retrieveAllTweetsFiltered();
                 SentimentAnnotator sA = new SentimentAnnotator(config, tweets, mongo);
                 sA.annotateWithSentiment();
                 mongo.closeMongoConnection();
@@ -306,11 +307,10 @@ public class PreProcessor {
         new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords, mongoDB, config); //Run the streamer
     }
     
-    
     private static void countSentimentAnnotatedTweets(MongoHandler mongo, List<Tweet> tweets) {
         int counter = 0;
         for(Tweet tweet : tweets) {
-            if(mongo.tweetHasSentiment(tweet.getID())) {
+            if(mongo.tweetHasSentiment(tweet.getID(), "sentiment")) {
                 counter++;
             }
         }

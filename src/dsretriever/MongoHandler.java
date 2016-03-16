@@ -23,6 +23,7 @@ import com.mongodb.MongoException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import exception.EmptyDatabaseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -36,13 +37,14 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.12_1710
+ * @version 2016.03.16_1211
  */
 public class MongoHandler {
     
     private static MongoClient client;
     private static MongoDatabase db;
     private Config config;
+    private String langFilter = "no_filter";
     
     /**
      * Constructor, creates a connection with the MongoDB instance
@@ -52,6 +54,11 @@ public class MongoHandler {
         try {
             this.config = config;
             client = new MongoClient(this.config.getServerName(), this.config.getServerPort());
+            
+            //********************
+            langFilter = "en";
+            //********************
+            
         } catch (MongoClientException e) {
             Utilities.printMessageln("Error connecting to client");
             client = null;
@@ -96,7 +103,7 @@ public class MongoHandler {
      * Creates an index on the 'id' field of the tweet collection
      * @return True if the process succeeds, false otherwise.
      */
-    public final boolean createIndex() {
+    public final boolean createIndexOnId() {
         try {
             db.getCollection(config.getRawTweetsCollectionName())
                     .createIndex(new Document("id", 1));
@@ -125,6 +132,9 @@ public class MongoHandler {
         }
     }
     
+    public final void applyLangFilter(String filter) {
+        this.langFilter = filter;
+    }
     /**
      * Store a tweet retrieved previously from a 3-party source (e.g. a text file).
      * @param tweet An ArrayList containing the appropriate information for the tweet. The list must
@@ -232,9 +242,16 @@ public class MongoHandler {
      * Retrieves all stored retrievedTweets in MongoDB Store.
      * @return A List containing all retrieved retrievedTweets
      */
-    public final List<Tweet> retrieveAllTweetsFromMongoDBStore() {
-        
+    public final List<Tweet> retrieveAllTweetsFiltered() {
         List<Tweet> retrievedTweets = new ArrayList<>();
+        if(langFilter.equals("no_filter")) {
+            Utilities.printMessageln("No language filter was applied. Retrieving "
+                    + "all tweets, unfiltered.");
+            //retrievedTweets = retrieveAllTweets();
+            return retrievedTweets;
+        }
+        
+        
         MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
         
         try {
@@ -242,7 +259,7 @@ public class MongoHandler {
             iterable.forEach(new Block<Document>() {
                 @Override
                 public void apply(final Document tweetDoc) {
-                    if(tweetDoc.getString("lang").equals("en")) {
+                    if(tweetDoc.getString("lang").equals(langFilter)) {
                         //Get tweet ID
                         long id = tweetDoc.getLong("id");
                         Document user = tweetDoc.get("user", Document.class); //Get the embedded document
@@ -341,10 +358,12 @@ public class MongoHandler {
     }
     
     /**
-     * This method parses the MongoDB store and returns the tweet that matches the String 'id'.
-     * @param id The id of the document to be retrieved
-     * @return A Tweet object containing all the information found in the document that matched the String 'id'
-     * @deprecated Subsumed by retrieveAllTweetsFromMongoDBStore() method.
+     * This method parses the MongoDB store and returns the tweet that matches
+     * a given ID. <br/>
+     * <i>Note: Consider creating an index on the field 'id' of the MongoDB Store.</i>
+     * @param id The id of the tweet to be retrieved.
+     * @return A Tweet object containing all the information found in the document
+     * that matched the long 'id'.
      */
     public final Tweet getATweetByIdFromMongoDBStore(long id) {
         MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
@@ -359,6 +378,12 @@ public class MongoHandler {
             
             //User details
             String username = user.getString("name"); //Name
+            long userId;
+            try {
+                userId = user.getLong("id");
+            } catch(ClassCastException e) {
+                userId = user.getInteger("id");
+            }
             
             //Tweet text, date and language
             String text = tweetDoc.getString("text");
@@ -399,9 +424,32 @@ public class MongoHandler {
                 retweetId = -1;
             }
 
-            Tweet tweet = new Tweet(id_, username, 0, text, date, latitude, 
-                    longitude, numberOfRetweets, numberOfFavorites, isRetweet, isFavorited, 
-                    isRetweeted, language, retweetId, 0, 0, 0, 0);
+            int stanfordSentiment;
+            try {
+                stanfordSentiment = tweetDoc.getInteger("sentiment1");
+            } catch(NullPointerException e) {
+                stanfordSentiment = -1;
+            }
+                        
+            int wekaSentiment;
+            try {
+                wekaSentiment = tweetDoc.getInteger("sentimentPrediction");
+            } catch(NullPointerException e) {
+                wekaSentiment = -10;
+            }
+
+            int posEmot, negEmot;
+            try {
+                posEmot = tweetDoc.getInteger("posEmot");
+                negEmot = tweetDoc.getInteger("negEmot");
+            } catch(NullPointerException e) {
+                posEmot = 0;
+                negEmot = 0;
+            }
+            Tweet tweet = new Tweet(id_, username, userId, text, date, latitude, 
+                    longitude, numberOfRetweets, numberOfFavorites, isRetweet,
+                    isFavorited, isRetweeted, language, retweetId, stanfordSentiment,
+                    posEmot, negEmot, wekaSentiment);
 
             return tweet;
         } catch(MongoException e) {
@@ -414,17 +462,20 @@ public class MongoHandler {
     }
     
     /**
-     * Updates an existing tweet with the stanfordSentiment information.
+     * Updates an existing tweet with its sentiment information.<br/>
+     * The method accepts sentiment information that was generated from a 3rd
+     * party source (e.g. Weka).
      * @param id The id of the tweet to be updated
-     * @param sentiment An integer representing the stanfordSentiment polarity of the tweet.
+     * @param sentiment An integer representing the sentiment polarity of the tweet.
+     * @param fieldName The name of the field where the sentiment will be stored.
      */
-    public final void updateTweetWithSentiment(long id, int sentiment) {
+    public final void updateSentiment(long id, int sentiment, String fieldName) {
         MongoCollection<Document> collection = db.getCollection(config
                 .getRawTweetsCollectionName());
         try {
             collection.updateOne(new Document("id", id),
                                  new Document("$set", 
-                                         new Document("sentimentPrediction", sentiment)));
+                                         new Document(fieldName, sentiment)));
         } catch(NullPointerException e) {
             Utilities.printMessageln("There is no tweet with id '" + id + "'.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
@@ -479,13 +530,13 @@ public class MongoHandler {
      * @param id The ID of the tweet to be checked for.
      * @return True if the tweet is stanfordSentiment annotated, false otherwise.
      */
-    public final boolean tweetHasSentiment(long id) {
+    public final boolean tweetHasSentiment(long id, String fieldName) {
         MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
         int sentiment;
         FindIterable<Document> iterable = collection.find(new Document("id", id));
         Document tweetDoc = iterable.first();
         try {
-            sentiment = tweetDoc.getInteger("sentiment");
+            sentiment = tweetDoc.getInteger(fieldName);
             return true;
         } catch(NullPointerException e) { //Tweet does not exist
             return false;
@@ -528,21 +579,24 @@ public class MongoHandler {
      * original tweet is also stored in the DB.<br/>
      * More formally, it parses all stored tweets and checks whether a specific
      * tweet is also a retweet. When this condition is true, the method tries to
-     * find whether the tweet that these retweets are originated from, also exists
+     * find whether the tweet that this retweet is originated from, also exists
      * in the store and if so, the retweet is removed from the collection.
      * <br/>
      * *WARNING:* This process is "one-way", meaning that once initiated the 
      * retweets that are going to be removed cannot be restored back.
      */
-    public void removeRetweets() {
+    public void removeRetweets() throws EmptyDatabaseException {
         Utilities.printMessageln("Starting process of removing...");
-        List<Tweet> tweets = retrieveAllTweetsFromMongoDBStore();
+        List<Tweet> tweets = retrieveAllTweetsFiltered();
+        if(tweets.isEmpty()) {
+            throw new EmptyDatabaseException("There are now tweets stored in the database.");
+        }
         MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
         List<Tweet> tweetsToBeRemoved = new ArrayList<>();
-        int initialSize = tweets.size();
         
         Utilities.printMessageln("Gathering retweets...");
-        //Gather the retweets
+        
+        //Find the retweets
         for(int i = 0; i < tweets.size(); i++) {
             Tweet tweet = tweets.get(i);
             
@@ -553,13 +607,14 @@ public class MongoHandler {
             }
         }
         
-        Utilities.printMessageln("Removing retweets from Store...");
-        //Remove them
+        Utilities.printMessageln("Removing retweets from MongoDB Store...");
         for(Tweet tweet : tweetsToBeRemoved) {
             collection.deleteMany(new Document("id", tweet.getID()));
         }
+        
         Utilities.printMessageln("Retweets were successfully removed.");
         Utilities.printMessageln("Total size of removed retweets: " 
                 + tweetsToBeRemoved.size());
+        Utilities.printMessageln("Size of stored tweets after deletion: " + tweets.size());
     }
 }

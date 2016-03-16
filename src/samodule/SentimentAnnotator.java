@@ -34,7 +34,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.12_1712  
+ * @version 2016.03.16_1214  
  */
 public class SentimentAnnotator {
     
@@ -95,7 +95,8 @@ public class SentimentAnnotator {
     public final void annotateWithSentiment() {
         int i = 0;
         for(Tweet tweet : tweets) {
-            mongo.updateTweetWithSentiment(tweet.getID(), sentimenAnnotations.get(i));
+            mongo.updateSentiment(tweet.getID(), sentimenAnnotations.get(i),
+                    "sentimentPrediction");
             i++;
         }
     }

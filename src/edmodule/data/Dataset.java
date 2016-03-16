@@ -50,7 +50,7 @@ public final class Dataset {
         Stemmers.initStemmers();
         
         //Load all tweets from MongoDB Store
-        tweets = mongo.retrieveAllTweetsFromMongoDBStore();
+        tweets = mongo.retrieveAllTweetsFiltered();
         mongo.closeMongoConnection();
  
         long endTime = System.currentTimeMillis();

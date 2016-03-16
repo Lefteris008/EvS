@@ -14,42 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edmodule.peakfinding;
+package exception;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.16_1212
- * @param <Start>
- * @param <End>
+ * @version 2016.03.16_1214
  */
-public class Window<Start,End> {
+public class EmptyDatabaseException extends Exception {
     
-    private Start start;
-    private End end;
-    
-    /**
-     * Public constructor
-     * @param start
-     * @param end 
-     */
-    public Window(Start start, End end){
-        this.start = start;
-        this.end = end;
+    public EmptyDatabaseException() {
+        ///
     }
     
-    public Start getStart() { return start; }
-    
-    public End getEnd() { return end; }
-    
-    public void setStart(Start start) { this.start = start; }
-    
-    public void setEnd(End end) { this.end = end; }
-    
-    public void swapEdges() {
-        Start temp;
-        temp = start;
-        start = (Start) end;
-        end = (End) temp;
+    /**
+     * Constructor with a custom message.
+     * @param message A String containing a message to be passed to the error stream.
+     */
+    public EmptyDatabaseException(String message) {
+        super(message);
     }
 }

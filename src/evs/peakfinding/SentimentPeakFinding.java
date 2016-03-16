@@ -14,27 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edmodule.peakfinding;
+package evs.peakfinding;
 
-import edmodule.peakfinding.event.Events;
-import edmodule.peakfinding.event.Event;
 import edmodule.utils.BinPair;
 import edmodule.EDMethod;
-import edmodule.data.PeakFindingCorpus;
+import edmodule.peakfinding.Statistics;
+import edmodule.peakfinding.Window;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import preprocessingmodule.nlp.stemming.StemUtils;
+import evs.data.PeakFindingSentimentCorpus;
+import evs.peakfinding.event.SentimentEvent;
+import evs.peakfinding.event.SentimentEvents;
 import utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.16_1212
+ * @version 2016.03.16_1213
  * 
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing Microblogs for Event Exploration", CHI 2011.
  */
-public class OfflinePeakFinding implements EDMethod {
+public class SentimentPeakFinding implements EDMethod {
     
     private final double alpha;
     private final int taph;
@@ -43,10 +45,10 @@ public class OfflinePeakFinding implements EDMethod {
     private final int refreshWindow;
     private final List<Window<Integer, Integer>> windows = new ArrayList<>();
     private final List<Window<Integer, Integer>> actualEventWindows = new ArrayList<>();
-    private final PeakFindingCorpus corpus;
+    private final PeakFindingSentimentCorpus corpus;
     private int totalEvents;
     private final List<Integer> tweetCountsInWindows = new ArrayList<>();
-    private List<Event> eventList;
+    private List<SentimentEvent> sEventList;
     private final StemUtils stemsHandler;
     
     /**
@@ -58,7 +60,8 @@ public class OfflinePeakFinding implements EDMethod {
      * @param refreshWindow An integer representing the refresh window of every bin.
      * @param corpus A PeakFindingCorpus object.
      */
-    public OfflinePeakFinding(List<BinPair<String, Integer>> bins, double a, int t, int p, int refreshWindow, PeakFindingCorpus corpus) {
+    public SentimentPeakFinding(List<BinPair<String, Integer>> bins, double a, 
+            int t, int p, int refreshWindow, PeakFindingSentimentCorpus corpus) {
         alpha = a;
         taph = t;
         pi = p;
@@ -90,9 +93,6 @@ public class OfflinePeakFinding implements EDMethod {
 
     /**
      * Implements the main algorithm of paper [1].
-     * <b>Simple version.</b>
-     * @see saWed.peakfinding.SentimentPeakFinding For sentiment version, 
-     * see SentimentPeakFinding.
      */
     @Override
     public void apply() throws FileNotFoundException {
@@ -110,7 +110,8 @@ public class OfflinePeakFinding implements EDMethod {
         int end = 0;
         
         for(int i = 1; i < bins.size(); i++) {
-            if(( (bins.get(i).getValue() - mean) / meanDev > taph ) && (bins.get(i).getValue() > bins.get(i-1).getValue())) {
+            if(( (bins.get(i).getValue() - mean) / meanDev > taph ) && 
+                    (bins.get(i).getValue() > bins.get(i-1).getValue())) {
                 start = i - 1; //Update the starting point
                 while( (i < bins.size()) && (bins.get(i).getValue() > bins.get(i-1).getValue()) ) {
                     mean = updateMean(meanDev, bins.get(i).getValue(), alpha); //Update mean
@@ -135,10 +136,14 @@ public class OfflinePeakFinding implements EDMethod {
             }
         }
         generateActualWindows(); //Generate non-zero windows
-        Events pfe = new Events(corpus.getTweetsByWindow(), bins, actualEventWindows, corpus, stemsHandler);
-        eventList = new ArrayList<>(pfe.getEvents());
+        SentimentEvents pfe = new SentimentEvents(corpus.getPeakFindingCorpus()
+                .getTweetsByWindow(), bins, windows, corpus, stemsHandler);
+        sEventList = new ArrayList<>(pfe.getEvents());
+        for(SentimentEvent sEvent : sEventList) {
+            sEvent.printEventStatistics();
+        }
         long endTime = System.currentTimeMillis();
-        Utilities.printExecutionTime(startTime, endTime, OfflinePeakFinding.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        Utilities.printExecutionTime(startTime, endTime, SentimentPeakFinding.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
     /**
@@ -252,7 +257,7 @@ public class OfflinePeakFinding implements EDMethod {
      */
     public final List<BinPair<String, Integer>> getBins() { return bins; }
     
-    public final List<Event> getEventList() { return eventList; }
+    public final List<SentimentEvent> getEventList() { return sEventList; }
     
     public final StemUtils getStemsHandler() { return stemsHandler; }
 }
