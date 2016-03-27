@@ -33,9 +33,9 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.16_1212
+ * @version 2016.03.27_2355
  */
-public class Event {
+public class PeakFindingEvent {
     
     private final int id;
     private final Window<Integer, Integer> window;
@@ -53,7 +53,7 @@ public class Event {
      * event.
      * @param corpus A PeakFindingCorpus object.
      */
-    public Event(int id, Window<Integer, Integer> window, List<Tweet> tweetsOfEvent, 
+    public PeakFindingEvent(int id, Window<Integer, Integer> window, List<Tweet> tweetsOfEvent, 
             PeakFindingCorpus corpus) {
         this.id = id;
         this.window = window;
@@ -121,20 +121,21 @@ public class Event {
             return commonTerms;
         } else {
             Utilities.printMessageln("No common terms have been calculated yet!");
-            Utilities.printMessageln("Run " + Event.class + "." + "generateCommonTerms() method first.");
+            Utilities.printMessageln("Run " + PeakFindingEvent.class + "." +
+                    "generateCommonTerms() method first.");
             return null;
         }
     }
     
     /**
-     * 
-     * @return 
+     * Returns all extracted terms of the event.
+     * @return A HashSet containing the terms of the event.
      */
     public final HashSet<String> getAllTerms() { return allTerms; } 
     
     /**
-     * 
-     * @return 
+     * Returns all extracted tweet IDs of the event.
+     * @return A List containing the tweet IDs of the event.
      */
     public final List<String> getTweetIDs() {
         List<String> ids = new ArrayList<>();
@@ -143,6 +144,7 @@ public class Event {
         }
         return ids;
     }
+    
     /**
      * Returns the five most common terms as a single String.
      * @return A String containing the five most common terms.
@@ -151,7 +153,8 @@ public class Event {
     public final String getCommonTermsAsString() {
         if(commonTerms.isEmpty()) {
             Utilities.printMessageln("No common terms have been calculated yet!");
-            Utilities.printMessageln("Run " + Event.class + "." + "generateCommonTerms() method first.");
+            Utilities.printMessageln("Run " + PeakFindingEvent.class + "." + 
+                    "generateCommonTerms() method first.");
             return null;
         }
         String commonTermsString = "";
@@ -189,15 +192,7 @@ public class Event {
             unsortedMap.remove(currentKey);
         }
     }
-    
-    /**
-     * Prints a specific event along with its tweetsOfEvent.
-     */
-    public final void printEvent() {
-        Utilities.printMessageln("Event '" + getID() + "' contains the following common terms:");
-        Utilities.printMessageln(getCommonTermsAsString());
-    }
-    
+        
     /**
      * Get event's StemsHandler object.
      * @return A StemsHandler object.

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edmodule.edcow;
+package evs.edcow;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -57,17 +57,17 @@ import utilities.Utilities;
  *   @author Yue HE, Falitokiniaina RABEARISON, Département Informatique et Statistiques, Université Lumière Lyon 2
  *   @author Adrien GUILLE, Laboratoire ERIC, Université Lumière Lyon 2
  */
-public class EDCoWModularityDetection {
+public class SentimentEDCoWModularityDetection {
     List<Node> nodeList;	
     ArrayList<Community> arrayCommunities;
     Structure<Node, Edge<Node>> structure;
-    LinkedList<EDCoWEvent_> events;
+    LinkedList<SentimentEDCoWEvent_> events;
     float startSlice;
     float endSlice;
 
 
     // Add two arguments : start and end index of the frequency array
-    public EDCoWModularityDetection(LinkedList<EDCoWKeyword> keywords, double[][] correlations, float startDay, float endDay) throws NetworkException, Exception{
+    public SentimentEDCoWModularityDetection(LinkedList<SentimentEDCoWKeyword> keywords, double[][] correlations, float startDay, float endDay) throws NetworkException, Exception{
         this.startSlice = startDay;
         this.endSlice = endDay;
 
@@ -127,7 +127,7 @@ public class EDCoWModularityDetection {
     public void saveEventFromCommunity(Community c){
         DenseVector nodesC = c.getVertexIndexes();
         if(nodesC.size() > 1){
-            EDCoWEvent_ event = new EDCoWEvent_();
+            SentimentEDCoWEvent_ event = new SentimentEDCoWEvent_();
             for(VectorEntry ve : nodesC){
                 int id = (int)ve.get();
                 String keyword = nodeList.get(id).getName();
@@ -143,7 +143,7 @@ public class EDCoWModularityDetection {
     public void explore(Community c){
         if(c.getChild1() == null){
             DenseVector nodesC = c.getVertexIndexes();
-            EDCoWEvent_ event = new EDCoWEvent_();
+            SentimentEDCoWEvent_ event = new SentimentEDCoWEvent_();
             for(VectorEntry ve : nodesC){
                 int id = (int)ve.get();
                 event.keywords.add(nodeList.get(id).getName());
@@ -182,7 +182,7 @@ public class EDCoWModularityDetection {
         return nodeList;
     }
 
-    public LinkedList<EDCoWEvent_> getEvents(){
+    public LinkedList<SentimentEDCoWEvent_> getEvents(){
         return events;
     }
 }

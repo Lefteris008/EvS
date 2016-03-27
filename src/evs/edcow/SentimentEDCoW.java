@@ -14,13 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edmodule.edcow;
+package evs.edcow;
 
-import edmodule.edcow.event.EDCoWEvents;
+import evs.edcow.event.SentimentEDCoWEvents;
 import ch.epfl.lis.jmod.modularity.community.Community;
-import edmodule.EDMethod;
-import edmodule.data.EDCoWCorpus;
-import edmodule.edcow.event.EDCoWEvent;
+import evs.data.SentimentEDCoWCorpus;
+import evs.edcow.event.SentimentEDCoWEvent;
 import java.util.*;
 
 import java.util.logging.Level;
@@ -32,22 +31,24 @@ import utilities.Utilities;
  * @author  Adrien GUILLE, ERIC Lab, University of Lyon 2
  * @email   adrien.guille@univ-lyon2.fr
  * 
- * @author  Lefteris Paraskevas (configurations in EDCoW to omit missing components)
- * @version 2016.03.27_2349 (For EvS project version alignment) 
+ * @author  Lefteris Paraskevas (configurations in SentimentEDCoW to omit missing components)
+ * @version 2016.03.28_0003 (For EDviaSA project version alignment) 
  */
-public class EDCoW implements EDMethod {
+public class SentimentEDCoW {
     private final int delta; //6
     private final int delta2;
     private final int gamma; //5
     private final double minTermSupport; //0.0001
     private final double maxTermSupport; //0.01
     private HashMap<String, Integer[]> termDocMap;
-    private LinkedList<EDCoWEvent_> eventList;
+    private LinkedList<SentimentEDCoWEvent_> eventList;
     private final int timeSliceA;
     private final int timeSliceB;
     private int countCorpus = 0; //Total number of tweets
-    private final EDCoWCorpus corpus;
-    public EDCoWEvents events;
+    private final SentimentEDCoWCorpus corpus;
+    private int sentimentSource;
+    private long executionTime;
+    public SentimentEDCoWEvents events;
     
     /**
      * Default constructor with minimum parameters. <br/>
@@ -64,7 +65,8 @@ public class EDCoW implements EDMethod {
      * @param timeSliceB Ending timeslice.
      * @param corpus An EDCoWCorpus object.
      */
-    public EDCoW(int delta2, int timeSliceA, int timeSliceB, EDCoWCorpus corpus) {
+    public SentimentEDCoW(int delta2, int timeSliceA, int timeSliceB,
+            SentimentEDCoWCorpus corpus, int sentimentSource) {
         this.delta = 6;
         this.delta2 = delta2;
         this.gamma = 5;
@@ -73,6 +75,7 @@ public class EDCoW implements EDMethod {
         this.timeSliceA = timeSliceA;
         this.timeSliceB = timeSliceB;
         this.corpus = corpus;
+        this.sentimentSource = sentimentSource;
     }
     
     /**
@@ -97,11 +100,11 @@ public class EDCoW implements EDMethod {
      * @param timeSliceA Starting timeslice.
      * @param timeSliceB Ending timeslice.
      * @param corpus An EDCoWCorpus object.
-     * @see #EDCoW(int, int, int, EDCoWCorpus) EDCoW() minimum constructor.
+     * @see #EDCoW(int, int, int, EDCoWCorpus, int) EDCoW() minimum constructor.
      */
-    public EDCoW(int delta1, int delta2, int gamma, double minTermSupport, 
+    public SentimentEDCoW(int delta1, int delta2, int gamma, double minTermSupport, 
             double maxTermSupport, int timeSliceA, int timeSliceB, 
-            EDCoWCorpus corpus) {
+            SentimentEDCoWCorpus corpus, int sentimentSource) {
         this.delta = delta1;
         this.delta2 = delta2;
         this.gamma = gamma;
@@ -111,32 +114,28 @@ public class EDCoW implements EDMethod {
         this.timeSliceB = timeSliceB;
         this.countCorpus = 0;
         this.corpus = corpus;
-        for (Integer numberOfDocument : corpus.getNumberOfDocuments()) {
+        for (Integer numberOfDocument : corpus.getEDCoWCorpus().getNumberOfDocuments()) {
             this.countCorpus += numberOfDocument;
         }
+        this.sentimentSource = sentimentSource;
     }
 
-    @Override
     public String getName() {
         return "EDCoW";
     }
 
-    @Override
     public String getCitation() {
         return "<li><b>EDCoW:</b> J. Weng and B. Lee (2011) Event Detection in Twitter, In Proceedings of the 2011 AAAI Conference on Weblogs and Social Media (ICWSM), pp. 401-408</li>";
     }
     
-    @Override
     public String getAuthors() {
         return "J. Weng and B. Lee";
     }
     
-    @Override
     public String getDescription() {
         return "Event detection with clustering of wavelet-based signals";
     }
 
-    @Override
     public void apply() {
         long startTime = System.currentTimeMillis();
         
@@ -148,11 +147,11 @@ public class EDCoW implements EDMethod {
         eventList = new LinkedList<>();
         
         Utilities.printMessageln("Calculating term frequencies...");
-        List<String> terms = corpus.getTerms();
+        List<String> terms = corpus.getEDCoWCorpus().getTerms();
         for(int i = 0; i < terms.size(); i++){
             String term = terms.get(i);
             if(term.length() > 1) { //Stopwords check removed as they are already ommitted when creating the dataset 
-                Integer[] frequency = corpus.getDocumentsTermFrequency(i);
+                Integer[] frequency = corpus.getEDCoWCorpus().getDocumentsTermFrequency(i);
                 int cf = 0;
                 for(int freq : frequency){
                     cf += freq;
@@ -168,29 +167,36 @@ public class EDCoW implements EDMethod {
             try {
                 processWindow(i);
             } catch (Exception ex) {
-                Logger.getLogger(EDCoW.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SentimentEDCoW.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         Collections.sort(eventList);
-        events = new EDCoWEvents();
+        events = new SentimentEDCoWEvents();
         
         eventList.stream().forEach((event) -> {
             //try {
-                events.list.add(new EDCoWEvent(
+                events.list.add(new SentimentEDCoWEvent(
                         event.getKeywordsIDsAsString(), 
-                        corpus.getDateFromTimeSlice(
+                        corpus.getEDCoWCorpus().getDateFromTimeSlice(
                                 (int)event.startSlice) + "," 
-                                + corpus.getDateFromTimeSlice((int)event.endSlice - 1), 
-                        corpus.getIDsOfWindowAsString(
-                                corpus.getDateFromTimeSlice((int)event.startSlice), 
-                                corpus.getDateFromTimeSlice((int)event.endSlice - 1))));
+                                + corpus.getEDCoWCorpus().getDateFromTimeSlice((int)event.endSlice - 1), 
+                        corpus.getEDCoWCorpus().getIDsOfWindowAsString(
+                                corpus.getEDCoWCorpus().getDateFromTimeSlice((int)event.startSlice), 
+                                corpus.getEDCoWCorpus().getDateFromTimeSlice((int)event.endSlice - 1)),
+                        corpus.getEDCoWCorpus().getTweetsOfWindowAsList(
+                                corpus.getEDCoWCorpus().getDateFromTimeSlice((int)event.startSlice), 
+                                corpus.getEDCoWCorpus().getDateFromTimeSlice((int)event.endSlice - 1)),
+                        sentimentSource));
+//            } catch(ArrayIndexOutOfBoundsException e) {
+//                System.out.println("");
+//            }
         });
         
         events.setFullList();
         
         long endTime = System.currentTimeMillis();
-        Utilities.printExecutionTime(startTime, endTime, EDCoW.class.getName(), 
-                Thread.currentThread().getStackTrace()[1].getMethodName());
+        executionTime = (endTime - startTime) / 1000;
+        Utilities.printExecutionTime(startTime, endTime, SentimentEDCoW.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
     /**
@@ -200,8 +206,8 @@ public class EDCoW implements EDMethod {
      */
     public void processWindow(int window) throws Exception {
     	//try{
-            LinkedList<EDCoWKeyword> keyWords = new LinkedList<>();
-            Integer[] distributioni = corpus.getNumberOfDocuments();
+            LinkedList<SentimentEDCoWKeyword> keyWords = new LinkedList<>();
+            Integer[] distributioni = corpus.getEDCoWCorpus().getNumberOfDocuments();
             double[] distributiond = new double[delta2];
             int startSlice = window * delta2;
             int endSlice = startSlice + delta2 - 1;
@@ -214,17 +220,17 @@ public class EDCoW implements EDMethod {
                 for(int i = startSlice; i < endSlice; i++){
                     frequencyd[i-startSlice] = (double) frequencyf[i];
                 }
-                keyWords.add(new EDCoWKeyword(entry.getKey(), frequencyd, delta, distributiond));
+                keyWords.add(new SentimentEDCoWKeyword(entry.getKey(), frequencyd, delta, distributiond));
             });
             double[] autoCorrelationValues = new double[keyWords.size()];
             for(int i = 0; i < keyWords.size(); i++){
                 autoCorrelationValues[i] = keyWords.get(i).getAutoCorrelation();
             }
-            EDCoWThreshold th1 = new EDCoWThreshold();
+            SentimentEDCoWThreshold th1 = new SentimentEDCoWThreshold();
             double theta1 = th1.theta1(autoCorrelationValues, gamma);
 
             // Removing trivial keywords based on theta1
-            LinkedList<EDCoWKeyword> keyWordsList1 = new LinkedList<>();
+            LinkedList<SentimentEDCoWKeyword> keyWordsList1 = new LinkedList<>();
             keyWords.stream().filter((k) -> (k.getAutoCorrelation() > theta1)).forEach((k) -> {
                 keyWordsList1.add(k);
             });
@@ -245,8 +251,7 @@ public class EDCoW implements EDMethod {
                     bigMatrix[i][j] = (bigMatrix[i][j] < theta2) ? 0 : bigMatrix[i][j];
                 }
             }
-            EDCoWModularityDetection modularity = new EDCoWModularityDetection(
-                    keyWordsList1, bigMatrix, startSlice, endSlice);
+            SentimentEDCoWModularityDetection modularity = new SentimentEDCoWModularityDetection(keyWordsList1, bigMatrix, startSlice, endSlice);
 
             double thresholdE = 0.1;
             ArrayList<Community> finalArrCom = modularity.getCommunitiesFiltered(thresholdE);
@@ -257,5 +262,15 @@ public class EDCoW implements EDMethod {
                     modularity.saveEventFromCommunity(c);
                 });
             eventList.addAll(modularity.getEvents());
+            
+        //} catch (NullPointerException e) {
+            //Do nothing
+        //} catch (IOException | NetworkException e) {
+            //Logger.getLogger(SentimentEDCoW.class.getName()).log(Level.SEVERE, null, e);
+        //} catch (Exception e) {
+            //Logger.getLogger(SentimentEDCoW.class.getName()).log(Level.SEVERE, null, e);
+        //}
     }
+    
+    public final long getExecutionTime() { return executionTime; }
 }

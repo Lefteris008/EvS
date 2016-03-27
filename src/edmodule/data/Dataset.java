@@ -27,7 +27,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.02.19_1709
+ * @version 2016.03.27_2342
  */
 public final class Dataset {
     
@@ -54,7 +54,8 @@ public final class Dataset {
         mongo.closeMongoConnection();
  
         long endTime = System.currentTimeMillis();
-        Utilities.printExecutionTime(startTime, endTime, Dataset.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        Utilities.printExecutionTime(startTime, endTime, Dataset.class.getName(), 
+                Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
     /**

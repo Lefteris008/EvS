@@ -14,24 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package exception;
+package evs.data;
+
+import dsretriever.Tweet;
+import edmodule.data.EDCoWCorpus;
+import edmodule.utils.StopWordsHandlers;
+import java.util.List;
+import utilities.Config;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.16_1214
+ * @version 2016.03.28_0003
  */
-public class EmptyDatabaseException extends Exception {
+public class SentimentEDCoWCorpus {
+    private final EDCoWCorpus corpus;
     
-    public EmptyDatabaseException() {
-        ///
+    public SentimentEDCoWCorpus(Config config, List<Tweet> tweets, StopWordsHandlers swH, int refreshWindow) {
+        this.corpus = new EDCoWCorpus(config, tweets, swH, refreshWindow);
     }
     
-    /**
-     * Constructor with a custom message.
-     * @param message A String containing a message to be passed to the error stream.
-     */
-    public EmptyDatabaseException(String message) {
-        super(message);
-    }
+    public final EDCoWCorpus getEDCoWCorpus() { return corpus; }
 }

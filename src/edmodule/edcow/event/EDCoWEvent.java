@@ -26,19 +26,19 @@ import java.io.Serializable;
  *
  * @author  Adrien GUILLE, Laboratoire ERIC, Université Lumière Lyon 2
  * @author  Lefteris Paraskevas
- * @version 2016.02.19_1710
+ * @version 2016.03.27_2349
  */
-public class Event implements Serializable {
+public class EDCoWEvent implements Serializable {
     private SimpleStringProperty textualDescription;
     private SimpleStringProperty temporalDescription;
     private SimpleStringProperty physicalDescription;
     private SimpleDoubleProperty score;
 
-    public Event(String text, String temp, String physical) {
+    public EDCoWEvent(String text, String temp, String physical) {
         this(text, temp, physical, 0);
     }
 
-    public Event(String text, String temp, String physical, double score) {
+    public EDCoWEvent(String text, String temp, String physical, double score) {
         textualDescription = new SimpleStringProperty(text);
         temporalDescription = new SimpleStringProperty(temp);
         physicalDescription = new SimpleStringProperty(physical);

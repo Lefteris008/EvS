@@ -20,7 +20,7 @@ import edmodule.data.Dataset;
 import edmodule.data.EDCoWCorpus;
 import edmodule.data.PeakFindingCorpus;
 import edmodule.edcow.EDCoW;
-import edmodule.edcow.event.Event;
+import edmodule.edcow.event.EDCoWEvent;
 import edmodule.utils.BinPair;
 import edmodule.peakfinding.BinsCreator;
 import edmodule.peakfinding.OfflinePeakFinding;
@@ -36,19 +36,19 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.02.19_1708
+ * @version 2016.03.27_2741
  */
 public class EDMethodPicker {
     
     /**
-     * Pick method of Event Detection.
+     * Pick method of EDCoWEvent Detection.
      * @param config A configuration object
      */
     public static void selectEDMethod(Config config) throws FileNotFoundException {
         System.out.println("\nPick a method for Event Detection");
         System.out.println("1. EDCoW");
-        System.out.println("2. LSH");
-        System.out.println("3. Offline Peak Finding");
+        System.out.println("2. Offline Peak Finding");
+        System.out.println("Press any other key for exit.");
         System.out.print("Your choice: ");
         
         Scanner keyboard = new Scanner(System.in);
@@ -64,7 +64,7 @@ public class EDMethodPicker {
                 corpus.createCorpus();
                 corpus.setDocTermFreqIdList();
                 int delta = 4, delta2 = 11, gamma = 26;
-                double minTermSupport = 0.0001, maxTermSupport = 0.001;
+                double minTermSupport = 0.001, maxTermSupport = 0.01;
                 
                 for(delta = 4; delta < 15; delta++) {
                     EDCoW edcow = new EDCoW(delta, delta2, gamma, minTermSupport, 
@@ -84,7 +84,7 @@ public class EDMethodPicker {
                             + "\t" + minTermSupport + "\t" + maxTermSupport 
                             + "\t" + eval.getTotalRecall() + "\t" + eval.getTotalPrecision();
                     lines.add(line); //Add first line
-                    for(Event event : edcow.events.list) {
+                    for(EDCoWEvent event : edcow.events.list) {
                         line = event.getTemporalDescriptionLowerBound()+ "\t" 
                                 + eval.getRecall(i) + "\t" 
                                 + eval.getPrecision(i) + "\t" 
@@ -97,17 +97,11 @@ public class EDMethodPicker {
                         lines.add(line);
                     }
                     lines.add(""); //Empty line
-//                    Utilities.printMessageln("Total events found: " + edcow.events.list.size());
-//                    Utilities.printMessageln("Total recall: " + eval.getTotalRecall());
-//                    Utilities.printMessageln("Total precision: " + eval.getTotalPrecision());
                     Utilities.exportToFileUTF_8(config.getResourcesPath() 
                             + config.getEDCoWEventFileName(), lines, true);
                 }
                 break;
             } case 2: {
-                Utilities.printMessageln("LSH not implemented yet!");
-                break;
-            } case 3: {
                 int window = 10;
                 double alpha = 0.999;
                 int taph = 1;
@@ -131,7 +125,7 @@ public class EDMethodPicker {
                             + "\t" + alpha + "\t" + taph + "\t" + pi 
                             + "\t" + eval.getTotalRecall() + "\t" + eval.getTotalPrecision();
                     lines.add(line); //Add first line
-                    for(edmodule.peakfinding.event.Event event : opf.getEventList()) {
+                    for(edmodule.peakfinding.event.PeakFindingEvent event : opf.getEventList()) {
                         line = bins.get(event.getWindowLowerBound()).getBin()+ "\t" 
                                 + eval.getMatchedGroundTruthID(i) + "\t"
                                 + eval.getRecallOfEvent(i) + "\t" 

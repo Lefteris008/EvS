@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package evaluator;
+package evs.evaluator;
 
-import edmodule.peakfinding.event.PeakFindingEvent;
+import evs.peakfinding.event.SentimentPeakFindingEvent;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -34,14 +34,14 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.28_0000
+ * @version 2016.03.28_0006
  */
-public class PeakFindingEvaluator {
+public class SentimentPeakFindingEvaluator {
     private final double alpha;
     private final int taph;
     private final int pi;
     private final Config config;
-    private List<PeakFindingEvent> eventList;
+    private List<SentimentPeakFindingEvent> eventList;
     private final HashMap<Integer, HashSet<String>> groundTruthTermsPerEvent = new HashMap<>();
     private final HashMap<Integer, HashSet<String>> groundTruthTweetIDsPerEvent = new HashMap<>();
     private final HashMap<Integer, Integer> matchedGroundTruthEventIDs = new HashMap<>();
@@ -56,7 +56,8 @@ public class PeakFindingEvaluator {
      * @param pi An integer value representing pi parameter.
      * @param config A configuration object.
      */
-    public PeakFindingEvaluator(double alpha, int taph, int pi, List<PeakFindingEvent> eventList, Config config) {
+    public SentimentPeakFindingEvaluator(double alpha, int taph, int pi, 
+            List<SentimentPeakFindingEvent> eventList, Config config) {
         this.alpha = alpha;
         this.taph = taph;
         this.pi = pi;
@@ -91,9 +92,9 @@ public class PeakFindingEvaluator {
                i++;
             }
         } catch (FileNotFoundException e) {
-            Logger.getLogger(PeakFindingEvaluator.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(SentimentPeakFindingEvaluator.class.getName()).log(Level.SEVERE, null, e);
         } catch (IOException e) {
-            Logger.getLogger(PeakFindingEvaluator.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(SentimentPeakFindingEvaluator.class.getName()).log(Level.SEVERE, null, e);
         }
     }
     
@@ -107,7 +108,7 @@ public class PeakFindingEvaluator {
         double recall, precision;
         int eventKey = -1;
         int matchedItems = 0;
-        for(PeakFindingEvent event : eventList) {
+        for(SentimentPeakFindingEvent event : eventList) {
             matchedItems = 0;
             for(String id : event.getTweetIDs()) {
                 if((eventKey = findEventById(id)) != -1) {
@@ -165,7 +166,7 @@ public class PeakFindingEvaluator {
         double recall, precision;
         int eventKey = -1;
         int matchedItems = 0;
-        for(PeakFindingEvent event : eventList) {
+        for(SentimentPeakFindingEvent event : eventList) {
             matchedItems = 0;
             for(String id : event.getTweetIDs()) {
                 if((eventKey = findEventById(id)) != -1) {

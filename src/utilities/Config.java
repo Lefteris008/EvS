@@ -16,13 +16,26 @@
  */
 package utilities;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import preprocessingmodule.PreProcessor;
 
 /**
  *
@@ -48,6 +61,9 @@ public class Config {
     private static String tweetDataFile;
     private static String resourcesPath;
     private static String emoticonsPath;
+    private static String outputPath;
+    private static String edcowOutputPath;
+    private static String peakFindingOutputPath;
     private static String sentimentFilesPath;
     private static String punctuationFile;
     private static String specialCharFile;
@@ -57,6 +73,36 @@ public class Config {
     
     private static String positiveEmoticonsFile;
     private static String negativeEmoticonsFile;
+    
+    private static String insideSentiment;
+    private static String outsideSentiment1;
+    private static String outsideSentiment2;
+
+
+
+    /**
+     * Parses a String array and creates an ArrayList containing only the appropriate fields.
+     * @param fields A String array containing fields of data of a tweet.
+     * @return An ArrayList containing the appropriate fields of the original array.
+     */
+    public static final ArrayList<String> getTweetFieldsFromArray(String[] fields) {
+        ArrayList<String> tweet = new ArrayList<>();
+        tweet.add(fields[6]);
+        tweet.add(fields[7]);
+        if ("R".equals(fields[5])) {
+            tweet.add("1");
+        } else {
+            tweet.add("0");
+        }
+        tweet.add(fields[8]);
+        tweet.add(fields[9]);
+        tweet.add(fields[10]);
+        tweet.add(fields[11]);
+        tweet.add("-1");
+        tweet.add("-1");
+        return tweet;
+    }
+
     
     public Config() throws IOException {
         
@@ -93,6 +139,9 @@ public class Config {
             tweetDataFile = prop.getProperty("TweetDataFile");
             resourcesPath = prop.getProperty("ResourcesPath");
             emoticonsPath = prop.getProperty("EmoticonsPath");
+            outputPath = prop.getProperty("OutputPath");
+            edcowOutputPath = prop.getProperty("EdcowOutputPath");
+            peakFindingOutputPath = prop.getProperty("PeakFindingOutputPath");
             sentimentFilesPath = prop.getProperty("SentimentPath");
             groundTruthDataFile = prop.getProperty("GroundTruthDataFile");
             punctuationFile = prop.getProperty("PunctuationFile");
@@ -102,6 +151,10 @@ public class Config {
             
             positiveEmoticonsFile = prop.getProperty("PositiveEmoticons");
             negativeEmoticonsFile = prop.getProperty("NegativeEmoticons");
+            
+            insideSentiment = prop.getProperty("InsideSentiment");
+            outsideSentiment1 = prop.getProperty("OutsideSentiment1");
+            outsideSentiment2 = prop.getProperty("OutsideSentiment2");
             
         } catch (IOException | NumberFormatException e) {
             if(inputStream != null) {
@@ -158,6 +211,18 @@ public class Config {
      * @return A string containing the name of the server, usually 'localhost'
      */
     public String getServerName() { return serverName; }
+
+    public static String getOutputPath() {
+        return outputPath;
+    }
+
+    public static String getEdcowOutputPath() {
+        return edcowOutputPath;
+    }
+
+    public static String getPeakFindingOutputPath() {
+        return peakFindingOutputPath;
+    }
     
     /**
      * Returns the port of the server the MongoDB instance is running into.
@@ -266,4 +331,24 @@ public class Config {
      * @return A pre-compiled pattern.
      */
     public Pattern getURLPattern() { return urlPattern; }
+    
+    /**
+     * Returns the field name of the sentiment predicted using the SST.
+     * @return A String containing the field name.
+     */
+    public String getStanfordSentimentName() { return insideSentiment; }
+    
+    /**
+     * Returns the field name of the sentiment predicted using the Naive Bayes
+     * classifier.
+     * @return A String containing the field name.
+     */
+    public String getNaiveBayesSentimentName() { return outsideSentiment1; }
+    
+    /**
+     * Returns the field name of the sentiment predicted using the Bayesian Net
+     * classifier.
+     * @return A String containing the field name.
+     */
+    public String getBayesianNetSentimentName() { return outsideSentiment2; }
 }

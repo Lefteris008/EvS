@@ -20,7 +20,6 @@ import utilities.Config;
 import dsretriever.TweetsRetriever;
 import dsretriever.Tweet;
 import dsretriever.MongoHandler;
-import dsretriever.Utils;
 import com.mongodb.MongoException;
 import edmodule.EDMethodPicker;
 import java.io.BufferedReader;
@@ -126,7 +125,7 @@ public class PreProcessor {
                 mongo.connectToMongoDB();
                 List<Tweet> tweets = mongo.retrieveAllTweetsFiltered();
                 Utilities.printMessageln("Starting calculating sentiment annotations...");
-                countSentimentAnnotatedTweets(mongo, tweets);
+                countSentimentAnnotatedTweets(config, mongo, tweets);
                 mongo.closeMongoConnection();
                 break;
             } case 5: {
@@ -138,9 +137,9 @@ public class PreProcessor {
                 SentimentAnalyzer.initAnalyzer(true);
                 int sentiment;
                 for(Tweet tweet : tweets) {
-                    if(!mongo.tweetHasSentiment(tweet.getID(), "sentiment")) {
+                    if(!mongo.tweetHasSentiment(tweet.getID(), config.getStanfordSentimentName())) {
                         sentiment = SentimentAnalyzer.getSentimentOfSentence(tweet.getText());
-                        mongo.updateSentiment(tweet.getID(), sentiment, "sentiment");
+                        mongo.updateSentiment(tweet.getID(), sentiment, config.getStanfordSentimentName());
                     }
                 }
                 SentimentAnalyzer.postActions(true);
@@ -209,7 +208,7 @@ public class PreProcessor {
                 mongo.connectToMongoDB();
                 List<Tweet> tweets = mongo.retrieveAllTweetsFiltered();
                 SentimentAnnotator sA = new SentimentAnnotator(config, tweets, mongo);
-                sA.annotateWithSentiment();
+                sA.annotateWithNaiveBayesSentiment();
                 mongo.closeMongoConnection();
                 break;
             } case 10: {
@@ -288,9 +287,9 @@ public class PreProcessor {
      * @param mongoDB A MongoDB object
      */
     public final static void retrieveByID(Config config, MongoHandler mongoDB) {
-        List<String> event1List = Utils.extractTweetIDsFromFile(config, "fa_cup");
-        List<String> event2List = Utils.extractTweetIDsFromFile(config, "super_tuesday");
-        List<String> event3List = Utils.extractTweetIDsFromFile(config, "us_elections");
+        List<String> event1List = Utilities.extractTweetIDsFromFile(config, "fa_cup");
+        List<String> event2List = Utilities.extractTweetIDsFromFile(config, "super_tuesday");
+        List<String> event3List = Utilities.extractTweetIDsFromFile(config, "us_elections");
 
         new TweetsRetriever().retrieveTweetsById(event1List, mongoDB, config, "FA Cup");
         new TweetsRetriever().retrieveTweetsById(event2List, mongoDB, config, "Super Tuesday");
@@ -307,10 +306,10 @@ public class PreProcessor {
         new TweetsRetriever().retrieveTweetsWithStreamingAPI(keywords, mongoDB, config); //Run the streamer
     }
     
-    private static void countSentimentAnnotatedTweets(MongoHandler mongo, List<Tweet> tweets) {
+    private static void countSentimentAnnotatedTweets(Config config, MongoHandler mongo, List<Tweet> tweets) {
         int counter = 0;
         for(Tweet tweet : tweets) {
-            if(mongo.tweetHasSentiment(tweet.getID(), "sentiment")) {
+            if(mongo.tweetHasSentiment(tweet.getID(), config.getStanfordSentimentName())) {
                 counter++;
             }
         }

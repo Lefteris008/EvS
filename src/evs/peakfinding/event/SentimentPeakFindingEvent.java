@@ -34,9 +34,9 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.16_1214
+ * @version 2016.03.28_0009
  */
-public class SentimentEvent {
+public class SentimentPeakFindingEvent {
     
     private final int id;
     private final Window<Integer, Integer> window;
@@ -60,15 +60,15 @@ public class SentimentEvent {
      * event.
      * @param corpus A PeakFindingCorpus object.
      */
-    public SentimentEvent(int id, Window<Integer, Integer> window, List<Tweet> tweetsOfEvent, 
-            PeakFindingSentimentCorpus corpus) {
+    public SentimentPeakFindingEvent(int id, Window<Integer, Integer> window, List<Tweet> tweetsOfEvent, 
+            PeakFindingSentimentCorpus corpus, int sentimentSource) {
         this.id = id;
         this.window = window;
         this.tweetsOfEvent = new ArrayList<>(tweetsOfEvent);
         this.corpus = corpus;
         this.stemsHandler =  new StemUtils();
         generateCommonTerms();
-        calculateSentimentStatistics(1);
+        calculateSentimentStatistics(sentimentSource);
         calculateUniqueUsersOfEvent();
     }
     
@@ -111,7 +111,11 @@ public class SentimentEvent {
                     neutralCounter++;
                 }
             } else { //Weka
-                returnedSentiment = tweet.getWekaSentiment();
+                if(sentimentSource == 1) {
+                    returnedSentiment = tweet.getNaiveBayesSentiment();
+                } else {
+                    returnedSentiment = tweet.getBayesianNetSentiment();
+                }
                 if(returnedSentiment == 0) {
                     negativeCounter++;
                 } else if(returnedSentiment == 1) {
@@ -201,7 +205,7 @@ public class SentimentEvent {
             return commonTerms;
         } else {
             Utilities.printMessageln("No common terms have been calculated yet!");
-            Utilities.printMessageln("Run " + SentimentEvent.class + "." + "generateCommonTerms() method first.");
+            Utilities.printMessageln("Run " + SentimentPeakFindingEvent.class + "." + "generateCommonTerms() method first.");
             return null;
         }
     }
@@ -231,7 +235,7 @@ public class SentimentEvent {
     public final String getCommonTermsAsString() {
         if(commonTerms.isEmpty()) {
             Utilities.printMessageln("No common terms have been calculated yet!");
-            Utilities.printMessageln("Run " + SentimentEvent.class + "." + "generateCommonTerms() method first.");
+            Utilities.printMessageln("Run " + SentimentPeakFindingEvent.class + "." + "generateCommonTerms() method first.");
             return null;
         }
         String commonTermsString = "";

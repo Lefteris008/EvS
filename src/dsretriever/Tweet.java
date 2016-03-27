@@ -21,7 +21,7 @@ import java.util.Date;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.12_1711
+ * @version 2016.03.27_2333
  */
 public class Tweet {
     
@@ -42,13 +42,15 @@ public class Tweet {
     private final int stanfordSentiment;
     private final int positiveEmoticonFlag;
     private final int negativeEmoticonFlag;
-    private final int wekaSentiment;
+    private final int naiveBayesSentiment;
+    private final int bayesianNetSentiment;
     
     public Tweet(long id, String username, long userId, String text, Date date, 
             double latitude, double longitude, int numberOfRetweets, 
             int numberOfFavorites, boolean retweet, boolean favorited, 
             boolean retweeted, String language, long retweetId, int stanfordSentiment,
-            int positiveEmoticonFlag, int negativeEmoticonFlag, int wekaSentiment) {
+            int positiveEmoticonFlag, int negativeEmoticonFlag, int naiveBayesSentiment,
+            int bayesianNetSentiment) {
         
         this.id = id;
         this.username = username;
@@ -67,7 +69,8 @@ public class Tweet {
         this.stanfordSentiment = stanfordSentiment;
         this.positiveEmoticonFlag = positiveEmoticonFlag;
         this.negativeEmoticonFlag = negativeEmoticonFlag;
-        this.wekaSentiment = wekaSentiment;
+        this.naiveBayesSentiment = naiveBayesSentiment;
+        this.bayesianNetSentiment = bayesianNetSentiment;
     }
     
     /**
@@ -163,12 +166,22 @@ public class Tweet {
     public int getStanfordSentiment() { return stanfordSentiment; }
     
     /**
-     * Returns the stanfordSentiment of a tweet, which was predicted by Weka.
-     * @return An integer that indicates the predicted stanfordSentiment. 0 indicates
-     * a negative stanfordSentiment, 1 a neutral, 2 a positive one while -1 indicates
-     * an irrelevant stanfordSentiment polarity.
+     * Returns the naiveBayesSentiment of a tweet, which was predicted by the 
+     * Naive Bayes classifier using Weka.
+     * @return An integer that indicates the predicted naiveBayesSentiment. 0 
+     * indicates a negative sentiment, 1 a neutral, 2 a positive one while -1 
+     * indicates an irrelevant stanfordSentiment polarity.
      */
-    public int getWekaSentiment() { return wekaSentiment; }
+    public int getNaiveBayesSentiment() { return naiveBayesSentiment; }
+    
+    /**
+     * Returns the bayesianNetSentiment of a tweet, which was predicted by the 
+     * Bayesian Net classifier using Weka.
+     * @return An integer that indicates the predicted naiveBayesSentiment. 0 
+     * indicates a negative sentiment, 1 a neutral, 2 a positive one while -1 
+     * indicates an irrelevant stanfordSentiment polarity.
+     */
+    public int getBayesianNetSentiment() { return bayesianNetSentiment; }
     
     /**
      * Returns a flag that indicates whether a tweet contains a positive emoticon.
@@ -186,7 +199,7 @@ public class Tweet {
      * Method to return a 64-bit hash code for the tweet, based on its text.
      * @return A long representing the hash code.
      */
-    public long getCustomHashCode() {
+    public long _64bitHashCode() {
         long hash = 0;
         long h = hash;
         char[] value = text.toCharArray();
@@ -208,6 +221,7 @@ public class Tweet {
         System.out.println("Tweet with ID '" + getID() + "'");
         System.out.println("--------------------------------------------");
         System.out.println("@" + getUsername());
+        System.out.println("User ID: " + userId);
         System.out.println(getText());
         System.out.println("Created at: " + getDate().toString());
         System.out.println("Location");
@@ -224,6 +238,17 @@ public class Tweet {
             System.out.println("Favorited " + (getNumberOfFavorites() == 1 ? "1 time." : getNumberOfFavorites() + " times."));
         }
         System.out.println("Language: " + getLanguage());
+        System.out.println(positiveEmoticonFlag == 1 ? 
+                "It contains at least one positive emoticon." 
+                : 
+                "It does not contain a positive emoticon.");
+        System.out.println(negativeEmoticonFlag == 1 ? 
+                "It contains at least one positive emoticon." 
+                : 
+                "It does not contain a positive emoticon.");
+        System.out.println("Naive Bayes Sentiment: " + naiveBayesSentiment);
+        System.out.println("Bayesian Net Sentiment: " + bayesianNetSentiment);
+        System.out.println("Stanford Sentiment Treebank Sentiment: " + stanfordSentiment);
         System.out.println("--------------------------------------------");
     }
 }

@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
 import preprocessingmodule.language.LangUtils;
@@ -39,7 +40,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.02.19_1709
+ * @version 2016.03.27_2374
  */
 public class EDCoWCorpus {
     
@@ -52,11 +53,12 @@ public class EDCoWCorpus {
     private List<String> terms = new ArrayList<>(); //List containing all occuring termsprivate final HashMap<String, Integer> termsMap = new HashMap<>(); //A map containing terms along with their frequency of occurance
     private final List<DocumentTermFrequencyItem> termDocFreqId = new ArrayList<>(); //A list containg triplets of tweetIDs, termIDs and their frequenciesprivate final HashMap<Integer, List<String>> docTerms = new HashMap<>(); //A map containing the tweetIDs and a list of the terms that each one of them includes
     private int numberOfTweets = 0;
-    private final HashMap<String, HashMap<String, Integer>> termsDocsWithOccurencies = new HashMap<>();
-    private final HashMap<String, ArrayList<String>> idsDocs = new HashMap<>();
-    private final HashMap<String, Integer> termIds = new HashMap<>(); //A map containing the ids of the terms (namely, their index as they are being read)
-    private final HashMap<String, Integer> messageDistribution = new HashMap<>();
-    private final HashMap<String, Integer> documentIndices = new HashMap<>();
+    private final Map<String, HashMap<String, Integer>> termsDocsWithOccurencies = new HashMap<>();
+    private final Map<String, ArrayList<String>> idsDocs = new HashMap<>();
+    private final Map<String, Integer> termIds = new HashMap<>(); //A map containing the ids of the terms (namely, their index as they are being read)
+    private final Map<String, Integer> messageDistribution = new HashMap<>();
+    private final Map<String, Integer> documentIndices = new HashMap<>();
+    private final Map<String, Tweet> tweetMap = new HashMap<>();
     private final StemUtils stemHandler = new StemUtils();
     private Date earliestDate;
     private Date latestDate;
@@ -72,32 +74,6 @@ public class EDCoWCorpus {
         this.tweets = tweets;
         this.swH = swH;
         this.refreshWindow = refreshWindow;
-        removeDublicateTweets();
-    }
-    
-    /**
-     * Method to quickly remove duplicate tweets.
-     * More formally, this method hashes the tweets by its text and stores
-     * the first one to show up. Tweets that have the exact same text, were
-     * ignored. Finally, the new list replaces the 'tweets' collection.
-     */
-    private void removeDublicateTweets() {
-        Utilities.printMessageln("Removing dublicates...");
-        long startTime = System.currentTimeMillis();
-        
-        HashMap<Integer, Tweet> uniqueTweetsMap = new HashMap<>();
-        tweets.stream().filter((tweet) -> (!uniqueTweetsMap.containsKey(
-                tweet.getText().hashCode()))).forEach((tweet) -> {
-            uniqueTweetsMap.put(tweet.getText().hashCode(), tweet);
-        });
-        List<Tweet> cleanedTweets = new ArrayList<>(uniqueTweetsMap.values());
-        
-        long endTime = System.currentTimeMillis();
-        Utilities.printExecutionTime(startTime, endTime, PeakFindingCorpus.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
-        Utilities.printMessageln("Original size of tweets: " + tweets.size());
-        Utilities.printMessageln("New size of tweets: " + cleanedTweets.size());
-        Utilities.printMessageln("Removed " + (tweets.size() - cleanedTweets.size()) + " duplicates.");
-        tweets = new ArrayList<>(cleanedTweets);
     }
     
     /**
@@ -118,7 +94,9 @@ public class EDCoWCorpus {
         //Set the calendar instance
         cal = Calendar.getInstance();
 
-        for(Tweet tweet : tweets) {            
+        for(Tweet tweet : tweets) {
+            tweetMap.put(String.valueOf(tweet.getID()), tweet);
+            
             Date tweetDate = tweet.getDate();
             if(tweetDate.before(earliestDate)) {
                 earliestDate = tweetDate;
@@ -181,45 +159,22 @@ public class EDCoWCorpus {
         setNumberOfDocuments(messageDistribution);
         
         long endTime = System.currentTimeMillis();
-        Utilities.printExecutionTime(startTime, endTime, EDCoWCorpus.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        Utilities.printExecutionTime(startTime, endTime, EDCoWCorpus.class.getName(), 
+                Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
     /**
      * Updates the distribution of incoming messages (tweets).
-     * More formally, it calculates the tweets belonging to a certain document. In this iteration, a document
-     * is set in a user-defined refresh window, so the method calculates and stores the tweets of this period. 
-     * It then stores this information into a HashMap which its docKey is the corresponding date and its value
-     * is the summary of the messages that have been generated into that time period.
+     * More formally, it calculates the tweets belonging to a certain document. 
+     * In this iteration, a document is set in a user-defined refresh window, 
+     * so the method calculates and stores the tweets of this period. It then 
+     * stores this information into a HashMap which its docKey is the corresponding
+     * date and its value is the summary of the messages that have been generated
+     * into that time period.
      * @param cal A Calendar instance, already set.
      * @param date The date to be checked.
-     * @param refreshWindow An integer representing the precision window (1-60) (in minutes) -E.g. 10 for 10-minute
-     * window, 30 for 30 minute window etc.
-     * @return The key of the document for HashMap storage. The key is assembled in YYYYMMDD_HHMM fashion
-     * using a user-defined precision window (for values of 10, HH00-HH09 belong to the 0-th 
-     * 10-minute window etc.)<br/> 
-     * For December 6th, 2014 10:07 PM, the generated key would be 20141206_2200
-     * For January 21st, 2015 10:27 AM, the generated key would be 20150121_1020
      */
     public final String updateMessageDistribution(Calendar cal, Date date) {
-//        int year;
-//        int month;
-//        int day;
-//        int hour;
-//        int minute;
-//        cal.setTime(date);
-//        year = cal.get(Calendar.YEAR); //Current year
-//        month = cal.get(Calendar.MONTH) + 1; //Zero-index based
-//        day = cal.get(Calendar.DAY_OF_MONTH); //Get the current day of month
-//        hour = cal.get(Calendar.HOUR_OF_DAY); //24h
-//        minute = cal.get(Calendar.MINUTE) / refreshWindow; //Nearest 10-minute window, starting from 0
-//        
-//        //Assemble the key in YYYYMMDD_HHMM form.
-//        String key = String.valueOf(year) 
-//                + (month < 10 ? "0" + String.valueOf(month) : String.valueOf(month)) 
-//                + (day < 10 ? "0" + String.valueOf(day) : String.valueOf(day))
-//                + "_" //Separate actual date from hour information
-//                + (hour < 10 ? "0" + String.valueOf(hour) : String.valueOf(hour))
-//                + String.valueOf(minute) + "0";
         String key = StringDateUtils.getDateKey(cal, date, refreshWindow);
         
         if(messageDistribution.containsKey(key)) {
@@ -244,9 +199,11 @@ public class EDCoWCorpus {
     }
     
     /**
-     * Initializes and stores a list containing objects of DocumentTermFrequencyItem class.
-     * More formally, each listing in this list contains a triplet with the ID of a document,
-     * the ID of a term that the document contains and the term's frequency.
+     * Initializes and stores a list containing objects of DocumentTermFrequencyItem
+     * class. <br/>
+     * More formally, each listing in this list contains a triplet with the ID of
+     * a document, the ID of a term that the document contains and the term's
+     * frequency.
      */
     public final void setDocTermFreqIdList() {
         int documentID, termID;
@@ -297,26 +254,12 @@ public class EDCoWCorpus {
         return frqs;
     }
     
-//    /**
-//     * Sets an integer array of numberOfDocuments size that contains
-//     * the tweets distribution of the user-defined window.
-//     * @param numberOfDocuments A HashMap containing the tweets distribution.
-//     */
-//    public void setNumberOfDocuments(HashMap<String, Integer> distribution) {
-//        numberOfDocuments = new Integer[distribution.size()];
-//        int i = 0;
-//        for(String key : distribution.keySet()) {
-//            numberOfDocuments[i] = distribution.get(key);
-//            i++;
-//        }
-//    }
-    
     /**
-     * Sets an integer array of numberOfDocuments size that contains
+     * Sets an integer array of numberOfDocuments size that contains.
      * the tweets distribution of the user-defined window.
      * @param numberOfDocuments A HashMap containing the tweets distribution.
      */
-    private void setNumberOfDocuments(HashMap<String, Integer> distribution) {
+    private void setNumberOfDocuments(Map<String, Integer> distribution) {
         
         Calendar cal = Calendar.getInstance();
         
@@ -416,5 +359,30 @@ public class EDCoWCorpus {
             }); //ids.append(idsDocs.get(currentKey));
         }
         return ids.toString();
+    }
+    
+    /**
+     * Returns the tweets that belong to the window [start, end) as a list.
+     * @param start The start point of the window.
+     * @param end The end point of the window.
+     * @return A list comprised by all tweets in the specified window.
+     */
+    public final List<Tweet> getTweetsOfWindowAsList(String start, String end) {
+        List<Tweet> tweetsInWindow = new ArrayList<>();
+        Calendar cal = Calendar.getInstance();
+        
+        StringDateUtils.clearAndSetYearToMinute(cal, end);
+        long endMillis = cal.getTimeInMillis();
+        StringDateUtils.clearAndSetYearToMinute(cal, start);
+        
+        //Iterate between the two dates and store all the corresponding 10-minute windows
+        for (; cal.getTimeInMillis() <= endMillis; cal.add(Calendar.MINUTE, refreshWindow)) {
+            
+            String currentKey = StringDateUtils.getDateKey(cal, cal.getTime(), refreshWindow);
+            for(String id : idsDocs.get(currentKey)) {
+                tweetsInWindow.add(tweetMap.get(id));
+            }
+        }
+        return tweetsInWindow;
     }
 }

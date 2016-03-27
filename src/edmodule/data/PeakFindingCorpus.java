@@ -52,22 +52,9 @@ public class PeakFindingCorpus {
         this.config = config;
         this.swH = swH;
         this.tweets = tweets;
-        removeRetweets();
+        //removeRetweets();
     }
     
-    private void removeRetweets() {
-        MongoHandler mongo = new MongoHandler(config);
-        mongo.connectToMongoDB();
-        for(int i = 0; i < tweets.size(); i++) {
-            Tweet tweet = tweets.get(i);
-            
-            //If the tweet is a retweet and the source of it exists, remove it
-            if(tweet.isRetweet() && mongo.tweetExists(tweet.getOriginalIDOfRetweet())) {
-                tweets.remove(tweet);
-            }
-        }
-        mongo.closeMongoConnection();
-    }
     /**
      * Method to create and return the windows needed for OfflinePeakFinding 
      * algorithm to operate.

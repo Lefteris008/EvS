@@ -25,16 +25,17 @@ import java.util.ArrayList;
 import java.util.List;
 import preprocessingmodule.nlp.stemming.StemUtils;
 import evs.data.PeakFindingSentimentCorpus;
-import evs.peakfinding.event.SentimentEvent;
-import evs.peakfinding.event.SentimentEvents;
+import evs.peakfinding.event.SentimentPeakFindingEvent;
+import evs.peakfinding.event.SentimentPeakFindingEvents;
 import utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.16_1213
+ * @version 2016.03.28_0007
  * 
- * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing Microblogs for Event Exploration", CHI 2011.
+ * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing 
+ * Microblogs for Event Exploration", CHI 2011.
  */
 public class SentimentPeakFinding implements EDMethod {
     
@@ -48,8 +49,10 @@ public class SentimentPeakFinding implements EDMethod {
     private final PeakFindingSentimentCorpus corpus;
     private int totalEvents;
     private final List<Integer> tweetCountsInWindows = new ArrayList<>();
-    private List<SentimentEvent> sEventList;
+    private List<SentimentPeakFindingEvent> sEventList;
     private final StemUtils stemsHandler;
+    private final int sentimentSouce;
+    private double executionTime;
     
     /**
      * Public constructor.
@@ -61,7 +64,8 @@ public class SentimentPeakFinding implements EDMethod {
      * @param corpus A PeakFindingCorpus object.
      */
     public SentimentPeakFinding(List<BinPair<String, Integer>> bins, double a, 
-            int t, int p, int refreshWindow, PeakFindingSentimentCorpus corpus) {
+            int t, int p, int refreshWindow, PeakFindingSentimentCorpus corpus,
+            int sentimentSouce) {
         alpha = a;
         taph = t;
         pi = p;
@@ -69,6 +73,7 @@ public class SentimentPeakFinding implements EDMethod {
         this.refreshWindow = refreshWindow;
         this.corpus = corpus;
         this.stemsHandler = new StemUtils();
+        this.sentimentSouce = sentimentSouce;
     }
     
     @Override
@@ -136,13 +141,11 @@ public class SentimentPeakFinding implements EDMethod {
             }
         }
         generateActualWindows(); //Generate non-zero windows
-        SentimentEvents pfe = new SentimentEvents(corpus.getPeakFindingCorpus()
-                .getTweetsByWindow(), bins, windows, corpus, stemsHandler);
+        SentimentPeakFindingEvents pfe = new SentimentPeakFindingEvents(corpus.getPeakFindingCorpus()
+                .getTweetsByWindow(), bins, actualEventWindows, corpus, stemsHandler, sentimentSouce);
         sEventList = new ArrayList<>(pfe.getEvents());
-        for(SentimentEvent sEvent : sEventList) {
-            sEvent.printEventStatistics();
-        }
         long endTime = System.currentTimeMillis();
+        executionTime = (endTime - startTime) / 1000;
         Utilities.printExecutionTime(startTime, endTime, SentimentPeakFinding.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
@@ -179,9 +182,6 @@ public class SentimentPeakFinding implements EDMethod {
         int tweetCount;
         for(Window<Integer, Integer> window : windows) {
             tweetCount = 0;
-            if(window.getStart() > window.getEnd()) {
-                window.swapEdges();
-            }
             for(int i = window.getStart(); i < window.getEnd(); i++) {
                 tweetCount += bins.get(i).getValue(); //Count the tweets in window
             }
@@ -195,57 +195,6 @@ public class SentimentPeakFinding implements EDMethod {
     }
     
     /**
-     * Secondary method to display tweet counts in all non-zero events,
-     * after applying the main algorithm.
-     * @see apply() Main method.
-     */
-//    public final void printEventsStatistics() {
-//        try {
-//            Events pfe = new Events(corpus.getTweetsByWindow(), bins, actualEventWindows, corpus);
-//            Utilities.printMessageln("For a " + refreshWindow + "-minute window, got " + totalEvents + " events.");
-//            int i = 0;
-//            for(Window<Integer, Integer> window : actualEventWindows) {
-//                Utilities.printMessageln("Event starts from bin '" + window.getStart() + "' and ends at bin '" + window.getEnd() + "'.");
-//                Utilities.printMessageln("Event contains " + tweetCountsInWindows.get(i) + " tweets.");
-//                pfe.getEvents().get(i).printEvent();
-//                i++; //Go to the next index
-//            }
-//        } catch(FileNotFoundException e) {
-//            Logger.getLogger(OfflinePeakFinding.class.getName()).log(Level.SEVERE, null, e);
-//        }
-//    }
-    
-    /**
-     * Secondary method to export all events into a new file.
-     * @see apply() Main method.
-     */
-//    public final void exportEventsToFile() {
-//        try {
-//            Events pfe = new Events(corpus.getTweetsByWindow(), bins, actualEventWindows, corpus);
-//            List<Event> events = pfe.getEvents();
-//            
-//            try (PrintWriter writer = new PrintWriter(corpus.getConfigHandler().getPeakFindingEventsFileName(), "UTF-8")) {
-//                int i = 0;
-//                for(Event event : events) {
-//                    writer.println("Event " + event.getID() + " from " + 
-//                            bins.get(actualEventWindows.get(i).getStart()).getBin() 
-//                            + " to " +
-//                            bins.get(actualEventWindows.get(i).getEnd()).getBin()
-//                            + " " +
-//                            event.getCommonTermsAsString()
-//                    );
-//                    i++;
-//                }
-//                writer.close();
-//            } catch (FileNotFoundException | UnsupportedEncodingException ex) {
-//                Logger.getLogger(OfflinePeakFinding.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        } catch(FileNotFoundException e) {
-//            Logger.getLogger(OfflinePeakFinding.class.getName()).log(Level.SEVERE, null, e);
-//        }
-//    }
-    
-    /**
      * Method to return windows that have calculated by main algorithm.
      * @return A List containing the windows.
      */
@@ -257,7 +206,21 @@ public class SentimentPeakFinding implements EDMethod {
      */
     public final List<BinPair<String, Integer>> getBins() { return bins; }
     
-    public final List<SentimentEvent> getEventList() { return sEventList; }
+    /**
+     * Returns a list of the extracted events, along with their sentiment info.
+     * @return A List comprised by the events.
+     */
+    public final List<SentimentPeakFindingEvent> getEventList() { return sEventList; }
     
+    /**
+     * Returns an already initiated StemsHandler object.
+     * @return A StemsHandler object.
+     */
     public final StemUtils getStemsHandler() { return stemsHandler; }
+    
+    /**
+     * Returns the total time of execution.
+     * @return A double representing the time of execution.
+     */
+    public final double getExecutionTime() { return executionTime; }
 }

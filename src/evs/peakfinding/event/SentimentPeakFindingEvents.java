@@ -29,15 +29,15 @@ import evs.data.PeakFindingSentimentCorpus;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.16_1214
+ * @version 2016.03.28_0009
  */
-public class SentimentEvents {
+public class SentimentPeakFindingEvents {
     
     private final HashMap<String, ArrayList<Tweet>> tweetsByWindow;
     private final List<BinPair<String, Integer>> bins;
     private final List<Window<Integer, Integer>> eventWindows;
     private final ArrayList<ArrayList<Tweet>> eventsTweets = new ArrayList<>();
-    private final List<SentimentEvent> events = new ArrayList<>();
+    private final List<SentimentPeakFindingEvent> events = new ArrayList<>();
     private final PeakFindingSentimentCorpus corpus;
     
     /**
@@ -48,15 +48,16 @@ public class SentimentEvents {
      * @param eventWindows A List of Window objects, containing the generated eventsTweets.
      * @param corpus A PeakFindingCorpus object.
      */
-    public SentimentEvents(HashMap<String, ArrayList<Tweet>> tweetsByWindow, 
+    public SentimentPeakFindingEvents(HashMap<String, ArrayList<Tweet>> tweetsByWindow, 
             List<BinPair<String, Integer>> bins, 
             List<Window<Integer, Integer>> eventWindows, 
-            PeakFindingSentimentCorpus corpus, StemUtils stemsHandler) throws FileNotFoundException {
+            PeakFindingSentimentCorpus corpus, StemUtils stemsHandler,
+            int sentimentSouce) throws FileNotFoundException {
         this.tweetsByWindow = new HashMap<>(tweetsByWindow);
         this.bins = new ArrayList<>(bins);
         this.eventWindows = new ArrayList<>(eventWindows);
         this.corpus = corpus;
-        generateEvents();
+        generateEvents(sentimentSouce);
     }
     
     /**
@@ -86,13 +87,14 @@ public class SentimentEvents {
      * Method to generate all subsequent events and create a list of them for
      * future use.
      */
-    public final void generateEvents() {
+    public final void generateEvents(int sentimentSouce) {
         eventWindows.stream().map((window) -> new ArrayList<>(getTweetsOfEvent(window))).forEach((tweets) -> {
             eventsTweets.add(tweets);
         });
         int i = 0;
         for(Window<Integer, Integer> window : eventWindows) {
-            SentimentEvent event = new SentimentEvent(i, window, eventsTweets.get(i), corpus);
+            SentimentPeakFindingEvent event = new SentimentPeakFindingEvent(i, window, eventsTweets.get(i),
+                    corpus, sentimentSouce);
             events.add(event);
             i++;
         }
@@ -102,5 +104,5 @@ public class SentimentEvents {
      * Returns the actual events. 
      * @return A List with Event object.
      */
-    public final List<SentimentEvent> getEvents() { return events; }
+    public final List<SentimentPeakFindingEvent> getEvents() { return events; }
 }

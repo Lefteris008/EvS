@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package evaluator;
+package evs.evaluator;
 
-import edmodule.edcow.event.EDCoWEvent;
-import edmodule.edcow.event.EDCoWEvents;
+import evs.edcow.event.SentimentEDCoWEvent;
+import evs.edcow.event.SentimentEDCoWEvents;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -31,30 +31,34 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import preprocessingmodule.nlp.stemming.StemUtils;
 import utilities.Config;
-import utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.27_2359
+ * @version 2016.03.28_0005
  */
-public class EDCoWEvaluator implements AbstractEvaluator {
-    private final int delta;
-    private final int delta2;
-    private final int gamma;
-    private final int timeSliceA;
-    private final int timeSliceB;
-    private final double minTermSupport;
-    private final double maxTermSupport;
-    private final List<EDCoWEvent> eventList;
-    private final Config config;
+public class SentimentEDCoWEvaluator implements AbstractSentimentEvaluator {
+    private int delta;
+    private int delta2;
+    private int gamma;
+    private int timeSliceA;
+    private int timeSliceB;
+    private double minTermSupport;
+    private double maxTermSupport;
+    private List<SentimentEDCoWEvent> eventList;
+    private Config config;
     private final HashMap<Integer, HashSet<String>> groundTruthTermsPerEvent = new HashMap<>();
     private final HashMap<Integer, HashSet<String>> groundTruthIDsPerEvent = new HashMap<>();
-    private final StemUtils stemsHandler;
+    private final HashMap<Integer, Integer> matchedGroundTruthEventIDs = new HashMap<>();
+    private StemUtils stemsHandler;
     private final List<Double> precisionByEvent = new ArrayList<>();
     private final List<Double> recallByEvent = new ArrayList<>();
     private final HashSet<Integer> assignedEvents = new HashSet<>();
-    private final EDCoWEvents events;
+    private SentimentEDCoWEvents events;
+    
+    public SentimentEDCoWEvaluator() {
+        ///
+    }
     
     /**
      * Public constructor.
@@ -68,9 +72,9 @@ public class EDCoWEvaluator implements AbstractEvaluator {
      * @param eventList A list containing the events after the application of EDCoW algorithm.
      * @param config A configuration object.
      */
-    public EDCoWEvaluator(int delta, int delta2, int gamma, int timeSliceA, 
+    public SentimentEDCoWEvaluator(int delta, int delta2, int gamma, int timeSliceA, 
             int timeSliceB, double minTermSupport, double maxTermSupport, 
-            EDCoWEvents events, Config config, StemUtils stemsHandler) {
+            SentimentEDCoWEvents events, Config config, StemUtils stemsHandler) {
         this.delta = delta;
         this.delta2 = delta2;
         this.gamma = gamma;
@@ -112,9 +116,9 @@ public class EDCoWEvaluator implements AbstractEvaluator {
                i++;
             }
         } catch (FileNotFoundException e) {
-            Logger.getLogger(EDCoWEvaluator.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(SentimentEDCoWEvaluator.class.getName()).log(Level.SEVERE, null, e);
         } catch (IOException e) {
-            Logger.getLogger(EDCoWEvaluator.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(SentimentEDCoWEvaluator.class.getName()).log(Level.SEVERE, null, e);
         }
     }
     
@@ -134,7 +138,8 @@ public class EDCoWEvaluator implements AbstractEvaluator {
         double recall;
         double precision;
         int eventKey;
-        for(EDCoWEvent event : eventList) {
+        int eventCounter = 0;
+        for(SentimentEDCoWEvent event : eventList) {
             matchedItems = 0;
             ids = new ArrayList<>(Arrays.asList(
                     event.getPhysicalDescription().split(" ")));
@@ -147,8 +152,9 @@ public class EDCoWEvaluator implements AbstractEvaluator {
             }
             calculatedKeywords = new ArrayList<>(
                     Arrays.asList(event.getTextualDescription().split(" ")));
+            matchedGroundTruthEventIDs.put(eventCounter, eventKey);
+            eventCounter++;
             if(eventKey != -1) {
-                Utilities.printMessageln("Event found: " + eventKey);
                 
                 //Get the ground truth keywords and compare them 1 by 1
                 groundTruthKeywords = new HashSet<>(groundTruthTermsPerEvent.get(eventKey));
@@ -166,13 +172,7 @@ public class EDCoWEvaluator implements AbstractEvaluator {
                 }
                 recall = (double) matchedItems / (double) groundTruthKeywordSize;
                 precision = (double) matchedItems / (double) calculatedKeywords.size();
-                Utilities.printMessageln("Out of " + calculatedKeywords.size() + " items:");
-                Utilities.printMessageln("Matched " + matchedItems + " out of " 
-                        + groundTruthKeywordSize + " ground truth terms.");
-                Utilities.printMessageln("Recall: " + recall);
-                Utilities.printMessageln("Precision: " + precision);
             } else {
-                Utilities.printMessageln("Event not found");
                 recall = 0;
                 precision = 0;
             }
@@ -197,6 +197,9 @@ public class EDCoWEvaluator implements AbstractEvaluator {
                     return key;
                 }
             }
+//            if(termSet.contains(term)) {
+//                return key;
+//            }
         }
         return -1;
     }
@@ -221,27 +224,29 @@ public class EDCoWEvaluator implements AbstractEvaluator {
     /**
      * Calculates and returns the total recall of the calculated dataset.
      * @return A double containing the total recall of the calculated dataset
-     * compared with the ground truth data.
+     * compared with the ground truth data. If no events were present, -1 is 
+     * returned instead.
      */
     @Override
     public final double getTotalRecall() {
-        double totalRecall = 0;
-        totalRecall = recallByEvent.stream().mapToDouble((recall) -> recall)
+        double totalRecall = 0.0;
+        totalRecall = recallByEvent.stream().map((recall) -> recall)
                 .reduce(totalRecall, (accumulator, _item) -> accumulator + _item);
-        return totalRecall;
+        return (totalRecall == 0.0 ? -1.0 : totalRecall / recallByEvent.size());
     }
     
     /**
      * Calculates and returns the total precision of the calculated dataset.
      * @return A double containing the total precision of the calculated dataset
-     * compared with the ground truth data.
+     * compared with the ground truth data. If no events were present, -1 is
+     * returned instead.
      */
     @Override
     public final double getTotalPrecision() {
-        double totalPrecision = 0;
-        totalPrecision = precisionByEvent.stream().mapToDouble((precision) -> precision)
+        double totalPrecision = 0.0;
+        totalPrecision = precisionByEvent.stream().map((precision) -> precision)
                 .reduce(totalPrecision, (accumulator, _item) -> accumulator + _item);
-        return totalPrecision;
+        return (totalPrecision == 0.0 ? -1.0 : totalPrecision / precisionByEvent.size());
     }
     
     @Override
@@ -252,6 +257,16 @@ public class EDCoWEvaluator implements AbstractEvaluator {
     @Override
     public final double getPrecision(int index) {
         return precisionByEvent.get(index);
+    }
+    
+    /**
+     * Method to return the ground truth event ID that the 'eventID' event was
+     * matched to.
+     * @param eventID The event to search for.
+     * @return A integer representing the ground event ID.
+     */
+    public final int getMatchedGroundTruthID(int eventID) {
+        return matchedGroundTruthEventIDs.get(eventID);
     }
     
     /**

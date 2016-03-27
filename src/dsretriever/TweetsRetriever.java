@@ -37,13 +37,13 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2016.02.02_1707
+ * @version 2016.03.27_2334
  */
 public class TweetsRetriever {
 
     /**
-     * Method to get authorization from Twitter API
-     * @return A ConfigurationBuilder object
+     * Method to get authorization from Twitter API.
+     * @return A ConfigurationBuilder object.
      */
     public ConfigurationBuilder getAuthorization() {
         ConfigurationBuilder cb = new ConfigurationBuilder();
@@ -66,39 +66,39 @@ public class TweetsRetriever {
     
     /**
      * Method to retrieve and store historical tweets by collecting them with their ID.
-     * @param tweetIDs The IDs of the tweets that are going to be collected
-     * @param mongoDB A MongoHandler object
-     * @param config A configuration object
-     * @param event The ground truth event for which the tweets that are going to be collected, are referring to
+     * @param tweetIDs The IDs of the tweets that are going to be collected.
+     * @param mongoDB A MongoHandler object.
+     * @param config A configuration object.
+     * @param event The ground truth event for which the tweets that are going 
+     * to be collected, are referring to.
      */
     public final void retrieveTweetsById(List<String> tweetIDs, MongoHandler mongoDB, Config config, String event) {
         
         ConfigurationBuilder cb  = getAuthorization();
-        
         Twitter twitter = new TwitterFactory(cb.build()).getInstance();
         
         tweetIDs.stream().forEach((item) -> {
             try {
                 Status status = twitter.showStatus(Long.parseLong(item)); //Get tweet and all its metadata
-                mongoDB.insertTweetIntoMongoDB(status, event); //Store it
+                mongoDB.insertSingleTweetIntoMongoDB(status, event); //Store it
             } catch(TwitterException e) {
                 System.out.println("Failed to retrieve tweet with ID: " + item);
-                Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
+                Logger.getLogger(TweetsRetriever.class.getName()).log(Level.SEVERE, null, e);
             }
         });
     }
     
     /**
-     * Method that handles the Twitter streaming API. WARNING: Method does not terminate by itself, due to
-     * the fact that the streamer runs in a different thread.
-     * @param keywords The keywords for which the streamer searches for tweets
-     * @param mongoDB A handler for the MongoDB database
-     * @param config A configuration object
+     * Method that handles the Twitter streaming API. <br/>
+     * <b>WARNING:</b> Method does not terminate by itself, due to the fact that
+     * the streamer runs in a different thread.
+     * @param keywords The keywords for which the streamer searches for tweets.
+     * @param mongoDB A handler for the MongoDB database.
+     * @param config A configuration object.
      */
     public final void retrieveTweetsWithStreamingAPI(String[] keywords, MongoHandler mongoDB, Config config) {
         
         ConfigurationBuilder cb = getAuthorization();  
-        
         TwitterStream twitterStream = new TwitterStreamFactory(cb.build()).getInstance();
         
         final StatusListener listener;
@@ -106,7 +106,7 @@ public class TweetsRetriever {
             
             @Override
             public final void onStatus(Status status) {
-                mongoDB.insertTweetIntoMongoDB(status, "NULL"); //Insert tweet to MongoDB
+                mongoDB.insertSingleTweetIntoMongoDB(status, "NULL"); //Insert tweet to MongoDB
             }
 
             @Override

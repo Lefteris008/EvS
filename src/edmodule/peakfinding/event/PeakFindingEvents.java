@@ -31,13 +31,13 @@ import preprocessingmodule.nlp.stemming.StemUtils;
  * @author  Lefteris Paraskevas
  * @version 2016.02.19_1712
  */
-public class Events {
+public class PeakFindingEvents {
     
     private final HashMap<String, ArrayList<Tweet>> tweetsByWindow;
     private final List<BinPair<String, Integer>> bins;
     private final List<Window<Integer, Integer>> eventWindows;
     private final ArrayList<ArrayList<Tweet>> eventsTweets = new ArrayList<>();
-    private final List<Event> events = new ArrayList<>();
+    private final List<PeakFindingEvent> events = new ArrayList<>();
     private final PeakFindingCorpus corpus;
     
     /**
@@ -48,7 +48,7 @@ public class Events {
      * @param eventWindows A List of Window objects, containing the generated eventsTweets.
      * @param corpus A PeakFindingCorpus object.
      */
-    public Events(HashMap<String, ArrayList<Tweet>> tweetsByWindow, 
+    public PeakFindingEvents(HashMap<String, ArrayList<Tweet>> tweetsByWindow, 
             List<BinPair<String, Integer>> bins, 
             List<Window<Integer, Integer>> eventWindows, 
             PeakFindingCorpus corpus, StemUtils stemsHandler) throws FileNotFoundException {
@@ -92,7 +92,7 @@ public class Events {
         });
         int i = 0;
         for(Window<Integer, Integer> window : eventWindows) {
-            Event event = new Event(i, window, eventsTweets.get(i), corpus);
+            PeakFindingEvent event = new PeakFindingEvent(i, window, eventsTweets.get(i), corpus);
             events.add(event);
             i++;
         }
@@ -100,7 +100,7 @@ public class Events {
     
     /**
      * Returns the actual events. 
-     * @return A List with Event object.
+     * @return A List with PeakFindingEvent object.
      */
-    public final List<Event> getEvents() { return events; }
+    public final List<PeakFindingEvent> getEvents() { return events; }
 }

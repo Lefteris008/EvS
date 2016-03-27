@@ -16,7 +16,6 @@
  */
 package edmodule.utils;
 
-import dsretriever.Utils;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,7 +28,7 @@ import java.util.logging.Logger;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.02.19_1712
+ * @version 2016.03.27_2356
  */
 public class StringDateUtils {
     
@@ -147,7 +146,7 @@ public class StringDateUtils {
             return format.parse(date);
         } catch(ParseException e) {
             System.err.println("Input String was malformed.");
-            Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(StringDateUtils.class.getName()).log(Level.SEVERE, null, e);
             return null;
         }
     }

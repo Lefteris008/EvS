@@ -16,6 +16,8 @@
  */
 package utilities;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -23,16 +25,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import preprocessingmodule.PreProcessor;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.02.19_1657
+ * @version 2016.03.28_0010
  */
 public class Utilities {
     
@@ -102,6 +109,119 @@ public class Utilities {
             printMessageln("There was a problem exporting to file.");
             Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
             return false;
+        }
+    }
+
+    /**
+     * Combines the tweet's text and the retweet information to assemble the final text.
+     * @param isRetweet 1 for retweet, 0 otherwise
+     * @param text The original text of the tweet
+     * @return The assembled text
+     */
+    public static final String assembleText(String isRetweet, String text) {
+        if (Integer.parseInt(isRetweet) == 1) {
+            return "RT " + text;
+        } else {
+            return text;
+        }
+    }
+
+    /**
+     * Method to extract search terms from the 'search_terms.txt' file.
+     * More formally, it generates a String array containing the search terms
+     * that will be used in Twitter Streaming API.
+     * @param config The configuration object
+     * @return A String array containing the search terms
+     */
+    public static final String[] extractTermsFromFile(Config config) {
+        String line;
+        ArrayList<String> terms = new ArrayList<>();
+        try (final BufferedReader br = new BufferedReader(new FileReader(config.getSearchTermsFile()))) {
+            while ((line = br.readLine()) != null) {
+                terms.add(line);
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("The file '" + config.getSearchTermsFile() + "' is missing.\nPlace a correct file in classpath and re-run the project");
+            Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
+            System.exit(1);
+        }
+        return terms.toArray(new String[terms.size()]);
+    }
+
+    /**
+     * Returns a Date object for a given String.
+     * @param date A String formed in 'hh:MM PM/AM - dd MMM YYYY'.
+     * @return A Date object
+     */
+    public static final Date stringToDate(String date, ArrayList<String> tweet) {
+        try {
+            DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
+            return format.parse(date);
+        } catch (ParseException e) {
+            System.err.println("Input String was malformed.");
+            Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
+            return null;
+        }
+    }
+
+    /**
+     * Method to read the IDs of the tweets that are going to be retrieved from Twitter.
+     * @param config The configuration object
+     * @param filename The folder name in which the .txt files containing the IDs are placed
+     * @return A list containing the tweet IDs
+     */
+    public static final List<String> extractTweetIDsFromFile(Config config, String filename) {
+        List<String> list = new ArrayList<>();
+        String path = config.getDatasetPath() + filename + "\\";
+        try {
+            Files.walk(Paths.get(path)).forEach((Path filePath) -> {
+                if (Files.isRegularFile(filePath)) {
+                    try (final BufferedReader br = new BufferedReader(new FileReader(filePath.toString()))) {
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            list.add(line);
+                        }
+                    } catch (IOException e) {
+                        System.out.println("No filed found in '" + config.getDatasetPath() + filename + "\\'Place the appropriate files in classpath and re-run the project");
+                        Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
+                        System.exit(1);
+                    }
+                }
+            });
+        } catch (IOException e) {
+            System.out.println("Folder '" + config.getDatasetPath() + filename + "\\' is missing.\nPlace a correct folder in classpath and re-run the project");
+            Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
+            System.exit(1);
+        }
+        return list;
+    }
+
+    /**
+     * Method to parse a text file containing tweet information and return the extracted fields.
+     * @param config A configuration object.
+     * @return An ArrayList containing ArrayLists of tweets.
+     */
+    public static final ArrayList<ArrayList<String>> getTweetDataFromFile(Config config) {
+        String path = config.getDatasetPath() + config.getTweetDataFile();
+        ArrayList<ArrayList<String>> tweets = new ArrayList<>();
+        String[] fields;
+        ArrayList<String> tweet;
+        String line;
+        try (final BufferedReader br = new BufferedReader(new FileReader(path))) {
+            while ((line = br.readLine()) != null) {
+                fields = line.split("\t");
+                if (!"404".equals(fields[0]) && !"true".equals(fields[1])) {
+                    tweet = new ArrayList<>(Config.getTweetFieldsFromArray(fields));
+                    tweets.add(tweet);
+                }
+            }
+            br.close();
+            return tweets;
+        } catch (IOException e) {
+            System.out.println("The file '" + config.getTweetDataFile() + "' is missing.\nPlace a correct file in '" + config.getDatasetPath() + "' and re-run the project");
+            Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
+            return null;
         }
     }
 }

@@ -30,20 +30,20 @@ import javafx.collections.ObservableList;
  *   @author Adrien GUILLE, Laboratoire ERIC, Université Lumière Lyon 2
  * 
  * @author  Lefteris Paraskevas
- * @version 2016.02.19_1711
+ * @version 2016.03.27_2350
  */
-public class Events implements Serializable {
-    public LinkedList<Event> list = new LinkedList<>();
-    public ObservableList<Event> observableList;
+public class EDCoWEvents implements Serializable {
+    public LinkedList<EDCoWEvent> list = new LinkedList<>();
+    public ObservableList<EDCoWEvent> observableList;
 
-    public Events(ObservableList<Event> ol) {
+    public EDCoWEvents(ObservableList<EDCoWEvent> ol) {
         observableList = ol;
         observableList.stream().forEach((e) -> {
             list.add(e);
         });
     }
 
-    public Events() {
+    public EDCoWEvents() {
         observableList = FXCollections.observableArrayList();
     }
 
@@ -69,7 +69,7 @@ public class Events implements Serializable {
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         out.writeInt(list.size());
-        for (Event evt : list) {
+        for (EDCoWEvent evt : list) {
             out.writeObject(evt);
         }
     }
@@ -80,7 +80,7 @@ public class Events implements Serializable {
             list = new LinkedList<>();
             observableList = FXCollections.observableArrayList();
             for (int i = 0; i < count; i++) {
-                list.add((Event)in.readObject());
+                list.add((EDCoWEvent)in.readObject());
             }
             setFullList();
         } catch (ClassNotFoundException ignored) {

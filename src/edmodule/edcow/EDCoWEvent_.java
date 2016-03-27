@@ -41,21 +41,21 @@ import java.util.LinkedList;
  *   @author Adrien GUILLE, Laboratoire ERIC, Université Lumière Lyon 2
  * 
  * @author  Lefteris Paraskevas
- * @version 2016.02.19_1710
+ * @version 2016.03.27_2349
  */
-public class EDCoWEvent implements Comparable<EDCoWEvent>{
+public class EDCoWEvent_ implements Comparable<EDCoWEvent_>{
     public LinkedList<String> keywords;
     public double epsylon;
     public float startSlice;
     public float endSlice;
     
-    public EDCoWEvent(LinkedList<String> keywords_, float startDay_, float endDay_){
+    public EDCoWEvent_(LinkedList<String> keywords_, float startDay_, float endDay_){
         keywords = keywords_;
         startSlice = startDay_;
         endSlice = endDay_;
     }
     
-    public EDCoWEvent(){
+    public EDCoWEvent_(){
         keywords = new LinkedList<>();
     }
     
@@ -93,7 +93,7 @@ public class EDCoWEvent implements Comparable<EDCoWEvent>{
     }
 
     @Override
-    public int compareTo(EDCoWEvent event0) {
+    public int compareTo(EDCoWEvent_ event0) {
         if(this.epsylon < event0.epsylon){
             return -1;
         }else{

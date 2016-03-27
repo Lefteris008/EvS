@@ -25,8 +25,17 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import evs.data.PeakFindingSentimentCorpus;
+import evs.data.SentimentEDCoWCorpus;
+import evs.edcow.SentimentEDCoW;
+import evs.edcow.event.SentimentEDCoWEvent;
+import evs.evaluator.SentimentEDCoWEvaluator;
+import evs.evaluator.SentimentPeakFindingEvaluator;
 import evs.peakfinding.SentimentPeakFinding;
+import evs.peakfinding.event.SentimentPeakFindingEvent;
+import java.util.ArrayList;
+import java.util.Scanner;
 import utilities.Config;
+import utilities.Utilities;
 
 /**
  *
@@ -36,21 +45,147 @@ import utilities.Config;
 public class EvS {
             
     public EvS(Config config) {
-        int window = 10;
-        double alpha = 0.999;
-        int taph = 1;
-        int pi = 5;
-        Dataset ds = new Dataset(config);
-        PeakFindingCorpus corpus = new PeakFindingCorpus(config, ds.getTweetList(), ds.getSWH());
-        List<BinPair<String, Integer>> bins = BinsCreator.createBins(corpus, config, window);
-        PeakFindingSentimentCorpus sCorpus = new PeakFindingSentimentCorpus(corpus);
+        int choice;
+        System.out.println("\n----EvS----");
+        System.out.println("Select one of the following options");
+        System.out.println("1. Run Offline Peak Finding experiments.");
+        System.out.println("2. Run EDCoW experiments.");
+        System.out.println("");
+        System.out.print("Your choice: ");
         
-        SentimentPeakFinding spf = new SentimentPeakFinding(bins, alpha, taph, 
-                pi, window, sCorpus);
-        try {
-            spf.apply();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(EvS.class.getName()).log(Level.SEVERE, null, ex);
+        Scanner keyboard = new Scanner(System.in);
+        choice = keyboard.nextInt();
+        
+        switch (choice) {
+            case 1: { //Offline Peak Finding
+                int window = 10;
+                double alpha = 0.85;
+                int taph = 1;
+                int pi = 5;
+                Dataset ds = new Dataset(config);
+                PeakFindingCorpus corpus = new PeakFindingCorpus(config, ds.getTweetList(), ds.getSWH());
+                corpus.createCorpus(window);
+                
+                List<BinPair<String, Integer>> bins = BinsCreator.createBins(corpus, config, window);
+                PeakFindingSentimentCorpus sCorpus = new PeakFindingSentimentCorpus(corpus);
+                List<String> lines;
+                String line;
+                
+                //for(taph = 1; taph < 10; taph++) {
+                    SentimentPeakFinding spf = new SentimentPeakFinding(bins, alpha, taph, 
+                            pi, window, sCorpus, 2);
+                    try {
+                        spf.apply();
+                        SentimentPeakFindingEvaluator eval = 
+                                new SentimentPeakFindingEvaluator(alpha, taph, 
+                                    pi, spf.getEventList(), config);
+                        eval.evaluateWithAllTerms(false);
+                        int i = 0;
+                        lines = new ArrayList<>();
+                        line = (spf.getEventList().isEmpty() ? 0 : spf.getEventList().size()) 
+                                + "\t" + alpha + "\t" 
+                                + taph + "\t" 
+                                + pi + "\t" 
+                                + eval.getTotalRecall() + "\t" 
+                                + eval.getTotalPrecision() + "\t"
+                                + spf.getExecutionTime();
+                        lines.add(line); //Add first line
+                        for(SentimentPeakFindingEvent event : spf.getEventList()) {
+                            line = bins.get(event.getWindowLowerBound()).getBin()+ "\t" 
+                                    + eval.getMatchedGroundTruthID(i) + "\t"
+                                    + eval.getRecallOfEvent(i) + "\t" 
+                                    + eval.getPrecisionOfEvent(i) + "\t" 
+                                    + event.getCommonTermsAsString() + "\t"
+                                    + event.getMainSentimentOfEvent() + "\t"
+                                    + event.getPositiveSentimentPercentage() + "\t"
+                                    + event.getNegativeSentimentPercentage() + "\t"
+                                    + event.getNeutralSentimentPercentage() + "\t"
+                                    + event.getIrrelevantSentimentPercentage();
+                            lines.add(line); //Add every event in a single line
+                            i++;
+                        }
+                        if(lines.size() == 1) { //No events were created
+                            line = "No events";
+                            lines.add(line);
+                        }
+                        lines.add(""); //Empty line
+                        Utilities.exportToFileUTF_8(config.getResourcesPath() 
+                                + config.getOutputPath() 
+                                + config.getPeakFindingOutputPath()
+                                + "bayesian_net_peak_finding.txt", lines, true);
+                    } catch (FileNotFoundException ex) {
+                        Logger.getLogger(EvS.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                //}
+                
+                break;
+            } case 2: { //EDCoW
+                Dataset ds = new Dataset(config);
+                List<String> lines;
+                String line;
+                SentimentEDCoWCorpus corpus = new SentimentEDCoWCorpus(config, 
+                        ds.getTweetList(), ds.getSWH(), 10);
+                
+                corpus.getEDCoWCorpus().createCorpus();
+                corpus.getEDCoWCorpus().setDocTermFreqIdList();
+                int delta = 5, delta2 = 11, gamma = 6;
+                double minTermSupport = 0.001, maxTermSupport = 0.01;
+                
+                for(gamma = 6; gamma < 15; gamma++) {
+                    //Create the EDCoW object -> Naive Bayes
+                    SentimentEDCoW sEdcow = new SentimentEDCoW(delta, delta2, gamma,
+                            minTermSupport, maxTermSupport, 1, 155, corpus, 2);
+
+                    sEdcow.apply(); //Apply the algorithm
+
+                    SentimentEDCoWEvaluator eval;
+                    if(sEdcow.events.list.isEmpty()) {
+                        eval = new SentimentEDCoWEvaluator();
+                    } else {
+                        eval = new SentimentEDCoWEvaluator(
+                                delta, delta2, gamma, 1, 155, minTermSupport,
+                                maxTermSupport, sEdcow.events, config,
+                                corpus.getEDCoWCorpus().getStemsHandler());
+                        eval.evaluate();
+                    }
+                    
+                    int i = 0;
+                    lines = new ArrayList<>();
+                    line = (sEdcow.events.list.isEmpty() ? 0 : sEdcow.events.list.size()) 
+                            + "\t" + delta + "\t" + delta2 + "\t" + gamma 
+                            + "\t" + minTermSupport + "\t" + maxTermSupport 
+                            + "\t" + eval.getTotalRecall() + "\t" 
+                            + eval.getTotalPrecision() + "\t"
+                            + sEdcow.getExecutionTime();
+                    lines.add(line); //Add first line
+                    for(SentimentEDCoWEvent event : sEdcow.events.list) {
+                        line = event.getTemporalDescriptionLowerBound()+ "\t" 
+                                + eval.getMatchedGroundTruthID(i) + "\t"
+                                + eval.getRecall(i) + "\t" 
+                                + eval.getPrecision(i) + "\t" 
+                                + event.getTextualDescription() + "\t"
+                                + event.getMainSentimentOfEvent() + "\t"
+                                + event.getPositiveSentimentPercentage() + "\t"
+                                + event.getNegatineSentimentPercentage() + "\t"
+                                + event.getNeutralSentimentPercentage() + "\t"
+                                + event.getIrrelevantSentimentPercentage();
+                        lines.add(line); //Add every event in a single line
+                        i++;
+                    }
+                    if(lines.size() == 1) { //No events were created
+                        line = "No events";
+                        lines.add(line);
+                    }
+                    lines.add(""); //Empty line
+                    Utilities.exportToFileUTF_8(config.getResourcesPath() 
+                            + config.getOutputPath() + config.getEdcowOutputPath()
+                            + "bayesian_net_edcow.txt", lines, true);
+                }
+                break;
+            } default: {
+                
+            }
         }
+        
     }
 }
