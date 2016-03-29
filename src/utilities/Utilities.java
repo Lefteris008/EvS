@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import preprocessingmodule.PreProcessor;
 
 /**
  *
@@ -143,7 +142,7 @@ public class Utilities {
             br.close();
         } catch (IOException e) {
             System.out.println("The file '" + config.getSearchTermsFile() + "' is missing.\nPlace a correct file in classpath and re-run the project");
-            Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
             System.exit(1);
         }
         return terms.toArray(new String[terms.size()]);
@@ -184,14 +183,14 @@ public class Utilities {
                         }
                     } catch (IOException e) {
                         System.out.println("No filed found in '" + config.getDatasetPath() + filename + "\\'Place the appropriate files in classpath and re-run the project");
-                        Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
+                        Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
                         System.exit(1);
                     }
                 }
             });
         } catch (IOException e) {
             System.out.println("Folder '" + config.getDatasetPath() + filename + "\\' is missing.\nPlace a correct folder in classpath and re-run the project");
-            Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
             System.exit(1);
         }
         return list;

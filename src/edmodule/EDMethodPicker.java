@@ -44,7 +44,7 @@ public class EDMethodPicker {
      * Pick method of EDCoWEvent Detection.
      * @param config A configuration object
      */
-    public static void selectEDMethod(Config config) throws FileNotFoundException {
+    public static void selectEDMethod(Config config) {
         System.out.println("\nPick a method for Event Detection");
         System.out.println("1. EDCoW");
         System.out.println("2. Offline Peak Finding");

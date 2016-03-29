@@ -21,7 +21,6 @@ import edmodule.peakfinding.event.PeakFindingEvent;
 import edmodule.utils.BinPair;
 import edmodule.EDMethod;
 import edmodule.data.PeakFindingCorpus;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import preprocessingmodule.nlp.stemming.StemUtils;
@@ -30,7 +29,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.27_2353
+ * @version 2016.03.29_1753
  * 
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing Microblogs 
  * for PeakFindingEvent Exploration", CHI 2011.
@@ -97,7 +96,7 @@ public class OfflinePeakFinding implements EDMethod {
      * see SentimentPeakFinding.
      */
     @Override
-    public void apply() throws FileNotFoundException {
+    public void apply() {
         long startTime = System.currentTimeMillis();
         
         double mean = bins.get(0).getValue(); //Set the first element as mean

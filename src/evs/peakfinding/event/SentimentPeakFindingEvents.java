@@ -52,7 +52,7 @@ public class SentimentPeakFindingEvents {
             List<BinPair<String, Integer>> bins, 
             List<Window<Integer, Integer>> eventWindows, 
             PeakFindingSentimentCorpus corpus, StemUtils stemsHandler,
-            int sentimentSouce) throws FileNotFoundException {
+            int sentimentSouce) {
         this.tweetsByWindow = new HashMap<>(tweetsByWindow);
         this.bins = new ArrayList<>(bins);
         this.eventWindows = new ArrayList<>(eventWindows);

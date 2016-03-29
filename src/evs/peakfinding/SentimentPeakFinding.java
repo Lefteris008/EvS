@@ -100,7 +100,7 @@ public class SentimentPeakFinding implements EDMethod {
      * Implements the main algorithm of paper [1].
      */
     @Override
-    public void apply() throws FileNotFoundException {
+    public void apply() {
         long startTime = System.currentTimeMillis();
         
         double mean = bins.get(0).getValue(); //Set the first element as mean

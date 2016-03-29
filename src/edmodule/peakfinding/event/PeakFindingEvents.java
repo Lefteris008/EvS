@@ -20,7 +20,6 @@ import edmodule.utils.BinPair;
 import dsretriever.Tweet;
 import edmodule.data.PeakFindingCorpus;
 import edmodule.peakfinding.Window;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +28,7 @@ import preprocessingmodule.nlp.stemming.StemUtils;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.02.19_1712
+ * @version 2016.03.29_1753
  */
 public class PeakFindingEvents {
     
@@ -51,7 +50,7 @@ public class PeakFindingEvents {
     public PeakFindingEvents(HashMap<String, ArrayList<Tweet>> tweetsByWindow, 
             List<BinPair<String, Integer>> bins, 
             List<Window<Integer, Integer>> eventWindows, 
-            PeakFindingCorpus corpus, StemUtils stemsHandler) throws FileNotFoundException {
+            PeakFindingCorpus corpus, StemUtils stemsHandler) {
         this.tweetsByWindow = new HashMap<>(tweetsByWindow);
         this.bins = new ArrayList<>(bins);
         this.eventWindows = new ArrayList<>(eventWindows);

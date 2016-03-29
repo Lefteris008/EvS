@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import utilities.Config;
-import preprocessingmodule.PreProcessor;
 import preprocessingmodule.language.LangUtils;
 import preprocessingmodule.language.LanguageCodes;
 
@@ -70,7 +69,7 @@ public final class StopWords {
                         }
                     } catch(IOException e) {
                         System.out.println("No filed found in '" + config.getResourcesPath() + config.getStopwordsPath() + "\\'Place the appropriate files in classpath and re-run the project");
-                        Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
+                        Logger.getLogger(StopWords.class.getName()).log(Level.SEVERE, null, e);
                     }
                 }
                 if (Files.isRegularFile(filePath) && 
@@ -82,7 +81,7 @@ public final class StopWords {
                         }
                     } catch(IOException e) {
                         System.out.println("No filed found in '" + config.getResourcesPath() + config.getStopwordsPath() + "\\'Place the appropriate files in classpath and re-run the project");
-                        Logger.getLogger(PreProcessor.class.getName()).log(Level.SEVERE, null, e);
+                        Logger.getLogger(StopWords.class.getName()).log(Level.SEVERE, null, e);
                     }
                 }
             });       

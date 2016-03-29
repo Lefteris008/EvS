@@ -16,11 +16,11 @@
  */
 package evs;
 
+import edmodule.EDMethodPicker;
 import edmodule.data.Dataset;
 import edmodule.data.PeakFindingCorpus;
 import edmodule.peakfinding.BinsCreator;
 import edmodule.utils.BinPair;
-import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,27 +29,53 @@ import evs.data.SentimentEDCoWCorpus;
 import evs.edcow.SentimentEDCoW;
 import evs.edcow.event.SentimentEDCoWEvent;
 import evs.evaluator.SentimentEDCoWEvaluator;
-import evs.evaluator.SentimentPeakFindingEvaluator;
-import evs.peakfinding.SentimentPeakFinding;
-import evs.peakfinding.event.SentimentPeakFindingEvent;
+import experimenter.SentimentPeakFindingExperimenter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import utilities.Config;
+import utilities.Console;
 import utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.16_1213
+ * @version 2016.03.29_1750
  */
 public class EvS {
-            
-    public EvS(Config config) {
+    
+    /**
+     * Main method that provides a simple console input interface for the user,
+     * if she wishes to execute the tool as a .jar executable.
+     * @param args A list of arguments.
+     */
+    public static void main(String[] args) {
+        
+        Console console = new Console(args); //Read the console
+        
+        if(!console.showMongoLogging) {
+            //Stop reporting logging information
+            Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
+            mongoLogger.setLevel(Level.SEVERE);
+        }
+        
+        Config config = null;
+        try {
+            config = new Config();
+        } catch (IOException ex) {
+            Utilities.printMessageln("Configuration file 'config.properties' "
+                    + "not in classpath!");
+            Logger.getLogger(EvS.class.getName()).log(Level.SEVERE, null, ex);
+            System.exit(1);
+        }
+        
         int choice;
         System.out.println("\n----EvS----");
         System.out.println("Select one of the following options");
         System.out.println("1. Run Offline Peak Finding experiments.");
         System.out.println("2. Run EDCoW experiments.");
+        System.out.println("3. Run each of the above methods without "
+                + "the sentiment annotations.");
         System.out.println("");
         System.out.print("Your choice: ");
         
@@ -68,55 +94,26 @@ public class EvS {
                 
                 List<BinPair<String, Integer>> bins = BinsCreator.createBins(corpus, config, window);
                 PeakFindingSentimentCorpus sCorpus = new PeakFindingSentimentCorpus(corpus);
-                List<String> lines;
-                String line;
                 
-                //for(taph = 1; taph < 10; taph++) {
-                    SentimentPeakFinding spf = new SentimentPeakFinding(bins, alpha, taph, 
-                            pi, window, sCorpus, 2);
-                    try {
-                        spf.apply();
-                        SentimentPeakFindingEvaluator eval = 
-                                new SentimentPeakFindingEvaluator(alpha, taph, 
-                                    pi, spf.getEventList(), config);
-                        eval.evaluateWithAllTerms(false);
-                        int i = 0;
-                        lines = new ArrayList<>();
-                        line = (spf.getEventList().isEmpty() ? 0 : spf.getEventList().size()) 
-                                + "\t" + alpha + "\t" 
-                                + taph + "\t" 
-                                + pi + "\t" 
-                                + eval.getTotalRecall() + "\t" 
-                                + eval.getTotalPrecision() + "\t"
-                                + spf.getExecutionTime();
-                        lines.add(line); //Add first line
-                        for(SentimentPeakFindingEvent event : spf.getEventList()) {
-                            line = bins.get(event.getWindowLowerBound()).getBin()+ "\t" 
-                                    + eval.getMatchedGroundTruthID(i) + "\t"
-                                    + eval.getRecallOfEvent(i) + "\t" 
-                                    + eval.getPrecisionOfEvent(i) + "\t" 
-                                    + event.getCommonTermsAsString() + "\t"
-                                    + event.getMainSentimentOfEvent() + "\t"
-                                    + event.getPositiveSentimentPercentage() + "\t"
-                                    + event.getNegativeSentimentPercentage() + "\t"
-                                    + event.getNeutralSentimentPercentage() + "\t"
-                                    + event.getIrrelevantSentimentPercentage();
-                            lines.add(line); //Add every event in a single line
-                            i++;
-                        }
-                        if(lines.size() == 1) { //No events were created
-                            line = "No events";
-                            lines.add(line);
-                        }
-                        lines.add(""); //Empty line
-                        Utilities.exportToFileUTF_8(config.getResourcesPath() 
-                                + config.getOutputPath() 
-                                + config.getPeakFindingOutputPath()
-                                + "bayesian_net_peak_finding.txt", lines, true);
-                    } catch (FileNotFoundException ex) {
-                        Logger.getLogger(EvS.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                //}
+                SentimentPeakFindingExperimenter exper = 
+                        new SentimentPeakFindingExperimenter(sCorpus, bins, alpha, 
+                                taph, pi, window, config);
+                
+                //Taph
+                List<String> lines = exper.experimentUsingTaph(1, 10, 1, 0);
+                exper.exportToFile("stanford.txt", lines);
+                lines = exper.experimentUsingTaph(1, 10, 1, 1);
+                exper.exportToFile("naive_bayes.txt", lines);
+                lines = exper.experimentUsingTaph(1, 10, 1, 2);
+                exper.exportToFile("bayesian_net.txt", lines);
+                
+                //Alpha
+                lines = exper.experimentUsingAlpha(0.85, 0.99, 0.01, 0);
+                exper.exportToFile("stanford.txt", lines);
+                lines = exper.experimentUsingAlpha(0.85, 0.99, 0.01, 1);
+                exper.exportToFile("naive_bayes.txt", lines);
+                lines = exper.experimentUsingAlpha(0.85, 0.99, 0.01, 2);
+                exper.exportToFile("bayesian_net.txt", lines);
                 
                 break;
             } case 2: { //EDCoW
@@ -182,10 +179,11 @@ public class EvS {
                             + "bayesian_net_edcow.txt", lines, true);
                 }
                 break;
+            } case 3: {
+                EDMethodPicker.selectEDMethod(config);
             } default: {
                 
             }
         }
-        
     }
 }
