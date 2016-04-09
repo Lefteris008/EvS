@@ -31,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import preprocessingmodule.nlp.stemming.StemUtils;
 import utilities.Config;
+import utilities.Utilities;
 
 /**
  *
@@ -129,7 +130,7 @@ public class SentimentEDCoWEvaluator implements AbstractSentimentEvaluator {
      * data into a file, along with other useful metrics.
      */
     @Override
-    public void evaluate() {
+    public void evaluate(boolean showInlineInfo) {
         List<String> calculatedKeywords;
         List<String> ids;
         HashSet<String> groundTruthKeywords;
@@ -172,7 +173,18 @@ public class SentimentEDCoWEvaluator implements AbstractSentimentEvaluator {
                 }
                 recall = (double) matchedItems / (double) groundTruthKeywordSize;
                 precision = (double) matchedItems / (double) calculatedKeywords.size();
+                if(showInlineInfo) {
+                    Utilities.printMessageln("Event found: " + eventKey);
+                    Utilities.printMessageln("Out of " + calculatedKeywords.size() + " items:");
+                    Utilities.printMessageln("Matched " + matchedItems + " out of " 
+                            + groundTruthKeywordSize + " ground truth terms.");
+                    Utilities.printMessageln("Recall: " + recall);
+                    Utilities.printMessageln("Precision: " + precision);
+                }
             } else {
+                if(showInlineInfo) {
+                    Utilities.printMessageln("Event not found.");
+                }
                 recall = 0;
                 precision = 0;
             }
@@ -197,9 +209,6 @@ public class SentimentEDCoWEvaluator implements AbstractSentimentEvaluator {
                     return key;
                 }
             }
-//            if(termSet.contains(term)) {
-//                return key;
-//            }
         }
         return -1;
     }
@@ -229,24 +238,7 @@ public class SentimentEDCoWEvaluator implements AbstractSentimentEvaluator {
      */
     @Override
     public final double getTotalRecall() {
-        double totalRecall = 0.0;
-        totalRecall = recallByEvent.stream().map((recall) -> recall)
-                .reduce(totalRecall, (accumulator, _item) -> accumulator + _item);
-        return (totalRecall == 0.0 ? -1.0 : totalRecall / recallByEvent.size());
-    }
-    
-    /**
-     * Calculates and returns the total precision of the calculated dataset.
-     * @return A double containing the total precision of the calculated dataset
-     * compared with the ground truth data. If no events were present, -1 is
-     * returned instead.
-     */
-    @Override
-    public final double getTotalPrecision() {
-        double totalPrecision = 0.0;
-        totalPrecision = precisionByEvent.stream().map((precision) -> precision)
-                .reduce(totalPrecision, (accumulator, _item) -> accumulator + _item);
-        return (totalPrecision == 0.0 ? -1.0 : totalPrecision / precisionByEvent.size());
+        return assignedEvents.size() / groundTruthIDsPerEvent.size();
     }
     
     @Override

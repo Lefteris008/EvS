@@ -17,7 +17,7 @@
 package edmodule.peakfinding.event;
 
 import edmodule.utils.BinPair;
-import dsretriever.Tweet;
+import utilities.dsretriever.Tweet;
 import edmodule.data.PeakFindingCorpus;
 import edmodule.peakfinding.Window;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import preprocessingmodule.nlp.stemming.StemUtils;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.29_1753
+ * @version 2016.04.09_2005
  */
 public class PeakFindingEvents {
     

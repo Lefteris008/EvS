@@ -16,8 +16,8 @@
  */
 package samodule;
 
-import dsretriever.MongoHandler;
-import dsretriever.Tweet;
+import utilities.dsretriever.MongoHandler;
+import utilities.dsretriever.Tweet;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;

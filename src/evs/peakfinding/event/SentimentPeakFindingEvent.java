@@ -16,7 +16,7 @@
  */
 package evs.peakfinding.event;
 
-import dsretriever.Tweet;
+import utilities.dsretriever.Tweet;
 import edmodule.peakfinding.Window;
 import edmodule.utils.Stemmers;
 import java.util.ArrayList;

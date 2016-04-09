@@ -18,7 +18,7 @@ package edmodule.edcow;
 
 import edmodule.edcow.event.EDCoWEvents;
 import ch.epfl.lis.jmod.modularity.community.Community;
-import edmodule.EDMethod;
+import edmodule.AbstractEDMethod;
 import edmodule.data.EDCoWCorpus;
 import edmodule.edcow.event.EDCoWEvent;
 import java.util.*;
@@ -33,9 +33,9 @@ import utilities.Utilities;
  * @email   adrien.guille@univ-lyon2.fr
  * 
  * @author  Lefteris Paraskevas (configurations in EDCoW to omit missing components)
- * @version 2016.03.27_2349 (For EvS project version alignment) 
+ * @version 2016.04.09_2001 (For EvS project version alignment) 
  */
-public class EDCoW implements EDMethod {
+public class EDCoW implements AbstractEDMethod {
     private final int delta; //6
     private final int delta2;
     private final int gamma; //5
@@ -48,6 +48,7 @@ public class EDCoW implements EDMethod {
     private int countCorpus = 0; //Total number of tweets
     private final EDCoWCorpus corpus;
     public EDCoWEvents events;
+    private long executionTime;
     
     /**
      * Default constructor with minimum parameters. <br/>
@@ -189,6 +190,7 @@ public class EDCoW implements EDMethod {
         events.setFullList();
         
         long endTime = System.currentTimeMillis();
+        executionTime = (endTime - startTime) / 1000;
         Utilities.printExecutionTime(startTime, endTime, EDCoW.class.getName(), 
                 Thread.currentThread().getStackTrace()[1].getMethodName());
     }
@@ -199,63 +201,69 @@ public class EDCoW implements EDMethod {
      * @param window The window index (0, 1, 2 etc).
      */
     public void processWindow(int window) throws Exception {
-    	//try{
-            LinkedList<EDCoWKeyword> keyWords = new LinkedList<>();
-            Integer[] distributioni = corpus.getNumberOfDocuments();
-            double[] distributiond = new double[delta2];
-            int startSlice = window * delta2;
-            int endSlice = startSlice + delta2 - 1;
+        LinkedList<EDCoWKeyword> keyWords = new LinkedList<>();
+        Integer[] distributioni = corpus.getNumberOfDocuments();
+        double[] distributiond = new double[delta2];
+        int startSlice = window * delta2;
+        int endSlice = startSlice + delta2 - 1;
+        for(int i = startSlice; i < endSlice; i++){
+            distributiond[i-startSlice] = (double) distributioni[i]; 
+        }
+        termDocMap.entrySet().stream().forEach((entry) -> {
+            Integer frequencyf[] = entry.getValue();
+            double frequencyd[] = new double[delta2];
             for(int i = startSlice; i < endSlice; i++){
-                distributiond[i-startSlice] = (double) distributioni[i]; 
+                frequencyd[i-startSlice] = (double) frequencyf[i];
             }
-            termDocMap.entrySet().stream().forEach((entry) -> {
-                Integer frequencyf[] = entry.getValue();
-                double frequencyd[] = new double[delta2];
-                for(int i = startSlice; i < endSlice; i++){
-                    frequencyd[i-startSlice] = (double) frequencyf[i];
-                }
-                keyWords.add(new EDCoWKeyword(entry.getKey(), frequencyd, delta, distributiond));
-            });
-            double[] autoCorrelationValues = new double[keyWords.size()];
-            for(int i = 0; i < keyWords.size(); i++){
-                autoCorrelationValues[i] = keyWords.get(i).getAutoCorrelation();
-            }
-            EDCoWThreshold th1 = new EDCoWThreshold();
-            double theta1 = th1.theta1(autoCorrelationValues, gamma);
+            keyWords.add(new EDCoWKeyword(entry.getKey(), frequencyd, delta, distributiond));
+        });
+        double[] autoCorrelationValues = new double[keyWords.size()];
+        for(int i = 0; i < keyWords.size(); i++){
+            autoCorrelationValues[i] = keyWords.get(i).getAutoCorrelation();
+        }
+        EDCoWThreshold th1 = new EDCoWThreshold();
+        double theta1 = th1.theta1(autoCorrelationValues, gamma);
 
-            // Removing trivial keywords based on theta1
-            LinkedList<EDCoWKeyword> keyWordsList1 = new LinkedList<>();
-            keyWords.stream().filter((k) -> (k.getAutoCorrelation() > theta1)).forEach((k) -> {
-                keyWordsList1.add(k);
-            });
-            
-            keyWordsList1.stream().forEach((kw1) -> {
-                kw1.computeCrossCorrelation(keyWordsList1);
-            });
-            
-            double[][] bigMatrix = new double[keyWordsList1.size()][keyWordsList1.size()];
-            for(int i=0; i < keyWordsList1.size(); i++){
-                bigMatrix[i] = keyWordsList1.get(i).getCrossCorrelation();
-            }
+        // Removing trivial keywords based on theta1
+        LinkedList<EDCoWKeyword> keyWordsList1 = new LinkedList<>();
+        keyWords.stream().filter((k) -> (k.getAutoCorrelation() > theta1)).forEach((k) -> {
+            keyWordsList1.add(k);
+        });
 
-            //Compute theta2 using the BigMatrix
-            double theta2 = th1.theta2(bigMatrix, gamma);        
-            for(int i = 0; i < keyWordsList1.size(); i++){
-                for(int j = i+1; j < keyWordsList1.size(); j++){
-                    bigMatrix[i][j] = (bigMatrix[i][j] < theta2) ? 0 : bigMatrix[i][j];
-                }
-            }
-            EDCoWModularityDetection modularity = new EDCoWModularityDetection(
-                    keyWordsList1, bigMatrix, startSlice, endSlice);
+        keyWordsList1.stream().forEach((kw1) -> {
+            kw1.computeCrossCorrelation(keyWordsList1);
+        });
 
-            double thresholdE = 0.1;
-            ArrayList<Community> finalArrCom = modularity.getCommunitiesFiltered(thresholdE);
-            finalArrCom.stream().map((c) -> {
-                System.out.println(c.getCommunitySize());
-                return c;
-                }).forEach((c) -> {
-                    modularity.saveEventFromCommunity(c);
-                });
-            eventList.addAll(modularity.getEvents());
+        double[][] bigMatrix = new double[keyWordsList1.size()][keyWordsList1.size()];
+        for(int i=0; i < keyWordsList1.size(); i++){
+            bigMatrix[i] = keyWordsList1.get(i).getCrossCorrelation();
+        }
+
+        //Compute theta2 using the BigMatrix
+        double theta2 = th1.theta2(bigMatrix, gamma);        
+        for(int i = 0; i < keyWordsList1.size(); i++){
+            for(int j = i+1; j < keyWordsList1.size(); j++){
+                bigMatrix[i][j] = (bigMatrix[i][j] < theta2) ? 0 : bigMatrix[i][j];
+            }
+        }
+        EDCoWModularityDetection modularity = new EDCoWModularityDetection(
+                keyWordsList1, bigMatrix, startSlice, endSlice);
+
+        double thresholdE = 0.1;
+        ArrayList<Community> finalArrCom = modularity.getCommunitiesFiltered(thresholdE);
+        finalArrCom.stream().map((c) -> {
+            System.out.println(c.getCommunitySize());
+            return c;
+            }).forEach((c) -> {
+                modularity.saveEventFromCommunity(c);
+            });
+        eventList.addAll(modularity.getEvents());
     }
+    
+    /**
+     * Returns the execution time of the algorithm in seconds.
+     * @return A long containing the running time of the algorithm.
+     */
+    @Override
+    public final long getExecutionTime() { return executionTime; }
 }

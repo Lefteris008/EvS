@@ -17,6 +17,7 @@
 package utilities;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -87,14 +88,28 @@ public class Utilities {
     }
     
     /**
-     * Exports a List of Strings to a standard UTF-8 file.
+     * Exports a List of Strings to a standard UTF-8 file. The file is created
+     * if it does not exist.
      * @param filePath The directory along with the name of the file.
      * @param lines A List containing the lines of the file as Strings.
      * @param appendToFile If true the contents of 'lines' are going to be appended
      * to the end of the file. False always replaces file's contents.
      * @return True if the process succeeds, false otherwise.
      */
-    public final static boolean exportToFileUTF_8(String filePath, List<String> lines, boolean appendToFile) {
+    public final static boolean exportToFileUTF_8(String filePath, List<String> lines, 
+            boolean appendToFile) {
+        
+        File f = new File(filePath);
+        if(!f.exists()) { //Create if not exists
+            try {
+                f.createNewFile();
+            } catch (IOException ex) {
+                printMessageln("There was a problem creating the file. Consider"
+                        + "manually creating it using you OS's file manager.");
+                Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, ex);
+                return false;
+            }
+        }
         Path file = Paths.get(filePath);
         try {
             if(appendToFile) {
@@ -141,7 +156,7 @@ public class Utilities {
             }
             br.close();
         } catch (IOException e) {
-            System.out.println("The file '" + config.getSearchTermsFile() + "' is missing.\nPlace a correct file in classpath and re-run the project");
+            printMessageln("The file '" + config.getSearchTermsFile() + "' is missing.\nPlace a correct file in classpath and re-run the project");
             Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
             System.exit(1);
         }
@@ -158,7 +173,7 @@ public class Utilities {
             DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
             return format.parse(date);
         } catch (ParseException e) {
-            System.err.println("Input String was malformed.");
+            printMessageln("Input String was malformed.");
             Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
             return null;
         }
@@ -182,14 +197,16 @@ public class Utilities {
                             list.add(line);
                         }
                     } catch (IOException e) {
-                        System.out.println("No filed found in '" + config.getDatasetPath() + filename + "\\'Place the appropriate files in classpath and re-run the project");
+                        printMessageln("No filed found in '" + config.getDatasetPath() 
+                                + filename + "\\'Place the appropriate files in "
+                                + "classpath and re-run the project");
                         Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
                         System.exit(1);
                     }
                 }
             });
         } catch (IOException e) {
-            System.out.println("Folder '" + config.getDatasetPath() + filename + "\\' is missing.\nPlace a correct folder in classpath and re-run the project");
+            printMessageln("Folder '" + config.getDatasetPath() + filename + "\\' is missing.\nPlace a correct folder in classpath and re-run the project");
             Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
             System.exit(1);
         }
@@ -218,7 +235,9 @@ public class Utilities {
             br.close();
             return tweets;
         } catch (IOException e) {
-            System.out.println("The file '" + config.getTweetDataFile() + "' is missing.\nPlace a correct file in '" + config.getDatasetPath() + "' and re-run the project");
+            printMessageln("The file '" + config.getTweetDataFile() + "' is missing."
+                    + "\nPlace a correct file in '" + config.getDatasetPath() + 
+                    "' and re-run the project");
             Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
             return null;
         }

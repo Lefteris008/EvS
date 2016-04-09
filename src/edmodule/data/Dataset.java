@@ -18,8 +18,8 @@ package edmodule.data;
 
 import java.util.List;
 import utilities.Config;
-import dsretriever.MongoHandler;
-import dsretriever.Tweet;
+import utilities.dsretriever.MongoHandler;
+import utilities.dsretriever.Tweet;
 import edmodule.utils.Stemmers;
 import edmodule.utils.StopWordsHandlers;
 import utilities.Utilities;
@@ -27,7 +27,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.27_2342
+ * @version 2016.04.09_1957
  */
 public final class Dataset {
     
@@ -35,9 +35,8 @@ public final class Dataset {
     private final List<Tweet> tweets;
 
     /**
-     * It retrieves a dataset from the already stored MongoDB collection.
+     * This method retrieves a dataset from an already stored MongoDB collection.
      * @param config A Configuration object.
-     * @param sw A StopWords handler
      */
     public Dataset(Config config) {
         long startTime = System.currentTimeMillis(); //Start time

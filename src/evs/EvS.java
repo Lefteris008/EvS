@@ -26,12 +26,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import evs.data.PeakFindingSentimentCorpus;
 import evs.data.SentimentEDCoWCorpus;
-import evs.edcow.SentimentEDCoW;
-import evs.edcow.event.SentimentEDCoWEvent;
-import evs.evaluator.SentimentEDCoWEvaluator;
+import experimenter.SentimentEDCoWExperimenter;
 import experimenter.SentimentPeakFindingExperimenter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Scanner;
 import utilities.Config;
 import utilities.Console;
@@ -40,9 +37,22 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.29_1750
+ * @version 2016.04.09_2018
  */
 public class EvS {
+    
+    private static int showMongoLogging = -1;
+    private static boolean showInlineInfo = false;
+    
+    /**
+     * Method to manually set mongoLoggingFlag if the tool is executed as a JAR
+     * library.
+     * @param value 0 if the user wishes to show Mongo Logging information,
+     * 1 otherwise.
+     */
+    public static void setShowMongoLoggingFlag(int value) {
+        showMongoLogging = value;
+    }
     
     /**
      * Main method that provides a simple console input interface for the user,
@@ -51,9 +61,14 @@ public class EvS {
      */
     public static void main(String[] args) {
         
-        Console console = new Console(args); //Read the console
+        if(args.length != 0) { //If the user supplied arguments
+            Console console = new Console(args); //Read the console
+            showMongoLogging = console.showMongoLogging; //Set the mongo logging flag.
+            showInlineInfo = console.showInlineInfo; //Set the inline info flag.
+            
+        }
         
-        if(!console.showMongoLogging) {
+        if(showMongoLogging == 1) {
             //Stop reporting logging information
             Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
             mongoLogger.setLevel(Level.SEVERE);
@@ -76,6 +91,7 @@ public class EvS {
         System.out.println("2. Run EDCoW experiments.");
         System.out.println("3. Run each of the above methods without "
                 + "the sentiment annotations.");
+        System.out.println("Any other key to exit.");
         System.out.println("");
         System.out.print("Your choice: ");
         
@@ -99,27 +115,25 @@ public class EvS {
                         new SentimentPeakFindingExperimenter(sCorpus, bins, alpha, 
                                 taph, pi, window, config);
                 
-                //Taph
-                List<String> lines = exper.experimentUsingTaph(1, 10, 1, 0);
+                //Experiment with Taph
+                List<String> lines = exper.experimentUsingTaph(1, 10, 1, 0, showInlineInfo);
                 exper.exportToFile("stanford.txt", lines);
-                lines = exper.experimentUsingTaph(1, 10, 1, 1);
+                lines = exper.experimentUsingTaph(1, 10, 1, 1, showInlineInfo);
                 exper.exportToFile("naive_bayes.txt", lines);
-                lines = exper.experimentUsingTaph(1, 10, 1, 2);
+                lines = exper.experimentUsingTaph(1, 10, 1, 2, showInlineInfo);
                 exper.exportToFile("bayesian_net.txt", lines);
                 
-                //Alpha
-                lines = exper.experimentUsingAlpha(0.85, 0.99, 0.01, 0);
+                //Experiment with Alpha
+                lines = exper.experimentUsingAlpha(0.85, 0.99, 0.01, 0, showInlineInfo);
                 exper.exportToFile("stanford.txt", lines);
-                lines = exper.experimentUsingAlpha(0.85, 0.99, 0.01, 1);
+                lines = exper.experimentUsingAlpha(0.85, 0.99, 0.01, 1, showInlineInfo);
                 exper.exportToFile("naive_bayes.txt", lines);
-                lines = exper.experimentUsingAlpha(0.85, 0.99, 0.01, 2);
+                lines = exper.experimentUsingAlpha(0.85, 0.99, 0.01, 2, showInlineInfo);
                 exper.exportToFile("bayesian_net.txt", lines);
                 
                 break;
             } case 2: { //EDCoW
                 Dataset ds = new Dataset(config);
-                List<String> lines;
-                String line;
                 SentimentEDCoWCorpus corpus = new SentimentEDCoWCorpus(config, 
                         ds.getTweetList(), ds.getSWH(), 10);
                 
@@ -128,61 +142,32 @@ public class EvS {
                 int delta = 5, delta2 = 11, gamma = 6;
                 double minTermSupport = 0.001, maxTermSupport = 0.01;
                 
-                for(gamma = 6; gamma < 15; gamma++) {
-                    //Create the EDCoW object -> Naive Bayes
-                    SentimentEDCoW sEdcow = new SentimentEDCoW(delta, delta2, gamma,
-                            minTermSupport, maxTermSupport, 1, 155, corpus, 2);
-
-                    sEdcow.apply(); //Apply the algorithm
-
-                    SentimentEDCoWEvaluator eval;
-                    if(sEdcow.events.list.isEmpty()) {
-                        eval = new SentimentEDCoWEvaluator();
-                    } else {
-                        eval = new SentimentEDCoWEvaluator(
-                                delta, delta2, gamma, 1, 155, minTermSupport,
-                                maxTermSupport, sEdcow.events, config,
-                                corpus.getEDCoWCorpus().getStemsHandler());
-                        eval.evaluate();
-                    }
-                    
-                    int i = 0;
-                    lines = new ArrayList<>();
-                    line = (sEdcow.events.list.isEmpty() ? 0 : sEdcow.events.list.size()) 
-                            + "\t" + delta + "\t" + delta2 + "\t" + gamma 
-                            + "\t" + minTermSupport + "\t" + maxTermSupport 
-                            + "\t" + eval.getTotalRecall() + "\t" 
-                            + eval.getTotalPrecision() + "\t"
-                            + sEdcow.getExecutionTime();
-                    lines.add(line); //Add first line
-                    for(SentimentEDCoWEvent event : sEdcow.events.list) {
-                        line = event.getTemporalDescriptionLowerBound()+ "\t" 
-                                + eval.getMatchedGroundTruthID(i) + "\t"
-                                + eval.getRecall(i) + "\t" 
-                                + eval.getPrecision(i) + "\t" 
-                                + event.getTextualDescription() + "\t"
-                                + event.getMainSentimentOfEvent() + "\t"
-                                + event.getPositiveSentimentPercentage() + "\t"
-                                + event.getNegatineSentimentPercentage() + "\t"
-                                + event.getNeutralSentimentPercentage() + "\t"
-                                + event.getIrrelevantSentimentPercentage();
-                        lines.add(line); //Add every event in a single line
-                        i++;
-                    }
-                    if(lines.size() == 1) { //No events were created
-                        line = "No events";
-                        lines.add(line);
-                    }
-                    lines.add(""); //Empty line
-                    Utilities.exportToFileUTF_8(config.getResourcesPath() 
-                            + config.getOutputPath() + config.getEdcowOutputPath()
-                            + "bayesian_net_edcow.txt", lines, true);
-                }
+                SentimentEDCoWExperimenter exper = new SentimentEDCoWExperimenter(
+                        corpus, delta, delta2, gamma, minTermSupport, maxTermSupport, 
+                        choice, choice, config);
+                
+                //Experiment with delta
+                List<String> lines = exper.experimentUsingDelta(1, 20, 1, 0, showInlineInfo);
+                exper.exportToFile("stanford.txt", lines);
+                lines = exper.experimentUsingDelta(1, 20, 1, 1, showInlineInfo);
+                exper.exportToFile("naive_bayes.txt", lines);
+                lines = exper.experimentUsingDelta(1, 20, 1, 2, showInlineInfo);
+                exper.exportToFile("bayesian_net.txt", lines);
+                
+                //Experiment with gamma
+                lines = exper.experimentUsingGamma(6, 10, 1, 0, showInlineInfo);
+                exper.exportToFile("stanford.txt", lines);
+                lines = exper.experimentUsingGamma(6, 10, 1, 1, showInlineInfo);
+                exper.exportToFile("naive_bayes.txt", lines);
+                lines = exper.experimentUsingGamma(6, 10, 1, 2, showInlineInfo);
+                exper.exportToFile("bayesian_net.txt", lines);
+                
                 break;
             } case 3: {
-                EDMethodPicker.selectEDMethod(config);
+                EDMethodPicker.selectEDMethod(config, showInlineInfo);
             } default: {
-                
+                System.out.println("Exiting now...");
+                System.exit(0);
             }
         }
     }

@@ -29,7 +29,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.29_1751
+ * @version 2016.04.09_2048
  */
 public class SentimentPeakFindingExperimenter {
     
@@ -61,35 +61,33 @@ public class SentimentPeakFindingExperimenter {
      * @param step An integer representing the increase step of taph between iterations.
      * @param sentimentSource The source of sentiment. 0 represents SST, 1 Naive
      * Bayes and 2 Bayesian Network.
+     * @param showInlineInfo Show or hide inline information during execution.
      * @return A List of String representing the lines to be exported to the file.
      */
     public final List<String> experimentUsingTaph(int start, int end, int step, 
-            int sentimentSource) {
+            int sentimentSource, boolean showInlineInfo) {
         List<String> lines = new ArrayList<>();
         String line;
         for(taph = start; taph < end; taph += step) {
             SentimentPeakFinding spf = new SentimentPeakFinding(bins, alpha, taph, 
-                    pi, window, sCorpus, sentimentSource);
+                    pi, sCorpus, sentimentSource);
 
             spf.apply();
             SentimentPeakFindingEvaluator eval = 
                     new SentimentPeakFindingEvaluator(alpha, taph, 
                         pi, spf.getEventList(), config);
-            eval.evaluateWithAllTerms(false);
+            eval.evaluateWithAllTerms(showInlineInfo);
             int i = 0;
             line = (spf.getEventList().isEmpty() ? 0 : spf.getEventList().size()) 
                     + "\t" + alpha + "\t" 
                     + taph + "\t" 
                     + pi + "\t" 
                     + eval.getTotalRecall() + "\t" 
-                    + eval.getTotalPrecision() + "\t"
                     + spf.getExecutionTime();
             lines.add(line); //Add first line
             for(SentimentPeakFindingEvent event : spf.getEventList()) {
                 line = bins.get(event.getWindowLowerBound()).getBin()+ "\t" 
                         + eval.getMatchedGroundTruthID(i) + "\t"
-                        + eval.getRecallOfEvent(i) + "\t" 
-                        + eval.getPrecisionOfEvent(i) + "\t" 
                         + event.getCommonTermsAsString() + "\t"
                         + event.getMainSentimentOfEvent() + "\t"
                         + event.getPositiveSentimentPercentage() + "\t"
@@ -116,35 +114,33 @@ public class SentimentPeakFindingExperimenter {
      * @param step An integer representing the increase step of taph between iterations.
      * @param sentimentSource The source of sentiment. 0 represents SST, 1 Naive
      * Bayes and 2 Bayesian Network.
+     * @param showInlineInfo Show or hide inline information during execution.
      * @return A List of String representing the lines to be exported to the file.
      */
     public final List<String> experimentUsingAlpha(double start, double end, double step, 
-            int sentimentSource) {
+            int sentimentSource, boolean showInlineInfo) {
         List<String> lines = new ArrayList<>();
         String line;
         for(alpha = start; alpha < end; alpha += step) {
             SentimentPeakFinding spf = new SentimentPeakFinding(bins, alpha, taph, 
-                    pi, window, sCorpus, sentimentSource);
+                    pi, sCorpus, sentimentSource);
 
             spf.apply();
             SentimentPeakFindingEvaluator eval = 
                     new SentimentPeakFindingEvaluator(alpha, taph, 
                         pi, spf.getEventList(), config);
-            eval.evaluateWithAllTerms(false);
+            eval.evaluateWithAllTerms(showInlineInfo);
             int i = 0;
             line = (spf.getEventList().isEmpty() ? 0 : spf.getEventList().size()) 
                     + "\t" + alpha + "\t" 
                     + taph + "\t" 
                     + pi + "\t" 
                     + eval.getTotalRecall() + "\t" 
-                    + eval.getTotalPrecision() + "\t"
                     + spf.getExecutionTime();
             lines.add(line); //Add first line
             for(SentimentPeakFindingEvent event : spf.getEventList()) {
                 line = bins.get(event.getWindowLowerBound()).getBin()+ "\t" 
                         + eval.getMatchedGroundTruthID(i) + "\t"
-                        + eval.getRecallOfEvent(i) + "\t" 
-                        + eval.getPrecisionOfEvent(i) + "\t" 
                         + event.getCommonTermsAsString() + "\t"
                         + event.getMainSentimentOfEvent() + "\t"
                         + event.getPositiveSentimentPercentage() + "\t"

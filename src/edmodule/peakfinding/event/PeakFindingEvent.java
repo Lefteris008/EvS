@@ -16,7 +16,7 @@
  */
 package edmodule.peakfinding.event;
 
-import dsretriever.Tweet;
+import utilities.dsretriever.Tweet;
 import edmodule.data.PeakFindingCorpus;
 import edmodule.peakfinding.Window;
 import edmodule.utils.Stemmers;
@@ -33,7 +33,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.27_2355
+ * @version 2016.04.09_2004
  */
 public class PeakFindingEvent {
     
@@ -49,8 +49,8 @@ public class PeakFindingEvent {
      * Public constructor. It creates an event.
      * @param id A String with the id of the event.
      * @param window A Window object with the window of the event.
-     * @param tweetsOfEvent A List of String containing the corresponding tweetsOfEvent of the
-     * event.
+     * @param tweetsOfEvent A List of String containing the corresponding 
+     * tweetsOfEvent of the event.
      * @param corpus A PeakFindingCorpus object.
      */
     public PeakFindingEvent(int id, Window<Integer, Integer> window, List<Tweet> tweetsOfEvent, 

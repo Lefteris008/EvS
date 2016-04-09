@@ -19,36 +19,31 @@ package edmodule;
 import edmodule.data.Dataset;
 import edmodule.data.EDCoWCorpus;
 import edmodule.data.PeakFindingCorpus;
-import edmodule.edcow.EDCoW;
-import edmodule.edcow.event.EDCoWEvent;
 import edmodule.utils.BinPair;
 import edmodule.peakfinding.BinsCreator;
-import edmodule.peakfinding.OfflinePeakFinding;
-import evaluator.EDCoWEvaluator;
-import evaluator.PeakFindingEvaluator;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
+import experimenter.EDCoWExperimenter;
+import experimenter.PeakFindingExperimenter;
 import java.util.List;
 import java.util.Scanner;
 import utilities.Config;
-import utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.27_2741
+ * @version 2016.04.09_1956
  */
 public class EDMethodPicker {
     
     /**
-     * Pick method of EDCoWEvent Detection.
-     * @param config A configuration object
+     * Pick method of Event Detection.
+     * @param config A configuration object.
      */
-    public static void selectEDMethod(Config config) {
+    public static void selectEDMethod(Config config, boolean showInlineInfo) {
         System.out.println("\nPick a method for Event Detection");
         System.out.println("1. EDCoW");
         System.out.println("2. Offline Peak Finding");
-        System.out.println("Press any other key for exit.");
+        System.out.println("Any other key to exit.");
+        System.out.println("");
         System.out.print("Your choice: ");
         
         Scanner keyboard = new Scanner(System.in);
@@ -57,8 +52,6 @@ public class EDMethodPicker {
         switch(choice) {
             case 1: {
                 Dataset ds = new Dataset(config);
-                List<String> lines;
-                String line;
                 EDCoWCorpus corpus = new EDCoWCorpus(config, ds.getTweetList(), ds.getSWH(), 10);
                 
                 corpus.createCorpus();
@@ -66,40 +59,18 @@ public class EDMethodPicker {
                 int delta = 4, delta2 = 11, gamma = 26;
                 double minTermSupport = 0.001, maxTermSupport = 0.01;
                 
-                for(delta = 4; delta < 15; delta++) {
-                    EDCoW edcow = new EDCoW(delta, delta2, gamma, minTermSupport, 
-                            maxTermSupport, 1, 155, corpus); //Create the EDCoW object
-
-                    edcow.apply(); //Apply the algorithm
-
-                    EDCoWEvaluator eval = new EDCoWEvaluator(delta, delta2, 
-                            gamma, 1, 155, minTermSupport, maxTermSupport, 
-                            edcow.events, config, corpus.getStemsHandler());
-                    eval.evaluate();
-                    
-                    int i = 0;
-                    lines = new ArrayList<>();
-                    line = (edcow.events.list.isEmpty() ? 0 : edcow.events.list.size()) 
-                            + "\t" + delta + "\t" + delta2 + "\t" + gamma 
-                            + "\t" + minTermSupport + "\t" + maxTermSupport 
-                            + "\t" + eval.getTotalRecall() + "\t" + eval.getTotalPrecision();
-                    lines.add(line); //Add first line
-                    for(EDCoWEvent event : edcow.events.list) {
-                        line = event.getTemporalDescriptionLowerBound()+ "\t" 
-                                + eval.getRecall(i) + "\t" 
-                                + eval.getPrecision(i) + "\t" 
-                                + event.getTextualDescription();
-                        lines.add(line); //Add every event in a single line
-                        i++;
-                    }
-                    if(lines.size() == 1) { //No events were created
-                        line = "No events";
-                        lines.add(line);
-                    }
-                    lines.add(""); //Empty line
-                    Utilities.exportToFileUTF_8(config.getResourcesPath() 
-                            + config.getEDCoWEventFileName(), lines, true);
-                }
+                EDCoWExperimenter exper = new EDCoWExperimenter(corpus, delta, 
+                        delta2, gamma, minTermSupport, maxTermSupport, choice, 
+                        choice, config);
+                
+                //Experiment with delta
+                List<String> lines = exper.experimentUsingDelta(1, 20, 1, showInlineInfo);
+                exper.exportToFile("edcow_simple.txt", lines);
+                
+                //Experiment with gamma
+                lines = exper.experimentUsingGamma(6, 10, 1, showInlineInfo);
+                exper.exportToFile("edcow_simple.txt", lines);
+                
                 break;
             } case 2: {
                 int window = 10;
@@ -109,40 +80,17 @@ public class EDMethodPicker {
                 Dataset ds = new Dataset(config);
                 PeakFindingCorpus corpus = new PeakFindingCorpus(config, ds.getTweetList(), ds.getSWH());
                 List<BinPair<String, Integer>> bins = BinsCreator.createBins(corpus, config, window);
-                Utilities.printMessageln("Selected method: Offline Peak Finding");
-                Utilities.printMessageln("Now applying algorithm...");
-                ArrayList<String> lines = new ArrayList<>();
-                String line;
-                for(alpha = 0.85; alpha < 0.999; alpha += 0.01) {
-                    OfflinePeakFinding opf = new OfflinePeakFinding(bins, 0.999, 1, 5, window, corpus);
-                    opf.apply();
-                    PeakFindingEvaluator eval = new PeakFindingEvaluator(alpha, taph, 
-                            pi, opf.getEventList(), config);
-                    eval.evaluateWithAllTerms(false);
-                    int i = 0;
-                    lines = new ArrayList<>();
-                    line = (opf.getEventList().isEmpty() ? 0 : opf.getEventList().size()) 
-                            + "\t" + alpha + "\t" + taph + "\t" + pi 
-                            + "\t" + eval.getTotalRecall() + "\t" + eval.getTotalPrecision();
-                    lines.add(line); //Add first line
-                    for(edmodule.peakfinding.event.PeakFindingEvent event : opf.getEventList()) {
-                        line = bins.get(event.getWindowLowerBound()).getBin()+ "\t" 
-                                + eval.getMatchedGroundTruthID(i) + "\t"
-                                + eval.getRecallOfEvent(i) + "\t" 
-                                + eval.getPrecisionOfEvent(i) + "\t" 
-                                + event.getCommonTermsAsString();
-                        lines.add(line); //Add every event in a single line
-                        i++;
-                    }
-                    if(lines.size() == 1) { //No events were created
-                        line = "No events";
-                        lines.add(line);
-                    }
-                    lines.add(""); //Empty line
-                    Utilities.exportToFileUTF_8(config.getResourcesPath() 
-                            + config.getPeakFindingEventsFileName(), lines, true);
-                }
                 
+                PeakFindingExperimenter exper = new PeakFindingExperimenter(corpus, 
+                        bins, alpha, taph, pi, window, config);
+                
+                //Experiment with Taph
+                List<String> lines = exper.experimentUsingTaph(1, 10, 1, showInlineInfo);
+                exper.exportToFile("peak_finding_simple.txt", lines);
+                
+                //Experiment with Alpha
+                lines = exper.experimentUsingAlpha(0.85, 0.99, 0.01, showInlineInfo);
+                exper.exportToFile("peak_finding_simple.txt", lines);
                 
                 break;
             } default: {

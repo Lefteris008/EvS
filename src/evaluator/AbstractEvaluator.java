@@ -18,22 +18,22 @@ package evaluator;
 
 /**
  *
+ * Interface for implementing an evaluator class for a desired Event Detection
+ * method.
  * @author  Lefteris Paraskevas
- * @version 2016.03.27_2356
+ * @version 2016.04.09_2016
  */
 public interface AbstractEvaluator {
     
     abstract void loadGroundTruthDataset();
     
-    abstract void evaluate();
+    abstract void evaluate(boolean showInlineInfo);
     
     abstract int findEventById(String id);
     
     abstract int findEventByTerm(String term);
     
     abstract double getTotalRecall();
-    
-    abstract double getTotalPrecision();
     
     abstract double getRecall(int index);
     

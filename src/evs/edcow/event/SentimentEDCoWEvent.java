@@ -16,7 +16,7 @@
  */
 package evs.edcow.event;
 
-import dsretriever.Tweet;
+import utilities.dsretriever.Tweet;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 

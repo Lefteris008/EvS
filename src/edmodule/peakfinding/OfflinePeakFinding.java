@@ -19,7 +19,7 @@ package edmodule.peakfinding;
 import edmodule.peakfinding.event.PeakFindingEvents;
 import edmodule.peakfinding.event.PeakFindingEvent;
 import edmodule.utils.BinPair;
-import edmodule.EDMethod;
+import edmodule.AbstractEDMethod;
 import edmodule.data.PeakFindingCorpus;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,25 +29,25 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.29_1753
+ * @version 2016.04.09_2003
  * 
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing Microblogs 
  * for PeakFindingEvent Exploration", CHI 2011.
  */
-public class OfflinePeakFinding implements EDMethod {
+public class OfflinePeakFinding implements AbstractEDMethod {
     
     private final double alpha;
     private final int taph;
     private final int pi;
     private final List<BinPair<String, Integer>> bins;
-    private final int refreshWindow;
     private final List<Window<Integer, Integer>> windows = new ArrayList<>();
     private final List<Window<Integer, Integer>> actualEventWindows = new ArrayList<>();
     private final PeakFindingCorpus corpus;
-    private int totalEvents;
+    public int totalEvents;
     private final List<Integer> tweetCountsInWindows = new ArrayList<>();
     private List<PeakFindingEvent> eventList;
     private final StemUtils stemsHandler;
+    private long executionTime;
     
     /**
      * Public constructor.
@@ -58,13 +58,11 @@ public class OfflinePeakFinding implements EDMethod {
      * @param refreshWindow An integer representing the refresh window of every bin.
      * @param corpus A PeakFindingCorpus object.
      */
-    public OfflinePeakFinding(List<BinPair<String, Integer>> bins, double a, int t, 
-            int p, int refreshWindow, PeakFindingCorpus corpus) {
+    public OfflinePeakFinding(List<BinPair<String, Integer>> bins, double a, int t, int p, PeakFindingCorpus corpus) {
         alpha = a;
         taph = t;
         pi = p;
         this.bins = bins;
-        this.refreshWindow = refreshWindow;
         this.corpus = corpus;
         this.stemsHandler = new StemUtils();
     }
@@ -142,6 +140,7 @@ public class OfflinePeakFinding implements EDMethod {
                 bins, actualEventWindows, corpus, stemsHandler);
         eventList = new ArrayList<>(pfe.getEvents());
         long endTime = System.currentTimeMillis();
+        executionTime = (endTime - startTime) / 1000;
         Utilities.printExecutionTime(startTime, endTime, OfflinePeakFinding.class.getName(), 
                 Thread.currentThread().getStackTrace()[1].getMethodName());
     }
@@ -217,4 +216,11 @@ public class OfflinePeakFinding implements EDMethod {
      * @return A StemsHandler object.
      */
     public final StemUtils getStemsHandler() { return stemsHandler; }
+    
+    /**
+     * Returns the total time of execution.
+     * @return A double representing the time of execution.
+     */
+    @Override
+    public final long getExecutionTime() { return executionTime; }
 }

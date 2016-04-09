@@ -20,21 +20,29 @@ package utilities;
  *
  * This class provides an easy interface to implement console controls, extend,
  * delete and enhance them, without cluttering the main method or methods that
- * receive the arguments array.
+ * receive the arguments' array.
  * 
  * @author  Lefteris Paraskevas
- * @version 2016.03.29_1706
+ * @version 2016.04.02_1326
  */
 public class Console {
-    public static boolean showMongoLogging;
+    public static int showMongoLogging;
+    public static boolean showInlineInfo;
     
     public Console(String[] args) {
         int mongoL = Integer.parseInt(args[0]);
+        int showInlineInfo = Integer.parseInt(args[1]);
         
         if(mongoL == 0) {
-            showMongoLogging = true;
+            showMongoLogging = 0;
         } else {
-            showMongoLogging = false;
+            showMongoLogging = 1;
+        }
+        
+        if(showInlineInfo == 0) {
+            this.showInlineInfo = true;
+        } else {
+            this.showInlineInfo = false;
         }
     }
 }

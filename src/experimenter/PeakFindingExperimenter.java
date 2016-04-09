@@ -16,10 +16,143 @@
  */
 package experimenter;
 
+import edmodule.data.PeakFindingCorpus;
+import edmodule.peakfinding.OfflinePeakFinding;
+import edmodule.peakfinding.event.PeakFindingEvent;
+import edmodule.utils.BinPair;
+import evaluator.PeakFindingEvaluator;
+import java.util.ArrayList;
+import java.util.List;
+import utilities.Config;
+import utilities.Utilities;
+
 /**
  *
- * @author Lefteris Paraskevas
+ * @author  Lefteris Paraskevas
+ * @version 2016.04.09_1944
  */
 public class PeakFindingExperimenter {
+    private final PeakFindingCorpus corpus;
+    private final List<BinPair<String, Integer>> bins;
+    private double alpha;
+    private int taph;
+    private final int pi;
+    private final int window;
+    private final Config config;
     
+    public PeakFindingExperimenter(PeakFindingCorpus corpus,
+            List<BinPair<String, Integer>> bins, double alpha, int taph, int pi,
+            int window, Config config) {
+        this.corpus = corpus;
+        this.bins = bins;
+        this.alpha = alpha;
+        this.taph = taph;
+        this.pi = pi;
+        this.window = window;
+        this.config = config;
+    }
+    
+    /**
+     * Method that exhaustively tests the algorithm, by iterating between the 
+     * 'start' and the 'end' value of taph parameter.
+     * @param start An integer representing the starting point of taph parameter.
+     * @param end An integer representing the ending point of taph parameter.
+     * @param step An integer representing the increase step of taph between iterations.
+     * @param sentimentSource The source of sentiment. 0 represents SST, 1 Naive
+     * Bayes and 2 Bayesian Network.
+     * @return A List of String representing the lines to be exported to the file.
+     */
+    public final List<String> experimentUsingTaph(int start, int end, int step,
+            boolean showInlineInfo) {
+        List<String> lines = new ArrayList<>();
+        String line;
+        for(taph = start; taph < end; taph += step) {
+            OfflinePeakFinding opf = new OfflinePeakFinding(bins, alpha, taph, 
+                    pi, corpus);
+
+            opf.apply();
+            PeakFindingEvaluator eval = new PeakFindingEvaluator(alpha, taph, 
+                        pi, opf.getEventList(), config);
+            eval.evaluateWithAllTerms(showInlineInfo);
+            int i = 0;
+            line = (opf.getEventList().isEmpty() ? 0 : opf.getEventList().size()) 
+                    + "\t" + alpha + "\t" 
+                    + taph + "\t" 
+                    + pi + "\t" 
+                    + eval.getTotalRecall() + "\t" 
+                    + opf.getExecutionTime();
+            lines.add(line); //Add first line
+            for(PeakFindingEvent event : opf.getEventList()) {
+                line = bins.get(event.getWindowLowerBound()).getBin()+ "\t" 
+                        + eval.getMatchedGroundTruthID(i) + "\t"
+                        + event.getCommonTermsAsString();
+                lines.add(line); //Add every event in a single line
+                i++;
+            }
+            if(lines.size() == 1) { //No events were created
+                line = "No events";
+                lines.add(line);
+            }
+            lines.add(""); //Empty line
+        }
+        return lines;
+    }
+    
+    /**
+     * Method that exhaustively tests the algorithm, by iterating between the 
+     * 'start' and the 'end' value of taph parameter.
+     * @param start An integer representing the starting point of taph parameter.
+     * @param end An integer representing the ending point of taph parameter.
+     * @param step An integer representing the increase step of taph between iterations.
+     * @param sentimentSource The source of sentiment. 0 represents SST, 1 Naive
+     * Bayes and 2 Bayesian Network.
+     * @return A List of String representing the lines to be exported to the file.
+     */
+    public final List<String> experimentUsingAlpha(double start, double end, double step,
+            boolean showInlineInfo) {
+        List<String> lines = new ArrayList<>();
+        String line;
+        for(alpha = start; alpha < end; alpha += step) {
+            OfflinePeakFinding opf = new OfflinePeakFinding(bins, alpha, taph, 
+                    pi, corpus);
+
+            opf.apply();
+            PeakFindingEvaluator eval = new PeakFindingEvaluator(alpha, taph, 
+                        pi, opf.getEventList(), config);
+            eval.evaluateWithAllTerms(showInlineInfo);
+            int i = 0;
+            line = (opf.getEventList().isEmpty() ? 0 : opf.getEventList().size()) 
+                    + "\t" + alpha + "\t" 
+                    + taph + "\t" 
+                    + pi + "\t" 
+                    + eval.getTotalRecall() + "\t" 
+                    + opf.getExecutionTime();
+            lines.add(line); //Add first line
+            for(PeakFindingEvent event : opf.getEventList()) {
+                line = bins.get(event.getWindowLowerBound()).getBin()+ "\t" 
+                        + eval.getMatchedGroundTruthID(i) + "\t"
+                        + event.getCommonTermsAsString();
+                lines.add(line); //Add every event in a single line
+                i++;
+            }
+            if(lines.size() == 1) { //No events were created
+                line = "No events";
+                lines.add(line);
+            }
+            lines.add(""); //Empty line
+        }
+        return lines;
+    }
+    
+    /**
+     * Exports a List of String lines into a file.
+     * @param filename The name of the file.
+     * @param lines The lines to exported.
+     */
+    public final void exportToFile(String filename, List<String> lines) {
+        Utilities.exportToFileUTF_8(config.getResourcesPath() 
+            + config.getOutputPath() 
+            + config.getPeakFindingOutputPath()
+            + filename, lines, true);
+    }
 }

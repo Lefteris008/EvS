@@ -36,25 +36,29 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.27_2359
+ * @version 2016.04.09_2017
  */
 public class EDCoWEvaluator implements AbstractEvaluator {
-    private final int delta;
-    private final int delta2;
-    private final int gamma;
-    private final int timeSliceA;
-    private final int timeSliceB;
-    private final double minTermSupport;
-    private final double maxTermSupport;
-    private final List<EDCoWEvent> eventList;
-    private final Config config;
+    private int delta;
+    private int delta2;
+    private int gamma;
+    private int timeSliceA;
+    private int timeSliceB;
+    private double minTermSupport;
+    private double maxTermSupport;
+    private List<EDCoWEvent> eventList;
+    private Config config;
     private final HashMap<Integer, HashSet<String>> groundTruthTermsPerEvent = new HashMap<>();
     private final HashMap<Integer, HashSet<String>> groundTruthIDsPerEvent = new HashMap<>();
-    private final StemUtils stemsHandler;
+    private StemUtils stemsHandler;
     private final List<Double> precisionByEvent = new ArrayList<>();
     private final List<Double> recallByEvent = new ArrayList<>();
     private final HashSet<Integer> assignedEvents = new HashSet<>();
-    private final EDCoWEvents events;
+    private EDCoWEvents events;
+    
+    public EDCoWEvaluator() {
+        ///
+    }
     
     /**
      * Public constructor.
@@ -125,7 +129,7 @@ public class EDCoWEvaluator implements AbstractEvaluator {
      * data into a file, along with other useful metrics.
      */
     @Override
-    public void evaluate() {
+    public void evaluate(boolean showInlineInfo) {
         List<String> calculatedKeywords;
         List<String> ids;
         HashSet<String> groundTruthKeywords;
@@ -148,8 +152,6 @@ public class EDCoWEvaluator implements AbstractEvaluator {
             calculatedKeywords = new ArrayList<>(
                     Arrays.asList(event.getTextualDescription().split(" ")));
             if(eventKey != -1) {
-                Utilities.printMessageln("Event found: " + eventKey);
-                
                 //Get the ground truth keywords and compare them 1 by 1
                 groundTruthKeywords = new HashSet<>(groundTruthTermsPerEvent.get(eventKey));
                 groundTruthKeywordSize = groundTruthKeywords.size();
@@ -166,13 +168,18 @@ public class EDCoWEvaluator implements AbstractEvaluator {
                 }
                 recall = (double) matchedItems / (double) groundTruthKeywordSize;
                 precision = (double) matchedItems / (double) calculatedKeywords.size();
-                Utilities.printMessageln("Out of " + calculatedKeywords.size() + " items:");
-                Utilities.printMessageln("Matched " + matchedItems + " out of " 
-                        + groundTruthKeywordSize + " ground truth terms.");
-                Utilities.printMessageln("Recall: " + recall);
-                Utilities.printMessageln("Precision: " + precision);
+                
+                if(showInlineInfo) {
+                    Utilities.printMessageln("Out of " + calculatedKeywords.size() + " items:");
+                    Utilities.printMessageln("Matched " + matchedItems + " out of " 
+                            + groundTruthKeywordSize + " ground truth terms.");
+                    Utilities.printMessageln("Recall: " + recall);
+                    Utilities.printMessageln("Precision: " + precision);
+                }
             } else {
-                Utilities.printMessageln("Event not found");
+                if(showInlineInfo) {
+                    Utilities.printMessageln("Event not found");
+                }
                 recall = 0;
                 precision = 0;
             }
@@ -225,23 +232,7 @@ public class EDCoWEvaluator implements AbstractEvaluator {
      */
     @Override
     public final double getTotalRecall() {
-        double totalRecall = 0;
-        totalRecall = recallByEvent.stream().mapToDouble((recall) -> recall)
-                .reduce(totalRecall, (accumulator, _item) -> accumulator + _item);
-        return totalRecall;
-    }
-    
-    /**
-     * Calculates and returns the total precision of the calculated dataset.
-     * @return A double containing the total precision of the calculated dataset
-     * compared with the ground truth data.
-     */
-    @Override
-    public final double getTotalPrecision() {
-        double totalPrecision = 0;
-        totalPrecision = precisionByEvent.stream().mapToDouble((precision) -> precision)
-                .reduce(totalPrecision, (accumulator, _item) -> accumulator + _item);
-        return totalPrecision;
+        return assignedEvents.size() / groundTruthIDsPerEvent.size();
     }
     
     @Override

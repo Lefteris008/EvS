@@ -17,10 +17,9 @@
 package evs.peakfinding;
 
 import edmodule.utils.BinPair;
-import edmodule.EDMethod;
+import edmodule.AbstractEDMethod;
 import edmodule.peakfinding.Statistics;
 import edmodule.peakfinding.Window;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import preprocessingmodule.nlp.stemming.StemUtils;
@@ -37,22 +36,21 @@ import utilities.Utilities;
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing 
  * Microblogs for Event Exploration", CHI 2011.
  */
-public class SentimentPeakFinding implements EDMethod {
+public class SentimentPeakFinding implements AbstractEDMethod {
     
     private final double alpha;
     private final int taph;
     private final int pi;
     private final List<BinPair<String, Integer>> bins;
-    private final int refreshWindow;
     private final List<Window<Integer, Integer>> windows = new ArrayList<>();
     private final List<Window<Integer, Integer>> actualEventWindows = new ArrayList<>();
     private final PeakFindingSentimentCorpus corpus;
-    private int totalEvents;
+    public int totalEvents;
     private final List<Integer> tweetCountsInWindows = new ArrayList<>();
     private List<SentimentPeakFindingEvent> sEventList;
     private final StemUtils stemsHandler;
     private final int sentimentSouce;
-    private double executionTime;
+    private long executionTime;
     
     /**
      * Public constructor.
@@ -63,14 +61,11 @@ public class SentimentPeakFinding implements EDMethod {
      * @param refreshWindow An integer representing the refresh window of every bin.
      * @param corpus A PeakFindingCorpus object.
      */
-    public SentimentPeakFinding(List<BinPair<String, Integer>> bins, double a, 
-            int t, int p, int refreshWindow, PeakFindingSentimentCorpus corpus,
-            int sentimentSouce) {
+    public SentimentPeakFinding(List<BinPair<String, Integer>> bins, double a, int t, int p, PeakFindingSentimentCorpus corpus, int sentimentSouce) {
         alpha = a;
         taph = t;
         pi = p;
         this.bins = bins;
-        this.refreshWindow = refreshWindow;
         this.corpus = corpus;
         this.stemsHandler = new StemUtils();
         this.sentimentSouce = sentimentSouce;
@@ -222,5 +217,6 @@ public class SentimentPeakFinding implements EDMethod {
      * Returns the total time of execution.
      * @return A double representing the time of execution.
      */
-    public final double getExecutionTime() { return executionTime; }
+    @Override
+    public final long getExecutionTime() { return executionTime; }
 }

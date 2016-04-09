@@ -16,8 +16,7 @@
  */
 package edmodule.data;
 
-import dsretriever.MongoHandler;
-import dsretriever.Tweet;
+import utilities.dsretriever.Tweet;
 import edmodule.utils.StringDateUtils;
 import edmodule.utils.StopWordsHandlers;
 import java.util.ArrayList;
@@ -30,7 +29,7 @@ import utilities.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.16_1212
+ * @version 2016.04.09_2000
  */
 public class PeakFindingCorpus {
     
@@ -52,7 +51,6 @@ public class PeakFindingCorpus {
         this.config = config;
         this.swH = swH;
         this.tweets = tweets;
-        //removeRetweets();
     }
     
     /**

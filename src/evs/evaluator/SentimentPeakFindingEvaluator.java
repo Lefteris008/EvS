@@ -34,9 +34,9 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.28_0006
+ * @version 2016.04.09_2053
  */
-public class SentimentPeakFindingEvaluator {
+public class SentimentPeakFindingEvaluator implements AbstractSentimentEvaluator {
     private final double alpha;
     private final int taph;
     private final int pi;
@@ -71,7 +71,8 @@ public class SentimentPeakFindingEvaluator {
      * More formally it creates a HashMap that contains integer IDs as keys
      * and a HashSet of the terms of a specific event, as values.
      */
-    private void loadGroundTruthDataset() {
+    @Override
+    public void loadGroundTruthDataset() {
         try (BufferedReader br = new BufferedReader(new FileReader(
                 config.getResourcesPath() + config.getGroundTruthDataFile()))) {
             String line;
@@ -96,6 +97,11 @@ public class SentimentPeakFindingEvaluator {
         } catch (IOException e) {
             Logger.getLogger(SentimentPeakFindingEvaluator.class.getName()).log(Level.SEVERE, null, e);
         }
+    }
+    
+    @Override
+    public void evaluate(boolean showInlineInfo) {
+        ///
     }
     
     /**
@@ -218,7 +224,8 @@ public class SentimentPeakFindingEvaluator {
      * @param term A String representing the term.
      * @return An integer representing the actual event index or -1 if not found.
      */
-    private int findEventByTerm(String term) {
+    @Override
+    public int findEventByTerm(String term) {
         for(Integer key : groundTruthTermsPerEvent.keySet()) {
             HashSet<String> termSet = new HashSet<>(groundTruthTermsPerEvent.get(key));
             for(String _term : termSet) {
@@ -236,7 +243,8 @@ public class SentimentPeakFindingEvaluator {
      * @param id The tweet ID to be searched for.
      * @return The retrieved event key from the analysis.
      */
-    private int findEventById(String id) {
+    @Override
+    public int findEventById(String id) {
         for(Integer key : groundTruthTweetIDsPerEvent.keySet()) {
             HashSet<String> idsSet = new HashSet<>(groundTruthTweetIDsPerEvent.get(key));
             if(idsSet.contains(id) && !assignedEvents.contains(key)) {
@@ -270,23 +278,9 @@ public class SentimentPeakFindingEvaluator {
      * @return A double containing the total recall of the calculated dataset
      * compared with the ground truth data.
      */
+    @Override
     public final double getTotalRecall() {
-        double totalRecall = 0;
-        totalRecall = recallByEvent.stream().mapToDouble((recall) -> recall)
-                .reduce(totalRecall, (accumulator, _item) -> accumulator + _item);
-        return totalRecall;
-    }
-    
-    /**
-     * Calculates and returns the total precision of the calculated dataset.
-     * @return A double containing the total precision of the calculated dataset
-     * compared with the ground truth data.
-     */
-    public final double getTotalPrecision() {
-        double totalPrecision = 0;
-        totalPrecision = precisionByEvent.stream().mapToDouble((precision) -> precision)
-                .reduce(totalPrecision, (accumulator, _item) -> accumulator + _item);
-        return totalPrecision;
+        return assignedEvents.size() / groundTruthTermsPerEvent.size();
     }
     
     /**
@@ -294,7 +288,8 @@ public class SentimentPeakFindingEvaluator {
      * @param index The index of the event.
      * @return A double value representing the recall of the event.
      */
-    public final double getRecallOfEvent(int index) {
+    @Override
+    public final double getRecall(int index) {
         return recallByEvent.get(index);
     }
     
@@ -303,7 +298,8 @@ public class SentimentPeakFindingEvaluator {
      * @param index The index of the event.
      * @return A double value representing the precision of the event.
      */
-    public final double getPrecisionOfEvent(int index) {
+    @Override
+    public final double getPrecision(int index) {
         return precisionByEvent.get(index);
     }
     

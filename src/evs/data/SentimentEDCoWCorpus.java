@@ -16,7 +16,7 @@
  */
 package evs.data;
 
-import dsretriever.Tweet;
+import utilities.dsretriever.Tweet;
 import edmodule.data.EDCoWCorpus;
 import edmodule.utils.StopWordsHandlers;
 import java.util.List;

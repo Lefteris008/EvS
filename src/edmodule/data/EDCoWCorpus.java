@@ -16,7 +16,7 @@
  */
 package edmodule.data;
 
-import dsretriever.Tweet;
+import utilities.dsretriever.Tweet;
 import edmodule.edcow.frequencies.DocumentTermFrequencyItem;
 import edmodule.utils.BinPair;
 import edmodule.utils.StringDateUtils;
@@ -40,7 +40,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.27_2374
+ * @version 2016.04.09_1959
  */
 public class EDCoWCorpus {
     
@@ -65,11 +65,13 @@ public class EDCoWCorpus {
     
     /**
      * Public constructor.
-     * @param config A configuration object
-     * @param tweets A ArrayList containing all retrieved tweets
-     * @param swH A StopWordsHandlers object
+     * @param config A configuration object.
+     * @param tweets A ArrayList containing all retrieved tweets.
+     * @param swH A StopWordsHandlers object.
+     * @param refreshWindow An integer representing the refresh window in minutes.
      */
-    public EDCoWCorpus(Config config, List<Tweet> tweets, StopWordsHandlers swH, int refreshWindow) {
+    public EDCoWCorpus(Config config, List<Tweet> tweets, StopWordsHandlers swH, 
+            int refreshWindow) {
         this.config = config;
         this.tweets = tweets;
         this.swH = swH;
@@ -257,7 +259,7 @@ public class EDCoWCorpus {
     /**
      * Sets an integer array of numberOfDocuments size that contains.
      * the tweets distribution of the user-defined window.
-     * @param numberOfDocuments A HashMap containing the tweets distribution.
+     * @param distribution A HashMap containing the tweets distribution.
      */
     private void setNumberOfDocuments(Map<String, Integer> distribution) {
         

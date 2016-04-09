@@ -262,15 +262,11 @@ public class SentimentEDCoW {
                     modularity.saveEventFromCommunity(c);
                 });
             eventList.addAll(modularity.getEvents());
-            
-        //} catch (NullPointerException e) {
-            //Do nothing
-        //} catch (IOException | NetworkException e) {
-            //Logger.getLogger(SentimentEDCoW.class.getName()).log(Level.SEVERE, null, e);
-        //} catch (Exception e) {
-            //Logger.getLogger(SentimentEDCoW.class.getName()).log(Level.SEVERE, null, e);
-        //}
     }
     
+    /**
+     * Returns the execution time of the algorithm in seconds.
+     * @return A long containing the running time of the algorithm.
+     */
     public final long getExecutionTime() { return executionTime; }
 }

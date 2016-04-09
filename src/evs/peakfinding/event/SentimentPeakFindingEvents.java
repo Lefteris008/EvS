@@ -17,7 +17,7 @@
 package evs.peakfinding.event;
 
 import edmodule.utils.BinPair;
-import dsretriever.Tweet;
+import utilities.dsretriever.Tweet;
 import edmodule.peakfinding.Window;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;

@@ -25,15 +25,13 @@ public interface AbstractSentimentEvaluator {
     
     abstract void loadGroundTruthDataset();
     
-    abstract void evaluate();
+    abstract void evaluate(boolean showInlineInfo);
     
     abstract int findEventById(String id);
     
     abstract int findEventByTerm(String term);
     
     abstract double getTotalRecall();
-    
-    abstract double getTotalPrecision();
     
     abstract double getRecall(int index);
     

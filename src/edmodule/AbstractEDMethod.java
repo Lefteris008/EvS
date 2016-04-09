@@ -17,11 +17,14 @@
 package edmodule;
 
 /**
- *
+ * Abstract interface that once implemented, provides the basic structure of
+ * an Event Detection algorithm. Specialized sub-classes my need to be created
+ * but every separate ED technique has to implement these 6 methods.
+ * 
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.04.09_1945
  */
-public interface EDMethod {
+public interface AbstractEDMethod {
     
     /**
      * Get the name of the the Event Detection algorithm used.
@@ -54,4 +57,10 @@ public interface EDMethod {
      * Main method that starts the execution of the Event Detection algorithm.
      */
     public abstract void apply() throws Exception;
+    
+    /**
+     * Method that returns the execution time of the main algorithm in seconds.
+     * @return A long containing the time in seconds.
+     */
+    public abstract long getExecutionTime();
 }
