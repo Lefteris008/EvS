@@ -36,7 +36,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.27_2328
+ * @version 2016.04.16_1515
  */
 public class MongoHandler {
     
@@ -53,10 +53,6 @@ public class MongoHandler {
         try {
             this.config = config;
             client = new MongoClient(this.config.getServerName(), this.config.getServerPort());
-            
-            //********************
-            langFilter = "en";
-            //********************
             
         } catch (MongoClientException e) {
             Utilities.printMessageln("Error connecting to client");
@@ -105,10 +101,11 @@ public class MongoHandler {
     public final boolean createIndexOnId() {
         try {
             db.getCollection(config.getRawTweetsCollectionName())
-                    .createIndex(new Document("id", 1));
+                    .createIndex(new Document(config.getTweetIdFieldName(), 1));
             return true;
         } catch(MongoException e) {
-            Utilities.printMessageln("Cannot create index for collection '" + config.getRawTweetsCollectionName() + "'");
+            Utilities.printMessageln("Cannot create index for collection '" 
+                    + config.getRawTweetsCollectionName() + "'");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -161,20 +158,28 @@ public class MongoHandler {
         try {
             if("0".equals(tweet.get(2))) {
                 db.getCollection(config.getRawTweetsCollectionName()).insertOne(new Document()
-                        .append("id", Long.parseLong(tweet.get(0))) //Tweet ID
-                        .append("user", new Document() //Embedded document
-                            .append("name", tweet.get(1))
+                        .append(config.getTweetIdFieldName(), Long.parseLong(tweet.get(0))) //Tweet ID
+                        .append(config.getUserDocumentFieldName(), new Document() //Embedded document
+                            .append(config.getUsernameFieldName(), tweet.get(1))
                         )
-                        .append("text", Utilities.assembleText(tweet.get(2), tweet.get(3))) //Actual tweet
-                        .append("created_at", Utilities.stringToDate(tweet.get(4), tweet)) //Date published/retrieved
-                        .append("retweeted", (Integer.parseInt(tweet.get(5)) > 0)) //Boolean
-                        .append("retweet_count", Integer.parseInt(tweet.get(5)))
-                        .append("favorited", (Integer.parseInt(tweet.get(6)) > 0)) //Boolean
-                        .append("favorite_count", Integer.parseInt(tweet.get(6)))
-                        .append("lang", "en") //Language of text
-                        .append("coordinates", null)
-//                        .append("coordinates", new Document() //Embedded document
-//                            .append("coordinates", asList( //Embeded array
+                        .append(config.getTextFieldName(), 
+                                Utilities.assembleText(tweet.get(2), tweet.get(3))) //Actual tweet
+                        .append(config.getDateFieldName(), 
+                                Utilities.stringToDate(tweet.get(4), tweet)) //Date published/retrieved
+                        .append(config.getRetweetedFieldName(), 
+                                (Integer.parseInt(tweet.get(5)) > 0)) //Boolean
+                        .append(config.getRetweetsCountFieldName(), 
+                                Integer.parseInt(tweet.get(5)))
+                        .append(config.getFavoritedFieldName(), 
+                                (Integer.parseInt(tweet.get(6)) > 0)) //Boolean
+                        .append(config.getFavoritesCountFieldName(), 
+                                Integer.parseInt(tweet.get(6)))
+                        .append(config.getLanguageFieldName(), "en") //Language of text
+                        .append(config.getCoordinatesDocumentFieldName(), null)
+//                        .append(config.getCoordinatesDocumentFieldName(), 
+//                        new Document() //Embedded document
+//                            .append(config.getCoordinatesDocumentFieldName(), 
+//                        asList( //Embeded array
 //                                tweet.get(7), //Latitude
 //                                tweet.get(8)) //Longitude
 //                            )   
@@ -182,21 +187,31 @@ public class MongoHandler {
                 );
             } else {
                 db.getCollection(config.getRawTweetsCollectionName()).insertOne(new Document()
-                        .append("id", Long.parseLong(tweet.get(0))) //Tweet ID
-                        .append("user", new Document() //Embedded document
-                            .append("name", tweet.get(1))
+                        .append(config.getTweetIdFieldName(), 
+                                Long.parseLong(tweet.get(0))) //Tweet ID
+                        .append(config.getUserDocumentFieldName(), 
+                                new Document() //Embedded document
+                            .append(config.getUsernameFieldName(), tweet.get(1))
                         )
-                        .append("retweeted_status", new Document())
-                        .append("text", Utilities.assembleText(tweet.get(2), tweet.get(3))) //Actual tweet
-                        .append("created_at", Utilities.stringToDate(tweet.get(4), tweet)) //Date published/retrieved
-                        .append("retweeted", (Integer.parseInt(tweet.get(5)) > 0)) //Boolean
-                        .append("retweet_count", Integer.parseInt(tweet.get(5)))
-                        .append("favorited", (Integer.parseInt(tweet.get(6)) > 0)) //Boolean
-                        .append("favorite_count", Integer.parseInt(tweet.get(6)))
-                        .append("lang", "en") //Language of text
-                        .append("coordinates", null)
-//                        .append("coordinates", new Document() //Embedded document
-//                            .append("coordinates", asList( //Embeded array
+                        .append(config.getRetweetedStatusDocumentFieldName(), new Document())
+                        .append(config.getTextFieldName(), 
+                                Utilities.assembleText(tweet.get(2), tweet.get(3))) //Actual tweet
+                        .append(config.getDateFieldName(), 
+                                Utilities.stringToDate(tweet.get(4), tweet)) //Date published/retrieved
+                        .append(config.getRetweetedFieldName(), 
+                                (Integer.parseInt(tweet.get(5)) > 0)) //Boolean
+                        .append(config.getRetweetsCountFieldName(), 
+                                Integer.parseInt(tweet.get(5)))
+                        .append(config.getFavoritedFieldName(), (
+                                Integer.parseInt(tweet.get(6)) > 0)) //Boolean
+                        .append(config.getFavoritesCountFieldName(), 
+                                Integer.parseInt(tweet.get(6)))
+                        .append(config.getLanguageFieldName(), "en") //Language of text
+                        .append(config.getCoordinatesDocumentFieldName(), null)
+//                        .append(config.getCoordinatesDocumentFieldName(), 
+//                        new Document() //Embedded document
+//                            .append(config.getCoordinatesDocumentFieldName(), 
+//                        asList( //Embeded array
 //                                Long.parseLong(tweet.get(7)), //Latitude
 //                                Long.parseLong(tweet.get(8))) //Longitude
 //                            )   
@@ -218,24 +233,25 @@ public class MongoHandler {
      * @param event The ground truth event, for which the tweet is actually
      * referring to.
      * @return True if the process succeeds, false otherwise.
+     * @deprecated 
      */
     public final boolean insertSingleTweetIntoMongoDB(Status status, String event) {
         try {
-            db.getCollection(config.getRawTweetsCollectionName()).insertOne(new Document()
-                    .append("id", status.getId()) //Tweet ID
-                    .append("user", status.getUser().getName()) //Username
-                    .append("text", status.getText()) //Actual tweet
-                    .append("date", String.valueOf(status.getCreatedAt())) //Date published
-                    .append("latitude", status.getGeoLocation() != null ? String.valueOf(status.getGeoLocation().getLatitude()) : "NULL") //Latitude
-                    .append("longitude", status.getGeoLocation() != null ? String.valueOf(status.getGeoLocation().getLongitude()) : "NULL") //Longitude
-                    .append("number_of_retweets", String.valueOf(status.getRetweetCount())) //Retweet count
-                    .append("number_of_favorites", String.valueOf(status.getFavoriteCount())) //Favorite count
-                    .append("is_retweet", status.isRetweet() ? "true" : "false") //True if the tweet is a retweet, false otherwise
-                    .append("is_favorited", status.getFavoriteCount() > 0 ? "true" : "false") //True if the tweet is favorited, false otherwise
-                    .append("is_retweeted", status.getRetweetCount() > 0 ? "true" : "false") //True if the tweet is retweeted, false otherwise
-                    .append("language", status.getLang()) //Language of text
-            );
-        return true;
+//            db.getCollection(config.getRawTweetsCollectionName()).insertOne(new Document()
+//                    .append(config.getTweetIdFieldName(), status.getId()) //Tweet ID
+//                    .append(config.getUsernameFieldName(), status.getUser().getName()) //Username
+//                    .append(config.getTextFieldName(), status.getText()) //Actual tweet
+//                    .append(config.getDateFieldName(), String.valueOf(status.getCreatedAt())) //Date published
+//                    //.append("latitude", status.getGeoLocation() != null ? String.valueOf(status.getGeoLocation().getLatitude()) : "NULL") //Latitude
+//                    //.append("longitude", status.getGeoLocation() != null ? String.valueOf(status.getGeoLocation().getLongitude()) : "NULL") //Longitude
+//                    .append(config.getRetweetsCountFieldName(), String.valueOf(status.getRetweetCount())) //Retweet count
+//                    .append(config.getFavoritesCountFieldName(), String.valueOf(status.getFavoriteCount())) //Favorite count
+//                    .append(c, status.isRetweet() ? "true" : "false") //True if the tweet is a retweet, false otherwise
+//                    .append("is_favorited", status.getFavoriteCount() > 0 ? "true" : "false") //True if the tweet is favorited, false otherwise
+//                    .append("is_retweeted", status.getRetweetCount() > 0 ? "true" : "false") //True if the tweet is retweeted, false otherwise
+//                    .append("language", status.getLang()) //Language of text
+//            );
+        return false;
         } catch(MongoException e) {
             Utilities.printMessageln("There was a problem inserting the tweet.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
@@ -263,59 +279,59 @@ public class MongoHandler {
             iterable.forEach(new Block<Document>() {
                 @Override
                 public void apply(final Document tweetDoc) {
-                    if(langFilter.equals("no_filter") || tweetDoc.getString("lang")
+                    if(langFilter.equals("no_filter") || tweetDoc.getString(config.getLanguageFieldName())
                             .equals(langFilter)) {
                         //Get tweet ID
-                        long id = tweetDoc.getLong("id");
-                        Document user = tweetDoc.get("user", Document.class); //Get the embedded document
+                        long id = tweetDoc.getLong(config.getTweetIdFieldName());
+                        Document user = tweetDoc.get(config.getUserDocumentFieldName(), Document.class); //Get the embedded document
                         
                         //User details
-                        String username = user.getString("name"); //Name
+                        String username = user.getString(config.getUsernameFieldName()); //Name
                         long userId; //User ID
                         try {
-                            userId = user.getLong("id");
+                            userId = user.getLong(config.getUserIdFieldName());
                         } catch(ClassCastException e) {
-                            userId = user.getInteger("id");
+                            userId = user.getInteger(config.getUserIdFieldName());
                         }
 
                         //Tweet text, date and language
-                        String text = tweetDoc.getString("text");
-                        Date date = tweetDoc.getDate("created_at");
-                        String language = tweetDoc.getString("lang");
+                        String text = tweetDoc.getString(config.getTextFieldName());
+                        Date date = tweetDoc.getDate(config.getDateFieldName());
+                        String language = tweetDoc.getString(config.getLanguageFieldName());
 
                         //Coordinates
-                        Document coordinates = tweetDoc.get("coordinates", Document.class);
+                        Document coordinates = tweetDoc.get(config.getCoordinatesDocumentFieldName(), Document.class);
                         double latitude = -1;
                         double longitude = -1;
                         if(coordinates != null) {
                             try {
-                                List<Double> coords = coordinates.get("coordinates", ArrayList.class);
+                                List<Double> coords = coordinates.get(config.getCoordinatesDocumentFieldName(), ArrayList.class);
                                 latitude = coords.get(0);
                                 longitude = coords.get(1);
                             } catch(ClassCastException e) { //Case where data where incorrectly casted as integers
-                                List<Integer> coords = coordinates.get("coordinates", ArrayList.class);
+                                List<Integer> coords = coordinates.get(config.getCoordinatesDocumentFieldName(), ArrayList.class);
                                 latitude = coords.get(0);
                                 longitude = coords.get(1);
                             }
                         }
 
                         //Number of retweets and favorites
-                        int numberOfRetweets = tweetDoc.getInteger("retweet_count");
-                        int numberOfFavorites = tweetDoc.getInteger("favorite_count");
-                        boolean isFavorited = tweetDoc.getBoolean("favorited");
-                        boolean isRetweeted = tweetDoc.getBoolean("retweeted");
+                        int numberOfRetweets = tweetDoc.getInteger(config.getRetweetsCountFieldName());
+                        int numberOfFavorites = tweetDoc.getInteger(config.getFavoritesCountFieldName());
+                        boolean isFavorited = tweetDoc.getBoolean(config.getFavoritedFieldName());
+                        boolean isRetweeted = tweetDoc.getBoolean(config.getRetweetedFieldName());
                         long retweetId;
 
                         //Retweet status
                         boolean isRetweet;
                         try {
-                            Document retweetStatus = tweetDoc.get("retweeted_status", 
+                            Document retweetStatus = tweetDoc.get(config.getRetweetedStatusDocumentFieldName(), 
                                     Document.class);
                             isRetweet = true;
                             try {
-                                retweetId = retweetStatus.getLong("id");
+                                retweetId = retweetStatus.getLong(config.getRetweetIdFieldName());
                             } catch(ClassCastException e) {
-                                retweetId = retweetStatus.getInteger("id");
+                                retweetId = retweetStatus.getInteger(config.getRetweetIdFieldName());
                             }
                         } catch(NullPointerException e) {
                             isRetweet = false;
@@ -348,8 +364,8 @@ public class MongoHandler {
                         
                         int posEmot, negEmot;
                         try {
-                            posEmot = tweetDoc.getInteger("posEmot");
-                            negEmot = tweetDoc.getInteger("negEmot");
+                            posEmot = tweetDoc.getInteger(config.getPositiveEmoticonFieldName());
+                            negEmot = tweetDoc.getInteger(config.getNegativeEmoticonFieldName());
                         } catch(NullPointerException e) {
                             posEmot = 0;
                             negEmot = 0;
@@ -384,57 +400,63 @@ public class MongoHandler {
     public final Tweet getATweetByIdFromMongoDBStore(long id) {
         MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
         try {
-            FindIterable<Document> iterable = collection.find(new Document("id", id));
+            FindIterable<Document> iterable = collection.find(new Document(
+                    config.getTweetIdFieldName(), id));
             
             Document tweetDoc = iterable.first();
             
             //Get tweet ID
-            long id_ = tweetDoc.getLong("id");
-            Document user = tweetDoc.get("user", Document.class); //Get the embedded document
+            long id_ = tweetDoc.getLong(config.getTweetIdFieldName());
+            Document user = tweetDoc.get(config.getUserDocumentFieldName(), 
+                    Document.class); //Get the embedded document
             
             //User details
-            String username = user.getString("name"); //Name
+            String username = user.getString(config.getUsernameFieldName()); //Name
             long userId;
             try {
-                userId = user.getLong("id");
+                userId = user.getLong(config.getUserIdFieldName());
             } catch(ClassCastException e) {
-                userId = user.getInteger("id");
+                userId = user.getInteger(config.getUserIdFieldName());
             }
             
             //Tweet text, date and language
-            String text = tweetDoc.getString("text");
-            Date date = tweetDoc.getDate("created_at");
-            String language = tweetDoc.getString("lang");
+            String text = tweetDoc.getString(config.getTextFieldName());
+            Date date = tweetDoc.getDate(config.getDateFieldName());
+            String language = tweetDoc.getString(config.getLanguageFieldName());
             
             //Coordinates
-            Document coordinates = tweetDoc.get("coordinates", Document.class);
+            Document coordinates = tweetDoc.get(config.getCoordinatesDocumentFieldName(),
+                    Document.class);
             double latitude = -1;
             double longitude = -1;
             if(coordinates != null) {
                 try {
-                    List<Double> coords = coordinates.get("coordinates", ArrayList.class);
+                    List<Double> coords = coordinates.get(
+                            config.getCoordinatesDocumentFieldName(), ArrayList.class);
                     latitude = coords.get(0);
                     longitude = coords.get(1);
                 } catch(ClassCastException e) { //Case where data where incorrectly casted as integers
-                    List<Integer> coords = coordinates.get("coordinates", ArrayList.class);
+                    List<Integer> coords = coordinates.get(
+                            config.getCoordinatesDocumentFieldName(), ArrayList.class);
                     latitude = coords.get(0);
                     longitude = coords.get(1);
                 }
             }
             
             //Number of retweets and favorites
-            int numberOfRetweets = tweetDoc.getInteger("retweet_count");
-            int numberOfFavorites = tweetDoc.getInteger("favorite_count");
-            boolean isFavorited = tweetDoc.getBoolean("favorited");
-            boolean isRetweeted = tweetDoc.getBoolean("retweeted");
+            int numberOfRetweets = tweetDoc.getInteger(config.getRetweetsCountFieldName());
+            int numberOfFavorites = tweetDoc.getInteger(config.getFavoritesCountFieldName());
+            boolean isFavorited = tweetDoc.getBoolean(config.getFavoritedFieldName());
+            boolean isRetweeted = tweetDoc.getBoolean(config.getRetweetedFieldName());
             
             //Retweet status
             boolean isRetweet;
             long retweetId;
             try {
-                Document retweetStatus = tweetDoc.get("retweeted_status", Document.class);
+                Document retweetStatus = tweetDoc.get(
+                        config.getRetweetedStatusDocumentFieldName(), Document.class);
                 isRetweet = true;
-                retweetId = retweetStatus.getLong("id");
+                retweetId = retweetStatus.getLong(config.getRetweetIdFieldName());
             } catch(NullPointerException e) {
                 isRetweet = false;
                 retweetId = -1;
@@ -466,8 +488,8 @@ public class MongoHandler {
 
             int posEmot, negEmot;
             try {
-                posEmot = tweetDoc.getInteger("posEmot");
-                negEmot = tweetDoc.getInteger("negEmot");
+                posEmot = tweetDoc.getInteger(config.getPositiveEmoticonFieldName());
+                negEmot = tweetDoc.getInteger(config.getNegativeEmoticonFieldName());
             } catch(NullPointerException e) {
                 posEmot = 0;
                 negEmot = 0;
@@ -497,7 +519,7 @@ public class MongoHandler {
         MongoCollection<Document> collection = db.getCollection(config
                 .getRawTweetsCollectionName());
         try {
-            collection.updateOne(new Document("id", id),
+            collection.updateOne(new Document(config.getTweetIdFieldName(), id),
                                  new Document("$set", 
                                          new Document(fieldName, sentiment)));
         } catch(NullPointerException e) {
@@ -522,12 +544,14 @@ public class MongoHandler {
         MongoCollection<Document> collection = db.getCollection(config
                 .getRawTweetsCollectionName());
         try {
-            collection.updateOne(new Document("id", id),
+            collection.updateOne(new Document(config.getTweetIdFieldName(), id),
                                  new Document("$set", 
-                                         new Document("posEmot", positiveEmoticon)));
-            collection.updateOne(new Document("id", id),
+                                         new Document(config.getPositiveEmoticonFieldName(), 
+                                                 positiveEmoticon)));
+            collection.updateOne(new Document(config.getTweetIdFieldName(), id),
                                  new Document("$set", 
-                                         new Document("negEmot", negativeEmoticon)));
+                                         new Document(config.getNegativeEmoticonFieldName(), 
+                                                 negativeEmoticon)));
         } catch(NullPointerException e) {
             Utilities.printMessageln("There is no tweet with id '" + id + "'.");
             Logger.getLogger(MongoHandler.class.getName()).log(Level.SEVERE, null, e);
@@ -542,7 +566,7 @@ public class MongoHandler {
     public final boolean tweetExists(long id) {
         MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
         try {
-            collection.find(new Document("id", id));
+            collection.find(new Document(config.getTweetIdFieldName(), id));
             return true;
         } catch(NullPointerException e) { //Tweet does not exist
             return false;
@@ -557,7 +581,8 @@ public class MongoHandler {
     public final boolean tweetHasSentiment(long id, String fieldName) {
         MongoCollection<Document> collection = db.getCollection(config.getRawTweetsCollectionName());
         int sentiment;
-        FindIterable<Document> iterable = collection.find(new Document("id", id));
+        FindIterable<Document> iterable = collection.find(new Document(
+                config.getTweetIdFieldName(), id));
         Document tweetDoc = iterable.first();
         try {
             sentiment = tweetDoc.getInteger(fieldName);
@@ -634,7 +659,7 @@ public class MongoHandler {
         
         Utilities.printMessageln("Removing retweets from MongoDB Store...");
         for(Tweet tweet : tweetsToBeRemoved) {
-            collection.deleteMany(new Document("id", tweet.getID()));
+            collection.deleteMany(new Document(config.getTweetIdFieldName(), tweet.getID()));
         }
         
         Utilities.printMessageln("Retweets were successfully removed.");

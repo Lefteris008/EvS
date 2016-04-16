@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.12_1712
+ * @version 2016.04.16_1453
  */
 public class Config {
     private static String consumerKey;
@@ -62,9 +62,29 @@ public class Config {
     private static String positiveEmoticonsFile;
     private static String negativeEmoticonsFile;
     
+    //Output file name
     private static String insideSentiment;
     private static String outsideSentiment1;
     private static String outsideSentiment2;
+
+    //MongoDB Fields
+    private static String iD;
+    private static String user;
+    private static String language;
+    private static String username;
+    private static String userId;
+    private static String text;
+    private static String date;
+    private static String coordinates;
+    private static String retweetsCount;
+    private static String favoritesCount;
+    private static String retweeted;
+    private static String favorited;
+    private static String retweetedStatus;
+    private static String retweetId;
+    private static String positiveEmoticon;
+    private static String negativeEmoticon;
+    
 
 
 
@@ -143,6 +163,23 @@ public class Config {
             insideSentiment = prop.getProperty("InsideSentiment");
             outsideSentiment1 = prop.getProperty("OutsideSentiment1");
             outsideSentiment2 = prop.getProperty("OutsideSentiment2");
+            
+            iD = prop.getProperty("id");
+            user = prop.getProperty("user");
+            language = prop.getProperty("language");
+            username = prop.getProperty("username");
+            userId = prop.getProperty("userId");
+            text = prop.getProperty("text");
+            date = prop.getProperty("date");
+            coordinates = prop.getProperty("coordinates");
+            retweetsCount = prop.getProperty("retweetsCount");
+            favoritesCount = prop.getProperty("favoritesCount");
+            favorited = prop.getProperty("favorited");
+            retweeted = prop.getProperty("retweeted");
+            retweetedStatus = prop.getProperty("retweetedStatus");
+            retweetId = prop.getProperty("retweetId");
+            positiveEmoticon = prop.getProperty("positiveEmoticon");
+            negativeEmoticon = prop.getProperty("negativeEmoticon");
             
         } catch (IOException | NumberFormatException e) {
             if(inputStream != null) {
@@ -339,4 +376,100 @@ public class Config {
      * @return A String containing the field name.
      */
     public String getBayesianNetSentimentName() { return outsideSentiment2; }
+    
+    /**
+     * Returns the ID field name of a retrieved tweet.
+     * @return a String containing the ID field name of the tweet.
+     */
+    public static String getTweetIdFieldName() { return iD; }
+
+    /**
+     * Returns the user document field name.
+     * @return a String containing the user document field name.
+     */
+    public static String getUserDocumentFieldName() { return user;}
+
+    /**
+     * Returns the language code field name of the tweet.
+     * @return a String representing the language field name of the tweet.
+     */
+    public static String getLanguageFieldName() { return language;}
+
+    /**
+     * Returns the display name field name of the creator of the tweet.
+     * @return a String containing the display name field name of the tweet's creator.
+     */
+    public static String getUsernameFieldName() { return username;}
+
+    /**
+     * Returns the user ID field name of the tweet's creator.
+     * @return a String containing the user ID field name of the tweet's creator.
+     */
+    public static String getUserIdFieldName() { return userId;}
+
+    /**
+     * Returns the text field name of the tweet.
+     * @return a String containing the text field name of the tweet.
+     */
+    public static String getTextFieldName() { return text; }
+
+    /**
+     * Returns the date field name of the tweet.
+     * @return a String containing the date field name of the tweet.
+     */
+    public static String getDateFieldName() { return date; }
+
+    /**
+     * Returns the coordinates document field name.
+     * @return a String containing the coordinates document field name.
+     */
+    public static String getCoordinatesDocumentFieldName() { return coordinates; }
+
+    /**
+     * Returns the retweet count field name.
+     * @return a String containing the retweet field name.
+     */
+    public static String getRetweetsCountFieldName() { return retweetsCount; }
+
+    /**
+     * Returns the favorite count field name.
+     * @return a String containing the favorite field name.
+     */
+    public static String getFavoritesCountFieldName() { return favoritesCount; }
+
+    /**
+     * Returns the retweeted flag field name.
+     * @return a String containing the retweeted flag field name.
+     */
+    public static String getRetweetedFieldName() { return retweeted; }
+
+    /**
+     * Returns the favorited flag field name.
+     * @return a String containing the favorited flag field name.
+     */
+    public static String getFavoritedFieldName() { return favorited; }
+
+    /**
+     * Returns the retweeted status document field name.
+     * @return a String containing the retweeted status document field name.
+     */
+    public static String getRetweetedStatusDocumentFieldName() { return retweetedStatus; }
+
+    /**
+     * Returns the retweet ID field name (the id of the original tweet).
+     * @return a String containing the retweet ID filed name.
+     */
+    public static String getRetweetIdFieldName() { return retweetId; }
+
+    /**
+     * Returns the positive emoticon field name.
+     * @return a String containing the positive emoticon field name.
+     */
+    public static String getPositiveEmoticonFieldName() { return positiveEmoticon; }
+
+    /**
+     * Returns the negative emoticon field name.
+     * @return a String containing the negative emoticon field name.
+     */
+    public static String getNegativeEmoticonFieldName() { return negativeEmoticon; }
 }
