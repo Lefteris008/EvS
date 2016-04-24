@@ -22,16 +22,65 @@ package utilities;
  * delete and enhance them, without cluttering the main method or methods that
  * receive the arguments' array.
  * 
+ * 
  * @author  Lefteris Paraskevas
- * @version 2016.04.02_1326
+ * @version 2016.04.24_1922
  */
 public class Console {
     public static int showMongoLogging;
     public static boolean showInlineInfo;
+    public static boolean hasExternalCommands = false;
+    public static int choice;
+    private String[] args;
     
     public Console(String[] args) {
+        this.args = args;
+        analyzeConsoleInput();
+    }
+    
+    /**
+      * Initial version includes 4 flags: <br/>
+      * showMonogLogging --> Indicates whether the MongoDB Logging information should
+      * be displayed during execution (0) or not (1). <br/>
+      * showInlineInfo --> Indicates whether inline information from various sources
+      * will be displayed during execution (0) or not (1). <br/>
+      * <b>External Commands</b> <br/>
+      * -opf --> Run the Sentiment version of Offline Peak Finding. <br/>
+      * &nbsp;&nbsp;&nbsp;&nbsp;-nosentiment --> Run the simple version of OPF. <br/>
+      * -edcow --> Run the Sentiment version of EDCoW. <br/>
+      * &nbsp;&nbsp;&nbsp;&nbsp;-nosentiment --> Run the simple version of EDCoW. <br/>
+      * Example: 0 1 -opf --> Show MongoDB Logging information, hides the inline
+      * information of the execution and runs the Sentiment version of OFP.
+     */
+    private void analyzeConsoleInput() {
         int mongoL = Integer.parseInt(args[0]);
         int showInlineInfo = Integer.parseInt(args[1]);
+        String extCommands = null;
+        if(args.length > 2) { //Has external commands
+            hasExternalCommands = true;
+            extCommands = args[2];
+            switch(extCommands) {
+                case "-opf": {
+                    if(args.length == 4) { //-nosentiment flag
+                        choice = 4;
+                        break;
+                    }
+                    choice = 1;
+                    break;
+                } case "-edcow" : {
+                    if(args.length == 4) { //-nosentiment flag
+                        choice = 5;
+                        break;
+                    }
+                    choice = 2;
+                    break;
+                } default: {
+                    Utilities.printMessageln("Wrong arguments. Refer to the online"
+                            + "wiki guide.");
+                    break;
+                }
+            }
+        }
         
         if(mongoL == 0) {
             showMongoLogging = 0;

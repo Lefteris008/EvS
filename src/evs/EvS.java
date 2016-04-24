@@ -37,12 +37,14 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.09_2018
+ * @version 2016.04.24_1922
  */
 public class EvS {
     
     private static int showMongoLogging = -1;
     private static boolean showInlineInfo = false;
+    private static boolean hasExtCommands = false;
+    private static int choice;
     
     /**
      * Method to manually set mongoLoggingFlag if the tool is executed as a JAR
@@ -65,7 +67,8 @@ public class EvS {
             Console console = new Console(args); //Read the console
             showMongoLogging = console.showMongoLogging; //Set the mongo logging flag.
             showInlineInfo = console.showInlineInfo; //Set the inline info flag.
-            
+            hasExtCommands = console.hasExternalCommands;
+            choice = console.choice;
         }
         
         if(showMongoLogging == 1) {
@@ -83,20 +86,21 @@ public class EvS {
             Logger.getLogger(EvS.class.getName()).log(Level.SEVERE, null, ex);
             System.exit(1);
         }
-        
-        int choice;
         System.out.println("\n----EvS----");
-        System.out.println("Select one of the following options");
-        System.out.println("1. Run Offline Peak Finding experiments.");
-        System.out.println("2. Run EDCoW experiments.");
-        System.out.println("3. Run each of the above methods without "
-                + "the sentiment annotations.");
-        System.out.println("Any other key to exit.");
-        System.out.println("");
-        System.out.print("Your choice: ");
         
-        Scanner keyboard = new Scanner(System.in);
-        choice = keyboard.nextInt();
+        if(!hasExtCommands) {
+            System.out.println("Select one of the following options");
+            System.out.println("1. Run Offline Peak Finding experiments.");
+            System.out.println("2. Run EDCoW experiments.");
+            System.out.println("3. Run each of the above methods without "
+                    + "the sentiment annotations.");
+            System.out.println("Any other key to exit.");
+            System.out.println("");
+            System.out.print("Your choice: ");
+
+            Scanner keyboard = new Scanner(System.in);
+            choice = keyboard.nextInt();
+        }
         
         switch (choice) {
             case 1: { //Offline Peak Finding
@@ -164,7 +168,14 @@ public class EvS {
                 
                 break;
             } case 3: {
-                EDMethodPicker.selectEDMethod(config, showInlineInfo);
+                EDMethodPicker.selectEDMethod(config, showInlineInfo, 0);
+                break;
+            } case 4: { //Directly run OPF
+                EDMethodPicker.selectEDMethod(config, showInlineInfo, 1);
+                break;
+            } case 5: { //Directly run EDCoW
+                EDMethodPicker.selectEDMethod(config, showInlineInfo, 2);
+                break;
             } default: {
                 System.out.println("Exiting now...");
                 System.exit(0);

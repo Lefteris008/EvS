@@ -30,24 +30,33 @@ import utilities.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.09_1956
+ * @version 2016.04.24_1922
  */
 public class EDMethodPicker {
     
     /**
      * Pick method of Event Detection.
      * @param config A configuration object.
+     * @param showInlineInfo A flag that indicates whether or not inline information
+     * should be displayed.
+     * @param extChoice Supplies an external choice.
      */
-    public static void selectEDMethod(Config config, boolean showInlineInfo) {
-        System.out.println("\nPick a method for Event Detection");
-        System.out.println("1. EDCoW");
-        System.out.println("2. Offline Peak Finding");
-        System.out.println("Any other key to exit.");
-        System.out.println("");
-        System.out.print("Your choice: ");
-        
-        Scanner keyboard = new Scanner(System.in);
-        int choice = keyboard.nextInt();
+    public static void selectEDMethod(Config config, boolean showInlineInfo, 
+            int extChoice) {
+        int choice;
+        if(extChoice == 0) {
+            System.out.println("\nPick a method for Event Detection");
+            System.out.println("1. EDCoW");
+            System.out.println("2. Offline Peak Finding");
+            System.out.println("Any other key to exit.");
+            System.out.println("");
+            System.out.print("Your choice: ");
+
+            Scanner keyboard = new Scanner(System.in);
+            choice = keyboard.nextInt();
+        } else { //Directly run an algorithm
+            choice = extChoice;
+        }
         
         switch(choice) {
             case 1: {
@@ -56,12 +65,13 @@ public class EDMethodPicker {
                 
                 corpus.createCorpus();
                 corpus.setDocTermFreqIdList();
-                int delta = 4, delta2 = 11, gamma = 26;
+                int delta = 4, delta2 = 11, gamma = 26, timeSliceA = 1, 
+                        timeSliceB = 154;
                 double minTermSupport = 0.001, maxTermSupport = 0.01;
                 
                 EDCoWExperimenter exper = new EDCoWExperimenter(corpus, delta, 
-                        delta2, gamma, minTermSupport, maxTermSupport, choice, 
-                        choice, config);
+                        delta2, gamma, minTermSupport, maxTermSupport, timeSliceA, 
+                        timeSliceB, config);
                 
                 //Experiment with delta
                 List<String> lines = exper.experimentUsingDelta(1, 20, 1, showInlineInfo);
