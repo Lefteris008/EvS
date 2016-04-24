@@ -19,7 +19,6 @@ package utilities;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,7 +27,7 @@ import java.util.regex.Pattern;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.16_1453
+ * @version 2016.04.24_1941
  */
 public class Config {
     private static String consumerKey;
@@ -84,34 +83,7 @@ public class Config {
     private static String retweetId;
     private static String positiveEmoticon;
     private static String negativeEmoticon;
-    
 
-
-
-    /**
-     * Parses a String array and creates an ArrayList containing only the appropriate fields.
-     * @param fields A String array containing fields of data of a tweet.
-     * @return An ArrayList containing the appropriate fields of the original array.
-     */
-    public static final ArrayList<String> getTweetFieldsFromArray(String[] fields) {
-        ArrayList<String> tweet = new ArrayList<>();
-        tweet.add(fields[6]);
-        tweet.add(fields[7]);
-        if ("R".equals(fields[5])) {
-            tweet.add("1");
-        } else {
-            tweet.add("0");
-        }
-        tweet.add(fields[8]);
-        tweet.add(fields[9]);
-        tweet.add(fields[10]);
-        tweet.add(fields[11]);
-        tweet.add("-1");
-        tweet.add("-1");
-        return tweet;
-    }
-
-    
     public Config() throws IOException {
         
         InputStream inputStream = null;

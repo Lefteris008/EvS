@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.28_0010
+ * @version 2016.04.24_1941
  */
 public class Utilities {
     
@@ -214,6 +214,29 @@ public class Utilities {
     }
 
     /**
+     * Parses a String array and creates an ArrayList containing only the appropriate fields.
+     * @param fields A String array containing fields of data of a tweet.
+     * @return An ArrayList containing the appropriate fields of the original array.
+     */
+    public static final ArrayList<String> getTweetFieldsFromArray(String[] fields) {
+        ArrayList<String> tweet = new ArrayList<>();
+        tweet.add(fields[6]);
+        tweet.add(fields[7]);
+        if ("R".equals(fields[5])) {
+            tweet.add("1");
+        } else {
+            tweet.add("0");
+        }
+        tweet.add(fields[8]);
+        tweet.add(fields[9]);
+        tweet.add(fields[10]);
+        tweet.add(fields[11]);
+        tweet.add("-1");
+        tweet.add("-1");
+        return tweet;
+    }
+    
+    /**
      * Method to parse a text file containing tweet information and return the extracted fields.
      * @param config A configuration object.
      * @return An ArrayList containing ArrayLists of tweets.
@@ -228,7 +251,7 @@ public class Utilities {
             while ((line = br.readLine()) != null) {
                 fields = line.split("\t");
                 if (!"404".equals(fields[0]) && !"true".equals(fields[1])) {
-                    tweet = new ArrayList<>(Config.getTweetFieldsFromArray(fields));
+                    tweet = new ArrayList<>(getTweetFieldsFromArray(fields));
                     tweets.add(tweet);
                 }
             }
