@@ -16,6 +16,12 @@
  */
 package utilities;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 /**
  *
  * This class provides an easy interface to implement console controls, extend,
@@ -24,74 +30,84 @@ package utilities;
  * 
  * 
  * @author  Lefteris Paraskevas
- * @version 2016.04.24_1922
+ * @version 2016.04.29_1429
  */
 public class Console {
-    public static int showMongoLogging;
-    public static boolean showInlineInfo;
-    public static boolean hasExternalCommands = false;
-    public static int choice;
+    private static Options options;
+    private static CommandLine cmd;
+    private final Config config;
     private String[] args;
     
-    public Console(String[] args) {
+    public Console(String[] args, Config config) throws ParseException {
+        
         this.args = args;
-        analyzeConsoleInput();
+        this.config = config;
+        setOptions();
+        
+        CommandLineParser parser = new DefaultParser();
+        cmd = parser.parse(options, this.args);
     }
     
     /**
-      * Initial version includes 4 flags: <br/>
-      * showMonogLogging --> Indicates whether the MongoDB Logging information should
-      * be displayed during execution (0) or not (1). <br/>
-      * showInlineInfo --> Indicates whether inline information from various sources
-      * will be displayed during execution (0) or not (1). <br/>
-      * <b>External Commands</b> <br/>
-      * -opf --> Run the Sentiment version of Offline Peak Finding. <br/>
-      * &nbsp;&nbsp;&nbsp;&nbsp;-nosentiment --> Run the simple version of OPF. <br/>
-      * -edcow --> Run the Sentiment version of EDCoW. <br/>
-      * &nbsp;&nbsp;&nbsp;&nbsp;-nosentiment --> Run the simple version of EDCoW. <br/>
-      * Example: 0 1 -opf --> Show MongoDB Logging information, hides the inline
-      * information of the execution and runs the Sentiment version of OFP.
+     * Method that defines the console input flags.
      */
-    private void analyzeConsoleInput() {
-        int mongoL = Integer.parseInt(args[0]);
-        int showInlineInfo = Integer.parseInt(args[1]);
-        String extCommands = null;
-        if(args.length > 2) { //Has external commands
-            hasExternalCommands = true;
-            extCommands = args[2];
-            switch(extCommands) {
-                case "-opf": {
-                    if(args.length == 4) { //-nosentiment flag
-                        choice = 4;
-                        break;
-                    }
-                    choice = 1;
-                    break;
-                } case "-edcow" : {
-                    if(args.length == 4) { //-nosentiment flag
-                        choice = 5;
-                        break;
-                    }
-                    choice = 2;
-                    break;
-                } default: {
-                    Utilities.printMessageln("Wrong arguments. Refer to the online"
-                            + "wiki guide.");
-                    break;
-                }
+    private void setOptions() {
+        options = new Options();
+        
+        options.addOption(config.getMongoLoggingArgName(), false, "Show or hide Mongo Logging Information");
+        options.addOption(config.getInlineInfoArgName(), false, "Show or hide inline information");
+        options.addOption(config.getOpfArgName(), false, "Non Sentiment version of Offline Peak Finding");
+        options.addOption(config.getNoSentimentArgName(), false, "Sentiment version of previous algorithm");
+        options.addOption(config.getEdcowArgName(), false, "Non Sentiment version of EDCoW");
+    }
+    
+    public final CommandLine getCmd() { return cmd; }
+    
+    /**
+     * Determine whether the console has external commands to run the ED algorithms
+     * or not.
+     * @return true if the console has external commands, false otherwise. 
+     */
+    public final boolean hasExternalCommands() {
+        return (args.length > 2) ? true : false;
+    }
+    
+    /**
+     * Determines whether the user has ordered to hide the MongoDB Logging Information.
+     * @return If the user set the flag returns true, false otherwise.
+     */
+    public final boolean showMongoLogging() {
+        return cmd.hasOption(config.getMongoLoggingArgName());
+    }
+    
+    /**
+     * Determines whether the user has ordered to hide the various inline info.
+     * @return If the user set the flag returns true, false otherwise.
+     */
+    public final boolean showInlineInfo() {
+        return cmd.hasOption(config.getInlineInfoArgName());
+    }
+    
+    /**
+     * Handles the rest of the console and returns the correct value for switch-
+     * case scenarios.
+     * @return The appropriate value or -1 for error.
+     */
+    public final int getChoiceValue() {
+        if(cmd.hasOption(config.getEdcowArgName())) {
+            if(cmd.hasOption(config.getNoSentimentArgName())) {
+                return 5;
             }
+            return 2;
         }
         
-        if(mongoL == 0) {
-            showMongoLogging = 0;
-        } else {
-            showMongoLogging = 1;
+        if(cmd.hasOption(config.getOpfArgName())) {
+            if(cmd.hasOption(config.getNoSentimentArgName())) {
+                return 4;
+            }
+            return 1;
         }
         
-        if(showInlineInfo == 0) {
-            this.showInlineInfo = true;
-        } else {
-            this.showInlineInfo = false;
-        }
+        return -1;
     }
 }

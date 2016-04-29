@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.24_1941
+ * @version 2016.04.29_1430
  */
 public class Config {
     private static String consumerKey;
@@ -83,6 +83,13 @@ public class Config {
     private static String retweetId;
     private static String positiveEmoticon;
     private static String negativeEmoticon;
+    
+    //Console arguments
+    private static String showMongoLogging;
+    private static String showInlineInfo;
+    private static String edcow;
+    private static String opf;
+    private static String noSentiment;
 
     public Config() throws IOException {
         
@@ -152,6 +159,12 @@ public class Config {
             retweetId = prop.getProperty("retweetId");
             positiveEmoticon = prop.getProperty("positiveEmoticon");
             negativeEmoticon = prop.getProperty("negativeEmoticon");
+            
+            showMongoLogging = prop.getProperty("showMongoLogging");
+            showInlineInfo = prop.getProperty("showInlineInfo");
+            edcow = prop.getProperty("edcow");
+            opf = prop.getProperty("opf");
+            noSentiment = prop.getProperty("noSentiment");
             
         } catch (IOException | NumberFormatException e) {
             if(inputStream != null) {
@@ -444,4 +457,34 @@ public class Config {
      * @return a String containing the negative emoticon field name.
      */
     public static String getNegativeEmoticonFieldName() { return negativeEmoticon; }
+    
+    /**
+     * Returns the argument name of MongoLogging flag.
+     * @return the argument name of MongoLogging flag.
+     */
+    public static String getMongoLoggingArgName() { return showMongoLogging; }
+    
+    /**
+     * Returns the argument name of InlineInfo flag.
+     * @return the argument name of InlineInfo flag.
+     */
+    public static String getInlineInfoArgName() { return showInlineInfo; }
+    
+    /**
+     * Returns the argument name of EDCoW flag.
+     * @return the argument name of EDCoW flag.
+     */
+    public static String getEdcowArgName() { return edcow; }
+    
+    /**
+     * Returns the argument name of Offline Peak Finding flag.
+     * @return the argument name of Offline Peak Finding flag.
+     */
+    public static String getOpfArgName() { return opf; }
+    
+    /**
+     * Returns the argument name of NoSentiment flag.
+     * @return the argument name of NoSentiment flag.
+     */
+    public static String getNoSentimentArgName() { return noSentiment; }
 }

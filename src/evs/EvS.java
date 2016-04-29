@@ -30,6 +30,8 @@ import experimenter.SentimentEDCoWExperimenter;
 import experimenter.SentimentPeakFindingExperimenter;
 import java.io.IOException;
 import java.util.Scanner;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 import utilities.Config;
 import utilities.Console;
 import utilities.Utilities;
@@ -37,11 +39,11 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.24_1922
+ * @version 2016.04.29_1429
  */
 public class EvS {
     
-    private static int showMongoLogging = -1;
+    private static boolean showMongoLogging = true;
     private static boolean showInlineInfo = false;
     private static boolean hasExtCommands = false;
     private static int choice;
@@ -49,10 +51,10 @@ public class EvS {
     /**
      * Method to manually set mongoLoggingFlag if the tool is executed as a JAR
      * library.
-     * @param value 0 if the user wishes to show Mongo Logging information,
-     * 1 otherwise.
+     * @param value True if the user wishes to show Mongo Logging information,
+     * false otherwise.
      */
-    public static void setShowMongoLoggingFlag(int value) {
+    public static void setShowMongoLoggingFlag(boolean value) {
         showMongoLogging = value;
     }
     
@@ -61,21 +63,7 @@ public class EvS {
      * if she wishes to execute the tool as a .jar executable.
      * @param args A list of arguments.
      */
-    public static void main(String[] args) {
-        
-        if(args.length != 0) { //If the user supplied arguments
-            Console console = new Console(args); //Read the console
-            showMongoLogging = console.showMongoLogging; //Set the mongo logging flag.
-            showInlineInfo = console.showInlineInfo; //Set the inline info flag.
-            hasExtCommands = console.hasExternalCommands;
-            choice = console.choice;
-        }
-        
-        if(showMongoLogging == 1) {
-            //Stop reporting logging information
-            Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
-            mongoLogger.setLevel(Level.SEVERE);
-        }
+    public static void main(String[] args) throws ParseException {
         
         Config config = null;
         try {
@@ -86,6 +74,22 @@ public class EvS {
             Logger.getLogger(EvS.class.getName()).log(Level.SEVERE, null, ex);
             System.exit(1);
         }
+        
+        if(args.length != 0) { //If the user supplied arguments
+            Console console = new Console(args, config); //Read the console
+            
+            showMongoLogging = console.showMongoLogging();
+            showInlineInfo = console.showInlineInfo();
+            hasExtCommands = console.hasExternalCommands();
+            choice = console.getChoiceValue();
+        }
+        
+        if(!showMongoLogging) {
+            //Stop reporting logging information
+            Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
+            mongoLogger.setLevel(Level.SEVERE);
+        }
+        
         System.out.println("\n----EvS----");
         
         if(!hasExtCommands) {
