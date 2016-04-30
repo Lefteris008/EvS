@@ -1,0 +1,6 @@
+{
+  "name": "EvS",
+  "tagline": "MSc Thesis Project",
+  "body": "# EvS (Event detection Via Sentiment analysis)\r\nMSc Thesis Project\r\n\r\nThis project focuses on Event Detection via Sentiment Analysis. Specialized wrapper classes were created to easily extend the tool with additional ED or SA algorithms.\r\nThis project does not automatically apply Sentiment Analysis on existing Event Detection techniques but it rather accompanies the results of the second category and enriches them with sentiment information.",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
