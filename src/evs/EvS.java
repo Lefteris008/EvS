@@ -30,7 +30,6 @@ import experimenter.SentimentEDCoWExperimenter;
 import experimenter.SentimentPeakFindingExperimenter;
 import java.io.IOException;
 import java.util.Scanner;
-import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import utilities.Config;
 import utilities.Console;
@@ -39,7 +38,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.29_1429
+ * @version 2016.04.30_1828
  */
 public class EvS {
     
@@ -62,6 +61,7 @@ public class EvS {
      * Main method that provides a simple console input interface for the user,
      * if she wishes to execute the tool as a .jar executable.
      * @param args A list of arguments.
+     * @throws org.apache.commons.cli.ParseException ParseExcetion
      */
     public static void main(String[] args) throws ParseException {
         

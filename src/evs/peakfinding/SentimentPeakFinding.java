@@ -31,7 +31,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.28_0007
+ * @version 2016.04.30_1829
  * 
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing 
  * Microblogs for Event Exploration", CHI 2011.
@@ -54,14 +54,18 @@ public class SentimentPeakFinding implements AbstractEDMethod {
     
     /**
      * Public constructor.
-     * @param bins Bins parameter, containing the count of tweets in pre-specified time intervals.
-     * @param a Alpha parameter to capture historical information. Values lower than 1 are recommended.
+     * @param bins Bins parameter, containing the count of tweets in pre-specified 
+     * time intervals.
+     * @param a Alpha parameter to capture historical information. Values lower 
+     * than 1 are recommended.
      * @param t Threshold parameter. 
-     * @param p Primary parameter indicates the first bins to be considered in calculating initial mean deviance.
-     * @param refreshWindow An integer representing the refresh window of every bin.
+     * @param p Primary parameter indicates the first bins to be considered in 
+     * calculating initial mean deviance.
      * @param corpus A PeakFindingCorpus object.
+     * @param sentimentSouce The source of the sentiment, internal or external.
      */
-    public SentimentPeakFinding(List<BinPair<String, Integer>> bins, double a, int t, int p, PeakFindingSentimentCorpus corpus, int sentimentSouce) {
+    public SentimentPeakFinding(List<BinPair<String, Integer>> bins, double a, 
+            int t, int p, PeakFindingSentimentCorpus corpus, int sentimentSouce) {
         alpha = a;
         taph = t;
         pi = p;

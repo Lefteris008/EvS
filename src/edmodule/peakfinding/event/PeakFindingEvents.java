@@ -28,7 +28,7 @@ import preprocessingmodule.nlp.stemming.StemUtils;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.09_2005
+ * @version 2016.04.30_1827
  */
 public class PeakFindingEvents {
     
@@ -46,6 +46,7 @@ public class PeakFindingEvents {
      * @param bins A List of BinPair objects, containing all bins.
      * @param eventWindows A List of Window objects, containing the generated eventsTweets.
      * @param corpus A PeakFindingCorpus object.
+     * @param stemsHandler A StemUtils object.
      */
     public PeakFindingEvents(HashMap<String, ArrayList<Tweet>> tweetsByWindow, 
             List<BinPair<String, Integer>> bins, 
@@ -59,7 +60,7 @@ public class PeakFindingEvents {
     }
     
     /**
-     * Returns the tweets that belong to a certain event. <br/>
+     * Returns the tweets that belong to a certain event. <br>
      * More formally, it parses the auxiliary tweetsByWindow HashMap and appends
      * the relevant tweets into a String list.
      * @param window A Window object, the actual event.

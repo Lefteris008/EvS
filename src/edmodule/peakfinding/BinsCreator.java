@@ -29,7 +29,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.02.19_1711
+ * @version 2016.04.30_1826
  */
 public class BinsCreator {
     
@@ -37,12 +37,13 @@ public class BinsCreator {
      * Method to create and return the bins needed for OfflinePeakFinding algorithm to operate.
      * More formally, it creates an List of BinPair objects, containing the count
      * of tweets in pre-specified time intervals (windows).
+     * @param corpus A PeakFindingCorpus object.
      * @param config A Configuration object.
      * @param refreshWindow An integer indicating the time interval in which the tweets
-     * should be counted.All values in minutes. <br/>
-     * E.g. For 1 minute interval --> 1. <br/>
-     * For half an hour interval --> 30. <br/>
-     * For 5 hours interval --> 300.
+     * should be counted.All values in minutes. <br>
+     * E.g. For 1 minute interval --&gt; 1. <br>
+     * For half an hour interval --&gt; 30. <br>
+     * For 5 hours interval --&gt; 300.
      * @return An List of BinPair objects containing the bins.
      * @see StringDateUtils StringDateUtils class.
      * @see BinPair BinPair class.

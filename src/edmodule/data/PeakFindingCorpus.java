@@ -29,7 +29,7 @@ import utilities.Config;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.09_2000
+ * @version 2016.04.30_1826
  */
 public class PeakFindingCorpus {
     
@@ -64,13 +64,13 @@ public class PeakFindingCorpus {
      * earliest and the latest date of corpus if needed (assuming that the corpus
      * has some extend of sparseness).
      * @param window An integer indicating the time interval in which the tweets
-     * should be counted. All values in minutes. <br/>
-     * E.g. For 1 minute interval --> 1. <br/>
-     * For half an hour interval --> 30. <br/>
-     * For 5 hours interval --> 300.
+     * should be counted. All values in minutes. <br>
+     * E.g. For 1 minute interval, 1. <br>
+     * For half an hour interval, 30. <br>
+     * For 5 hours interval, 300.
      * @return A HashMap containing the bins.
-     * @see BinsCreator BinsCreator class.
-     * @see OfflinePeakFinding OfflinePeakFinding class.
+     * @see edmodule.peakfinding.BinsCreator BinsCreator class.
+     * @see edmodule.peakfinding.OfflinePeakFinding OfflinePeakFinding class.
      */
     public final HashMap<String, Integer> createCorpus(int window) {   
         //Initialize variables

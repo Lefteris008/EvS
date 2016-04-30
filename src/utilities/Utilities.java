@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.24_1941
+ * @version 2016.04.30_1831
  */
 public class Utilities {
     
@@ -47,6 +47,7 @@ public class Utilities {
      * Prints the execution time of a current running method in seconds.
      * @param startTime Long representing the current System time when the method started.
      * @param endTime Long representing the current System time when the method finished.
+     * @param className The name of the class the method belongs to.
      * @param methodName A String containing the name of the current running method.
      */
     public static void printExecutionTime(long startTime, long endTime, String className, String methodName) {
@@ -63,7 +64,7 @@ public class Utilities {
      * Supplies a message to the error stream, formatting it according to a 
      * standard form, appending '\n' escape character at the end.
      * @param message The message to be printed.
-     * @see printMessage() printMessage() method.
+     * @see #printMessage(java.lang.String) printMessage() method.
      */
     public final static void printMessageln(String message) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -77,7 +78,7 @@ public class Utilities {
      * Supplies a message to the error stream, formatting it according to a 
      * standard form, without creating a new line.
      * @param message The message to be printed.
-     * @see printMessageln() printMessageln() method.
+     * @see #printMessageln(java.lang.String) printMessageln() method.
      */
     public final static void printMessage(String message) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -168,7 +169,7 @@ public class Utilities {
      * @param date A String formed in 'hh:MM PM/AM - dd MMM YYYY'.
      * @return A Date object
      */
-    public static final Date stringToDate(String date, ArrayList<String> tweet) {
+    public static final Date stringToDate(String date) {
         try {
             DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
             return format.parse(date);

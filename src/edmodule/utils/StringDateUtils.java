@@ -28,15 +28,15 @@ import java.util.logging.Logger;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.27_2356
+ * @version 2016.04.30_1827
  */
 public class StringDateUtils {
     
     /**
-     * Method to return a String date key, assembled in YYYYMMDD_HHMM. <br/>
+     * Method to return a String date key, assembled in YYYYMMDD_HHMM. <br>
      * More formally, the key is constructed by a given date and is mapped
-     * to the nearest minute refresh window ('window' variable). <br/>
-     * E.g. for 10-minute refresh window, the key is mapped to the nearest 10-minute. <br/>
+     * to the nearest minute refresh window ('window' variable). <br>
+     * E.g. for 10-minute refresh window, the key is mapped to the nearest 10-minute. <br>
      * For 30-minute refresh window, the key is mapped to the nearest half-hour.
      * @param cal A Calendar instance.
      * @param date The date from which is key is going to be constructed.
@@ -137,8 +137,8 @@ public class StringDateUtils {
     
     /**
      * Returns a complete Date object from a
-     * @param date
-     * @return 
+     * @param date The date to be parsed in plain text.
+     * @return A date object from the input String.
      */
     public final static Date getDateFromString(String date) {
         try {

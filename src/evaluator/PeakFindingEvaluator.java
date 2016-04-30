@@ -34,7 +34,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.09_2017
+ * @version 2016.04.30_1827
  */
 public class PeakFindingEvaluator implements AbstractEvaluator {
     private final double alpha;
@@ -54,9 +54,11 @@ public class PeakFindingEvaluator implements AbstractEvaluator {
      * @param alpha A double value representing alpha parameter.
      * @param taph An integer value representing taph parameter.
      * @param pi An integer value representing pi parameter.
+     * @param eventList A List containing the events found by the algorithm.
      * @param config A configuration object.
      */
-    public PeakFindingEvaluator(double alpha, int taph, int pi, List<PeakFindingEvent> eventList, Config config) {
+    public PeakFindingEvaluator(double alpha, int taph, int pi, 
+            List<PeakFindingEvent> eventList, Config config) {
         this.alpha = alpha;
         this.taph = taph;
         this.pi = pi;
@@ -105,6 +107,8 @@ public class PeakFindingEvaluator implements AbstractEvaluator {
     
     /**
      * Run the evaluation using only the 5 most common terms of every event.
+     * @param showInlineInfo Boolean flag that indicates whether to show or hide
+     * inline information during execution.
      */
     public void evaluateWithCommonTerms(boolean showInlineInfo) {
         HashSet<String> groundTruthKeywords;
@@ -163,6 +167,8 @@ public class PeakFindingEvaluator implements AbstractEvaluator {
     
     /**
      * Run the evaluation method using all the generated terms in a specific event.
+     * @param showInlineInfo Boolean flag that indicates whether to show or hide
+     * inline information during execution.
      */
     public void evaluateWithAllTerms(boolean showInlineInfo) {
         HashSet<String> groundTruthKeywords;

@@ -33,7 +33,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.09_2004
+ * @version 2016.04.30_1827
  */
 public class PeakFindingEvent {
     
@@ -83,7 +83,7 @@ public class PeakFindingEvent {
     
     /**
      * Generates a List with the most common terms of the tweetsOfEvent that belong
-     * to the specific event. <br/>
+     * to the specific event. <br>
      * More formally, it parses every single tweet of the event, tokenizes it
      * and stores the terms in a HashMap with their respective occurencies as
      * values.
@@ -148,7 +148,7 @@ public class PeakFindingEvent {
     /**
      * Returns the five most common terms as a single String.
      * @return A String containing the five most common terms.
-     * @see getCommonTerms() getCommonTerms() method.
+     * @see #getCommonTerms() getCommonTerms() method.
      */
     public final String getCommonTermsAsString() {
         if(commonTerms.isEmpty()) {
@@ -167,7 +167,7 @@ public class PeakFindingEvent {
     /**
      * Auxiliary method to sort a Map by value.
      * @param unsortedMap The Map to be sorted.
-     * @return A sorted List of the String keys.
+     * @param stemHandler A StemUtils object.
      */
     public final void sortMapByValue(HashMap<String, Integer> unsortedMap, StemUtils stemHandler) {
         //Initialize variables

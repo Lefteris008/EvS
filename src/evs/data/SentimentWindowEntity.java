@@ -19,13 +19,13 @@ package evs.data;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.16_1213
+ * @version 2016.04.30_1828
  * 
  * Sentiment Entity class represents the main sentiment information wrapper.
- * <b>0 --></b> Negative sentiment. <br/>
- * <b>1 --></b> Neutral sentiment. <br/>
- * <b>2 --></b> Positive sentiment. <br/>
- * <b>Anything different --></b> Irrelevant sentiment.
+ * <b>0 --&gt;</b> Negative sentiment. <br>
+ * <b>1 --&gt;</b> Neutral sentiment. <br>
+ * <b>2 --&gt;</b> Positive sentiment. <br>
+ * <b>Anything different --&gt;</b> Irrelevant sentiment.
  */
 public class SentimentWindowEntity {
     private final double positivePercentage;

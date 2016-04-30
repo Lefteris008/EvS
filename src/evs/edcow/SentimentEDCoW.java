@@ -29,10 +29,10 @@ import utilities.Utilities;
 /**
  *
  * @author  Adrien GUILLE, ERIC Lab, University of Lyon 2
- * @email   adrien.guille@univ-lyon2.fr
+ * email   adrien.guille@univ-lyon2.fr
  * 
  * @author  Lefteris Paraskevas (configurations in SentimentEDCoW to omit missing components)
- * @version 2016.03.28_0003 (For EDviaSA project version alignment) 
+ * @version 2016.04.30_1828 (For EDviaSA project version alignment) 
  */
 public class SentimentEDCoW {
     private final int delta; //6
@@ -51,12 +51,12 @@ public class SentimentEDCoW {
     public SentimentEDCoWEvents events;
     
     /**
-     * Default constructor with minimum parameters. <br/>
+     * Default constructor with minimum parameters. <br>
      * Delta is set to 6, gamma is set to 5, minimum term support is set to
      * 0.0001 and maximum term support is set to 0.01. If you wish to change the
-     * aforementioned values use the {@link #EDCoW(int, int, int, double, double,
-     * int, int, EDCoWCorpus) second constructor}.
-     * @param delta2 Delta2 value. <br/>
+     * aforementioned values use the {@link #SentimentEDCoW(int, int, int, double, 
+     * double, int, int, evs.data.SentimentEDCoWCorpus, int) second constructor}.
+     * @param delta2 Delta2 value. <br>
      * Prime divisors of the number of documents are required as values. It must
      * be cross-referenced with the number of documents. More specifically, the
      * outcome of the division between the number of documents and this metric
@@ -64,6 +64,7 @@ public class SentimentEDCoW {
      * @param timeSliceA Beginning timeslice.
      * @param timeSliceB Ending timeslice.
      * @param corpus An EDCoWCorpus object.
+     * @param sentimentSource The source of the sentiment, internal or external.
      */
     public SentimentEDCoW(int delta2, int timeSliceA, int timeSliceB,
             SentimentEDCoWCorpus corpus, int sentimentSource) {
@@ -80,27 +81,29 @@ public class SentimentEDCoW {
     
     /**
      * Default constructor with the full set of parameters.
-     * @param delta1 Delta value (suggested 6). <br/>
+     * @param delta1 Delta value (suggested 6). <br>
      * It directly affects the number of events. Increasing this value, reduces
      * the number of them and vice versa.
-     * @param delta2 Delta2 value. <br/>
+     * @param delta2 Delta2 value. <br>
      * Prime divisors of the number of documents are required as values. It must
      * be cross-referenced with the number of documents. More specifically, the
      * outcome of the division between the number of documents and this metric
      * should result the number of total windows.
-     * @param gamma Gamma value (suggested 5). <br/>
+     * @param gamma Gamma value (suggested 5). <br>
      * It affects the quality of the uncovered events. Values greater than 15,
      * seem to increase the number of the uncovered events.
-     * @param minTermSupport Minimum term support value (suggested 0.0001). <br/>
+     * @param minTermSupport Minimum term support value (suggested 0.0001). <br>
      * Changing this value would result in altering the lower bound below which
      * a term should not be included in the keywords list of an event.
-     * @param maxTermSupport Maximum term support value (suggested 0.01). <br/>
+     * @param maxTermSupport Maximum term support value (suggested 0.01). <br>
      * Changing this value would result in altering the upper bound above which
      * a term should not be included in the keywords list of an event.
      * @param timeSliceA Starting timeslice.
      * @param timeSliceB Ending timeslice.
      * @param corpus An EDCoWCorpus object.
-     * @see #EDCoW(int, int, int, EDCoWCorpus, int) EDCoW() minimum constructor.
+     * @param sentimentSource The source of the sentiment, internal or external.
+     * @see #SentimentEDCoW(int, int, int, evs.data.SentimentEDCoWCorpus, int) 
+     * SentimentEDCoW() minimum constructor.
      */
     public SentimentEDCoW(int delta1, int delta2, int gamma, double minTermSupport, 
             double maxTermSupport, int timeSliceA, int timeSliceB, 
@@ -203,65 +206,66 @@ public class SentimentEDCoW {
      * Method to run the algorithm and analyze terms and frequencies in a
      * specific window.
      * @param window The window index (0, 1, 2 etc).
+     * @throws java.lang.Exception General Exception
      */
     public void processWindow(int window) throws Exception {
-    	//try{
-            LinkedList<SentimentEDCoWKeyword> keyWords = new LinkedList<>();
-            Integer[] distributioni = corpus.getEDCoWCorpus().getNumberOfDocuments();
-            double[] distributiond = new double[delta2];
-            int startSlice = window * delta2;
-            int endSlice = startSlice + delta2 - 1;
+    	
+        LinkedList<SentimentEDCoWKeyword> keyWords = new LinkedList<>();
+        Integer[] distributioni = corpus.getEDCoWCorpus().getNumberOfDocuments();
+        double[] distributiond = new double[delta2];
+        int startSlice = window * delta2;
+        int endSlice = startSlice + delta2 - 1;
+        for(int i = startSlice; i < endSlice; i++){
+            distributiond[i-startSlice] = (double) distributioni[i]; 
+        }
+        termDocMap.entrySet().stream().forEach((entry) -> {
+            Integer frequencyf[] = entry.getValue();
+            double frequencyd[] = new double[delta2];
             for(int i = startSlice; i < endSlice; i++){
-                distributiond[i-startSlice] = (double) distributioni[i]; 
+                frequencyd[i-startSlice] = (double) frequencyf[i];
             }
-            termDocMap.entrySet().stream().forEach((entry) -> {
-                Integer frequencyf[] = entry.getValue();
-                double frequencyd[] = new double[delta2];
-                for(int i = startSlice; i < endSlice; i++){
-                    frequencyd[i-startSlice] = (double) frequencyf[i];
-                }
-                keyWords.add(new SentimentEDCoWKeyword(entry.getKey(), frequencyd, delta, distributiond));
-            });
-            double[] autoCorrelationValues = new double[keyWords.size()];
-            for(int i = 0; i < keyWords.size(); i++){
-                autoCorrelationValues[i] = keyWords.get(i).getAutoCorrelation();
-            }
-            SentimentEDCoWThreshold th1 = new SentimentEDCoWThreshold();
-            double theta1 = th1.theta1(autoCorrelationValues, gamma);
+            keyWords.add(new SentimentEDCoWKeyword(entry.getKey(), frequencyd, delta, distributiond));
+        });
+        double[] autoCorrelationValues = new double[keyWords.size()];
+        for(int i = 0; i < keyWords.size(); i++){
+            autoCorrelationValues[i] = keyWords.get(i).getAutoCorrelation();
+        }
+        SentimentEDCoWThreshold th1 = new SentimentEDCoWThreshold();
+        double theta1 = th1.theta1(autoCorrelationValues, gamma);
 
-            // Removing trivial keywords based on theta1
-            LinkedList<SentimentEDCoWKeyword> keyWordsList1 = new LinkedList<>();
-            keyWords.stream().filter((k) -> (k.getAutoCorrelation() > theta1)).forEach((k) -> {
-                keyWordsList1.add(k);
-            });
-            
-            keyWordsList1.stream().forEach((kw1) -> {
-                kw1.computeCrossCorrelation(keyWordsList1);
-            });
-            
-            double[][] bigMatrix = new double[keyWordsList1.size()][keyWordsList1.size()];
-            for(int i=0; i < keyWordsList1.size(); i++){
-                bigMatrix[i] = keyWordsList1.get(i).getCrossCorrelation();
-            }
+        // Removing trivial keywords based on theta1
+        LinkedList<SentimentEDCoWKeyword> keyWordsList1 = new LinkedList<>();
+        keyWords.stream().filter((k) -> (k.getAutoCorrelation() > theta1)).forEach((k) -> {
+            keyWordsList1.add(k);
+        });
 
-            //Compute theta2 using the BigMatrix
-            double theta2 = th1.theta2(bigMatrix, gamma);        
-            for(int i = 0; i < keyWordsList1.size(); i++){
-                for(int j = i+1; j < keyWordsList1.size(); j++){
-                    bigMatrix[i][j] = (bigMatrix[i][j] < theta2) ? 0 : bigMatrix[i][j];
-                }
-            }
-            SentimentEDCoWModularityDetection modularity = new SentimentEDCoWModularityDetection(keyWordsList1, bigMatrix, startSlice, endSlice);
+        keyWordsList1.stream().forEach((kw1) -> {
+            kw1.computeCrossCorrelation(keyWordsList1);
+        });
 
-            double thresholdE = 0.1;
-            ArrayList<Community> finalArrCom = modularity.getCommunitiesFiltered(thresholdE);
-            finalArrCom.stream().map((c) -> {
-                System.out.println(c.getCommunitySize());
-                return c;
-                }).forEach((c) -> {
-                    modularity.saveEventFromCommunity(c);
-                });
-            eventList.addAll(modularity.getEvents());
+        double[][] bigMatrix = new double[keyWordsList1.size()][keyWordsList1.size()];
+        for(int i=0; i < keyWordsList1.size(); i++){
+            bigMatrix[i] = keyWordsList1.get(i).getCrossCorrelation();
+        }
+
+        //Compute theta2 using the BigMatrix
+        double theta2 = th1.theta2(bigMatrix, gamma);        
+        for(int i = 0; i < keyWordsList1.size(); i++){
+            for(int j = i+1; j < keyWordsList1.size(); j++){
+                bigMatrix[i][j] = (bigMatrix[i][j] < theta2) ? 0 : bigMatrix[i][j];
+            }
+        }
+        SentimentEDCoWModularityDetection modularity = new SentimentEDCoWModularityDetection(keyWordsList1, bigMatrix, startSlice, endSlice);
+
+        double thresholdE = 0.1;
+        ArrayList<Community> finalArrCom = modularity.getCommunitiesFiltered(thresholdE);
+        finalArrCom.stream().map((c) -> {
+            System.out.println(c.getCommunitySize());
+            return c;
+            }).forEach((c) -> {
+                modularity.saveEventFromCommunity(c);
+            });
+        eventList.addAll(modularity.getEvents());
     }
     
     /**

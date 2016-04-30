@@ -22,7 +22,7 @@ package edmodule;
  * but every separate ED technique has to implement these 6 methods.
  * 
  * @author  Lefteris Paraskevas
- * @version 2016.04.09_1945
+ * @version 2016.04.30_1825
  */
 public interface AbstractEDMethod {
     
@@ -35,7 +35,7 @@ public interface AbstractEDMethod {
     /**
      * Get the citation of the paper that introduced the used Event Detection algorithm.
      * @return A String containing the citation. The String must start and end
-     * with '<li>' tags.
+     * with '&lt;li&gt;' tags.
      */
     public abstract String getCitation();
     
@@ -55,6 +55,7 @@ public interface AbstractEDMethod {
     
     /**
      * Main method that starts the execution of the Event Detection algorithm.
+     * @throws java.lang.Exception General Exception
      */
     public abstract void apply() throws Exception;
     

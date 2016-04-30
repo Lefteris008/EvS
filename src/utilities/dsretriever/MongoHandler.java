@@ -36,7 +36,7 @@ import twitter4j.Status;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.16_1515
+ * @version 2016.04.30_1832
  */
 public class MongoHandler {
     
@@ -141,17 +141,17 @@ public class MongoHandler {
     /**
      * Stores a tweet retrieved previously from a 3-party source (e.g. a text file).
      * @param tweet An ArrayList containing the appropriate information for the 
-     * tweet. The list must be created according to the following scheme:<br/>
-     * [0] -> Tweet ID<br/>
-     * [1] -> User (For retweets this is the original user created the tweet)<br/>
-     * [2] -> 1 if the tweet is a retweet, 0 otherwise<br/>
-     * [3] -> Text of the tweet<br/>
-     * [4] -> Date and time of the original tweet in YYYY-MM-DD HH:MM:SS.ZZZZ fashion<br/>
-     * [5] -> Number of retweets<br/>
-     * [6] -> Number of favorites<br/>
-     * [7] -> Latitude (if available, -1 otherwise)<br/>
-     * [8] -> Longitude (if available, -1 otherwise)<br/>
-     * @param config A configuration object.
+     * tweet. The list must be created according to the following scheme:<br>
+     * [0] -&gt; Tweet ID<br>
+     * [1] -&gt; User (For retweets this is the original user created the tweet)<br>
+     * [2] -&gt; 1 if the tweet is a retweet, 0 otherwise<br>
+     * [3] -&gt; Text of the tweet<br>
+     * [4] -&gt; Date and time of the original tweet in YYYY-MM-DD HH:MM:SS.ZZZZ fashion<br>
+     * [5] -&gt; Number of retweets<br>
+     * [6] -&gt; Number of favorites<br>
+     * [7] -&gt; Latitude (if available, -1 otherwise)<br>
+     * [8] -&gt; Longitude (if available, -1 otherwise)<br>
+     * @param tweet A List containing a tweet.
      * @return True if the process succeeds, false otherwise.
      */
     public final boolean insertTweetIntoMongo(ArrayList<String> tweet) {
@@ -165,7 +165,7 @@ public class MongoHandler {
                         .append(config.getTextFieldName(), 
                                 Utilities.assembleText(tweet.get(2), tweet.get(3))) //Actual tweet
                         .append(config.getDateFieldName(), 
-                                Utilities.stringToDate(tweet.get(4), tweet)) //Date published/retrieved
+                                Utilities.stringToDate(tweet.get(4))) //Date published/retrieved
                         .append(config.getRetweetedFieldName(), 
                                 (Integer.parseInt(tweet.get(5)) > 0)) //Boolean
                         .append(config.getRetweetsCountFieldName(), 
@@ -197,7 +197,7 @@ public class MongoHandler {
                         .append(config.getTextFieldName(), 
                                 Utilities.assembleText(tweet.get(2), tweet.get(3))) //Actual tweet
                         .append(config.getDateFieldName(), 
-                                Utilities.stringToDate(tweet.get(4), tweet)) //Date published/retrieved
+                                Utilities.stringToDate(tweet.get(4))) //Date published/retrieved
                         .append(config.getRetweetedFieldName(), 
                                 (Integer.parseInt(tweet.get(5)) > 0)) //Boolean
                         .append(config.getRetweetsCountFieldName(), 
@@ -391,7 +391,7 @@ public class MongoHandler {
     
     /**
      * This method parses the MongoDB store and returns the tweet that matches
-     * a given ID. <br/>
+     * a given ID. <br>
      * <i>Note: Consider creating an index on the field 'id' of the MongoDB Store.</i>
      * @param id The id of the tweet to be retrieved.
      * @return A Tweet object containing all the information found in the document
@@ -510,7 +510,7 @@ public class MongoHandler {
     }
     
     /**
-     * Updates an existing tweet with its sentiment information. <br/>
+     * Updates an existing tweet with its sentiment information. <br>
      * @param id The id of the tweet to be updated
      * @param sentiment An integer representing the sentiment polarity of the tweet.
      * @param fieldName The name of the field where the sentiment will be stored.
@@ -529,7 +529,7 @@ public class MongoHandler {
     }
     
     /**
-     * Updates an existing tweet with emoticon information. <br/>
+     * Updates an existing tweet with emoticon information. <br>
      * More formally, the method adds two new attributes namely 'posEmot' and
      * 'negEmot' that indicate whether or not a given tweet has any positive or
      * negative emoticon, with zero indicating total absence and one indicating
@@ -576,6 +576,7 @@ public class MongoHandler {
     /**
      * Checks whether a tweet is already annotated with its stanfordSentiment.
      * @param id The ID of the tweet to be checked for.
+     * @param fieldName The MongoDB field name of ID.
      * @return True if the tweet is stanfordSentiment annotated, false otherwise.
      */
     public final boolean tweetHasSentiment(long id, String fieldName) {
@@ -625,12 +626,12 @@ public class MongoHandler {
     
     /**
      * Removes all retweets that are found in the MongoDB Store for which their
-     * original tweet is also stored in the DB.<br/>
+     * original tweet is also stored in the DB.<br>
      * More formally, it parses all stored tweets and checks whether a specific
      * tweet is also a retweet. When this condition is true, the method tries to
      * find whether the tweet that this retweet is originated from, also exists
      * in the store and if so, the retweet is removed from the collection.
-     * <br/>
+     * <br>
      * *WARNING:* This process is "one-way", meaning that once initiated the 
      * retweets that are going to be removed cannot be restored back.
      */

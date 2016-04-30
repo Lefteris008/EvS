@@ -40,7 +40,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.09_1959
+ * @version 2016.04.30_1826
  */
 public class EDCoWCorpus {
     
@@ -175,6 +175,7 @@ public class EDCoWCorpus {
      * into that time period.
      * @param cal A Calendar instance, already set.
      * @param date The date to be checked.
+     * @return A String key with date information.
      */
     public final String updateMessageDistribution(Calendar cal, Date date) {
         String key = StringDateUtils.getDateKey(cal, date, refreshWindow);
@@ -202,7 +203,7 @@ public class EDCoWCorpus {
     
     /**
      * Initializes and stores a list containing objects of DocumentTermFrequencyItem
-     * class. <br/>
+     * class. <br>
      * More formally, each listing in this list contains a triplet with the ID of
      * a document, the ID of a term that the document contains and the term's
      * frequency.

@@ -30,10 +30,10 @@ import utilities.Utilities;
 /**
  *
  * @author  Adrien GUILLE, ERIC Lab, University of Lyon 2
- * @email   adrien.guille@univ-lyon2.fr
+ * email    adrien.guille@univ-lyon2.fr
  * 
  * @author  Lefteris Paraskevas (configurations in EDCoW to omit missing components)
- * @version 2016.04.09_2001 (For EvS project version alignment) 
+ * @version 2016.04.30_1826 (For EvS project version alignment) 
  */
 public class EDCoW implements AbstractEDMethod {
     private final int delta; //6
@@ -51,12 +51,12 @@ public class EDCoW implements AbstractEDMethod {
     private long executionTime;
     
     /**
-     * Default constructor with minimum parameters. <br/>
+     * Default constructor with minimum parameters. <br>
      * Delta is set to 6, gamma is set to 5, minimum term support is set to
      * 0.0001 and maximum term support is set to 0.01. If you wish to change the
      * aforementioned values use the {@link #EDCoW(int, int, int, double, double,
      * int, int, EDCoWCorpus) second constructor}.
-     * @param delta2 Delta2 value. <br/>
+     * @param delta2 Delta2 value. <br>
      * Prime divisors of the number of documents are required as values. It must
      * be cross-referenced with the number of documents. More specifically, the
      * outcome of the division between the number of documents and this metric
@@ -78,21 +78,21 @@ public class EDCoW implements AbstractEDMethod {
     
     /**
      * Default constructor with the full set of parameters.
-     * @param delta1 Delta value (suggested 6). <br/>
+     * @param delta1 Delta value (suggested 6). <br>
      * It directly affects the number of events. Increasing this value, reduces
      * the number of them and vice versa.
-     * @param delta2 Delta2 value. <br/>
+     * @param delta2 Delta2 value. <br>
      * Prime divisors of the number of documents are required as values. It must
      * be cross-referenced with the number of documents. More specifically, the
      * outcome of the division between the number of documents and this metric
      * should result the number of total windows.
-     * @param gamma Gamma value (suggested 5). <br/>
+     * @param gamma Gamma value (suggested 5). <br>
      * It affects the quality of the uncovered events. Values greater than 15,
      * seem to increase the number of the uncovered events.
-     * @param minTermSupport Minimum term support value (suggested 0.0001). <br/>
+     * @param minTermSupport Minimum term support value (suggested 0.0001). <br>
      * Changing this value would result in altering the lower bound below which
      * a term should not be included in the keywords list of an event.
-     * @param maxTermSupport Maximum term support value (suggested 0.01). <br/>
+     * @param maxTermSupport Maximum term support value (suggested 0.01). <br>
      * Changing this value would result in altering the upper bound above which
      * a term should not be included in the keywords list of an event.
      * @param timeSliceA Starting timeslice.
@@ -199,6 +199,7 @@ public class EDCoW implements AbstractEDMethod {
      * Method to run the algorithm and analyze terms and frequencies in a
      * specific window.
      * @param window The window index (0, 1, 2 etc).
+     * @throws java.lang.Exception General Exception.
      */
     public void processWindow(int window) throws Exception {
         LinkedList<EDCoWKeyword> keyWords = new LinkedList<>();

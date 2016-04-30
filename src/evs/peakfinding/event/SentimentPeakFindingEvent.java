@@ -34,7 +34,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.28_0009
+ * @version 2016.04.30_1829
  */
 public class SentimentPeakFindingEvent {
     
@@ -59,6 +59,7 @@ public class SentimentPeakFindingEvent {
      * @param tweetsOfEvent A List of String containing the corresponding tweetsOfEvent of the
      * event.
      * @param corpus A PeakFindingCorpus object.
+     * @param sentimentSource The source of sentiment (internal or external).
      */
     public SentimentPeakFindingEvent(int id, Window<Integer, Integer> window, List<Tweet> tweetsOfEvent, 
             PeakFindingSentimentCorpus corpus, int sentimentSource) {
@@ -85,7 +86,7 @@ public class SentimentPeakFindingEvent {
     public final Window<Integer, Integer> getWindow() { return window; }
     
     /**
-     * Calculates the main sentiment of an event. <br/>
+     * Calculates the main sentiment of an event. <br>
      * More formally, it counts separately the sentiment of every tweet belonging
      * to a certain event and updates the field 'mainSentiment' with the appropriate
      * value.
@@ -156,7 +157,7 @@ public class SentimentPeakFindingEvent {
     
     /**
      * Generates a List with the most common terms of the tweetsOfEvent that belong
-     * to the specific event. <br/>
+     * to the specific event. <br>
      * More formally, it parses every single tweet of the event, tokenizes it
      * and stores the terms in a HashMap with their respective occurencies as
      * values.
@@ -211,14 +212,14 @@ public class SentimentPeakFindingEvent {
     }
     
     /**
-     * 
-     * @return 
+     * Returns all the terms of the event.
+     * @return A HashSet containing all event's terms.
      */
     public final HashSet<String> getAllTerms() { return allTerms; } 
     
     /**
-     * 
-     * @return 
+     * Returns all the tweet IDs of the event.
+     * @return A List containing all the tweet ID's of the event.
      */
     public final List<String> getTweetIDs() {
         List<String> ids = new ArrayList<>();
@@ -230,7 +231,7 @@ public class SentimentPeakFindingEvent {
     /**
      * Returns the five most common terms as a single String.
      * @return A String containing the five most common terms.
-     * @see getCommonTerms() getCommonTerms() method.
+     * @see #getCommonTerms() getCommonTerms() method.
      */
     public final String getCommonTermsAsString() {
         if(commonTerms.isEmpty()) {
@@ -248,7 +249,7 @@ public class SentimentPeakFindingEvent {
     /**
      * Auxiliary method to sort a Map by value.
      * @param unsortedMap The Map to be sorted.
-     * @return A sorted List of the String keys.
+     * @param stemHandler A StemUtils object.
      */
     public final void sortMapByValue(HashMap<String, Integer> unsortedMap, StemUtils stemHandler) {
         //Initialize variables

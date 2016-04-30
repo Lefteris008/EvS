@@ -29,7 +29,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.09_1944
+ * @version 2016.04.30_1830
  */
 public class PeakFindingExperimenter {
     private final PeakFindingCorpus corpus;
@@ -37,18 +37,14 @@ public class PeakFindingExperimenter {
     private double alpha;
     private int taph;
     private final int pi;
-    private final int window;
     private final Config config;
     
-    public PeakFindingExperimenter(PeakFindingCorpus corpus,
-            List<BinPair<String, Integer>> bins, double alpha, int taph, int pi,
-            int window, Config config) {
+    public PeakFindingExperimenter(PeakFindingCorpus corpus, List<BinPair<String, Integer>> bins, double alpha, int taph, int pi, Config config) {
         this.corpus = corpus;
         this.bins = bins;
         this.alpha = alpha;
         this.taph = taph;
         this.pi = pi;
-        this.window = window;
         this.config = config;
     }
     
@@ -58,8 +54,8 @@ public class PeakFindingExperimenter {
      * @param start An integer representing the starting point of taph parameter.
      * @param end An integer representing the ending point of taph parameter.
      * @param step An integer representing the increase step of taph between iterations.
-     * @param sentimentSource The source of sentiment. 0 represents SST, 1 Naive
-     * Bayes and 2 Bayesian Network.
+     * @param showInlineInfo A boolean flag that indicates whether to show or hide
+     * inline information during execution.
      * @return A List of String representing the lines to be exported to the file.
      */
     public final List<String> experimentUsingTaph(int start, int end, int step,
@@ -104,8 +100,8 @@ public class PeakFindingExperimenter {
      * @param start An integer representing the starting point of taph parameter.
      * @param end An integer representing the ending point of taph parameter.
      * @param step An integer representing the increase step of taph between iterations.
-     * @param sentimentSource The source of sentiment. 0 represents SST, 1 Naive
-     * Bayes and 2 Bayesian Network.
+     * @param showInlineInfo Boolean flag that indicates whether to show or hide
+     * inline information during execution.
      * @return A List of String representing the lines to be exported to the file.
      */
     public final List<String> experimentUsingAlpha(double start, double end, double step,

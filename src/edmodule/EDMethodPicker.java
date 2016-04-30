@@ -92,7 +92,7 @@ public class EDMethodPicker {
                 List<BinPair<String, Integer>> bins = BinsCreator.createBins(corpus, config, window);
                 
                 PeakFindingExperimenter exper = new PeakFindingExperimenter(corpus, 
-                        bins, alpha, taph, pi, window, config);
+                        bins, alpha, taph, pi, config);
                 
                 //Experiment with Taph
                 List<String> lines = exper.experimentUsingTaph(1, 10, 1, showInlineInfo);

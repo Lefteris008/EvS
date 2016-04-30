@@ -36,7 +36,7 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2016.03.27_2334
+ * @version 2016.04.30_1832
  */
 public class TweetsRetriever {
 
@@ -88,7 +88,7 @@ public class TweetsRetriever {
     }
     
     /**
-     * Method that handles the Twitter streaming API. <br/>
+     * Method that handles the Twitter streaming API. <br>
      * <b>WARNING:</b> Method does not terminate by itself, due to the fact that
      * the streamer runs in a different thread.
      * @param keywords The keywords for which the streamer searches for tweets.

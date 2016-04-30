@@ -29,7 +29,7 @@ import evs.data.PeakFindingSentimentCorpus;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.28_0009
+ * @version 2016.04.30_1829
  */
 public class SentimentPeakFindingEvents {
     
@@ -47,6 +47,8 @@ public class SentimentPeakFindingEvents {
      * @param bins A List of BinPair objects, containing all bins.
      * @param eventWindows A List of Window objects, containing the generated eventsTweets.
      * @param corpus A PeakFindingCorpus object.
+     * @param stemsHandler A StemUtils object.
+     * @param sentimentSouce The source of sentiment, internal or external.
      */
     public SentimentPeakFindingEvents(HashMap<String, ArrayList<Tweet>> tweetsByWindow, 
             List<BinPair<String, Integer>> bins, 
@@ -61,7 +63,7 @@ public class SentimentPeakFindingEvents {
     }
     
     /**
-     * Returns the tweets that belong to a certain event. <br/>
+     * Returns the tweets that belong to a certain event. <br>
      * More formally, it parses the auxiliary tweetsByWindow HashMap and appends
      * the relevant tweets into a String list.
      * @param window A Window object, the actual event.
@@ -86,6 +88,7 @@ public class SentimentPeakFindingEvents {
     /**
      * Method to generate all subsequent events and create a list of them for
      * future use.
+     * @param sentimentSouce The source of sentiment, internal or external.
      */
     public final void generateEvents(int sentimentSouce) {
         eventWindows.stream().map((window) -> new ArrayList<>(getTweetsOfEvent(window))).forEach((tweets) -> {

@@ -29,7 +29,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.09_2003
+ * @version 2016.04.30_1826
  * 
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing Microblogs 
  * for PeakFindingEvent Exploration", CHI 2011.
@@ -55,7 +55,6 @@ public class OfflinePeakFinding implements AbstractEDMethod {
      * @param a Alpha parameter to capture historical information. Values lower than 1 are recommended.
      * @param t Threshold parameter. 
      * @param p Primary parameter indicates the first bins to be considered in calculating initial mean deviance.
-     * @param refreshWindow An integer representing the refresh window of every bin.
      * @param corpus A PeakFindingCorpus object.
      */
     public OfflinePeakFinding(List<BinPair<String, Integer>> bins, double a, int t, int p, PeakFindingCorpus corpus) {

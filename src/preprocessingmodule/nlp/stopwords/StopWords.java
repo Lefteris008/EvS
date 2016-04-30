@@ -32,7 +32,7 @@ import preprocessingmodule.language.LanguageCodes;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.04.30_1831
  */
 public final class StopWords {
     
@@ -42,7 +42,7 @@ public final class StopWords {
     
     /**
      * Public constructor that initializes a HashSet.
-     * @param config
+     * @param config A Config object.
      */
     public StopWords(Config config) {
         this.config = config;

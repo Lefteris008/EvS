@@ -36,7 +36,7 @@ import utilities.Utilities;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.28_0005
+ * @version 2016.04.30_1828
  */
 public class SentimentEDCoWEvaluator implements AbstractSentimentEvaluator {
     private int delta;
@@ -70,8 +70,9 @@ public class SentimentEDCoWEvaluator implements AbstractSentimentEvaluator {
      * @param timeSliceB An integer representing the ending time slice of the dataset.
      * @param minTermSupport A double representing the minimum term support of the terms in an event.
      * @param maxTermSupport A double representing the maximum term support of the terms in an event.
-     * @param eventList A list containing the events after the application of EDCoW algorithm.
+     * @param events A list containing the events after the application of EDCoW algorithm.
      * @param config A configuration object.
+     * @param stemsHandler A StemUtils object.
      */
     public SentimentEDCoWEvaluator(int delta, int delta2, int gamma, int timeSliceA, 
             int timeSliceB, double minTermSupport, double maxTermSupport, 
