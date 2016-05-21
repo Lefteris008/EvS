@@ -1,11 +1,12 @@
 # EvS (Event detection Via Sentiment analysis)
 MSc Thesis Project
 
-**Latest version: 1.5** ([Details](https://github.com/Lefteris008/EvS/releases/tag/1.5))
+**Latest version: 1.5.1** ([Details](https://github.com/Lefteris008/EvS/releases/tag/1.5.1))
 ---
 Version highlights:
-* Ability to externally run the tool using your terminal prompt. For more details about the flag arguments, refer to [Ch. 2.5 Run from the Console](https://github.com/Lefteris008/EvS/wiki/02.5.-Run-from-the-Console).
-* Separate HTML JavaDoc files, separate JAR files with and without sources. 
+* Structural changes in packaging.
+* Reverted old methods to use the built in printing message utility instead of Java's own method.
+ 
 
 ___
 
