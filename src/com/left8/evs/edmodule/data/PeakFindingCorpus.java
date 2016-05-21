@@ -70,8 +70,8 @@ public class PeakFindingCorpus {
      * For half an hour interval, 30. <br>
      * For 5 hours interval, 300.
      * @return A HashMap containing the bins.
-     * @see edmodule.peakfinding.BinsCreator BinsCreator class.
-     * @see edmodule.peakfinding.OfflinePeakFinding OfflinePeakFinding class.
+     * @see com.left8.evs.edmodule.peakfinding.BinsCreator BinsCreator class.
+     * @see com.left8.evs.edmodule.peakfinding.OfflinePeakFinding OfflinePeakFinding class.
      */
     public final HashMap<String, Integer> createCorpus(int window) {   
         //Initialize variables

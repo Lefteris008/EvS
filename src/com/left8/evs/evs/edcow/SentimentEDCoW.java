@@ -60,7 +60,7 @@ public class SentimentEDCoW {
      * Delta is set to 6, gamma is set to 5, minimum term support is set to
      * 0.0001 and maximum term support is set to 0.01. If you wish to change the
      * aforementioned values use the {@link #SentimentEDCoW(int, int, int, double, 
-     * double, int, int, evs.data.SentimentEDCoWCorpus, int) second constructor}.
+     * double, int, int, com.left8.evs.evs.data.SentimentEDCoWCorpus, int) second constructor}.
      * @param delta2 Delta2 value. <br>
      * Prime divisors of the number of documents are required as values. It must
      * be cross-referenced with the number of documents. More specifically, the
@@ -107,7 +107,7 @@ public class SentimentEDCoW {
      * @param timeSliceB Ending timeslice.
      * @param corpus An EDCoWCorpus object.
      * @param sentimentSource The source of the sentiment, internal or external.
-     * @see #SentimentEDCoW(int, int, int, evs.data.SentimentEDCoWCorpus, int) 
+     * @see #SentimentEDCoW(int, int, int, com.left8.evs.evs.data.SentimentEDCoWCorpus, int) 
      * SentimentEDCoW() minimum constructor.
      */
     public SentimentEDCoW(int delta1, int delta2, int gamma, double minTermSupport, 

@@ -65,7 +65,11 @@ public class EDCoWDwt {
 		return (int)((arrHilb.length)/Math.pow(2, level1));
 	}
 	
-	/** Get coefficients of a level*/
+	/**
+         * Get coefficients of a level
+         * @param atLev 
+         * @return A double array
+         */
 	public double[] getCoefficients(int atLev) {
 		// TODO Auto-generated method stub	           			
 			int rightPart = 0;

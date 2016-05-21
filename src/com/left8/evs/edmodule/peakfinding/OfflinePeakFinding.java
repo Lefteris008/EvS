@@ -90,7 +90,7 @@ public class OfflinePeakFinding implements AbstractEDMethod {
     /**
      * Implements the main algorithm of paper [1].
      * <b>Simple version.</b>
-     * @see evs.peakfinding.SentimentPeakFinding For sentiment version, 
+     * @see com.left8.evs.evs.peakfinding.SentimentPeakFinding For sentiment version, 
      * see SentimentPeakFinding.
      */
     @Override
