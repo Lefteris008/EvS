@@ -29,7 +29,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -39,55 +38,17 @@ import java.util.logging.Logger;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.30_1831
+ * @version 2016.11.26_1225
  */
 public class Utilities {
     
     /**
-     * Prints the execution time of a current running method in seconds.
-     * @param startTime Long representing the current System time when the method started.
-     * @param endTime Long representing the current System time when the method finished.
-     * @param className The name of the class the method belongs to.
-     * @param methodName A String containing the name of the current running method.
+     * Private constructor for making class non-instantiateable
      */
-    public static void printExecutionTime(long startTime, long endTime, String className, String methodName) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Calendar cal = Calendar.getInstance();
-        long runningTime = (endTime - startTime) / 1000; //Convert to seconds
-        System.err.println("INFO: " + 
-                dateFormat.format(cal.getTime()) + " " + 
-                className + " " + methodName + " run for " + 
-                (runningTime == 1 ? runningTime + " second." : runningTime + " seconds."));
+    private Utilities() {
+        ///
     }
-    
-    /**
-     * Supplies a message to the error stream, formatting it according to a 
-     * standard form, appending '\n' escape character at the end.
-     * @param message The message to be printed.
-     * @see #printMessage(java.lang.String) printMessage() method.
-     */
-    public final static void printMessageln(String message) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Calendar cal = Calendar.getInstance();
-        System.err.println("INFO: " + 
-                dateFormat.format(cal.getTime()) + " " + 
-                message);
-    }
-    
-    /**
-     * Supplies a message to the error stream, formatting it according to a 
-     * standard form, without creating a new line.
-     * @param message The message to be printed.
-     * @see #printMessageln(java.lang.String) printMessageln() method.
-     */
-    public final static void printMessage(String message) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Calendar cal = Calendar.getInstance();
-        System.err.print("INFO: " + 
-                dateFormat.format(cal.getTime()) + " " + 
-                message);
-    }
-    
+        
     /**
      * Exports a List of Strings to a standard UTF-8 file. The file is created
      * if it does not exist.
@@ -105,7 +66,7 @@ public class Utilities {
             try {
                 f.createNewFile();
             } catch (IOException ex) {
-                printMessageln("There was a problem creating the file. Consider"
+                PrintUtilities.printErrorMessageln("There was a problem creating the file. Consider"
                         + "manually creating it using you OS's file manager.");
                 Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, ex);
                 return false;
@@ -118,10 +79,10 @@ public class Utilities {
             } else {
                 Files.write(file, lines, Charset.forName("UTF-8"));
             }
-            printMessageln("Successfully exported to file.");
+            PrintUtilities.printInfoMessageln("Successfully exported to file.");
             return true;
         } catch (IOException e) {
-            printMessageln("There was a problem exporting to file.");
+            PrintUtilities.printErrorMessageln("There was a problem exporting to file.");
             Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
             return false;
         }
@@ -157,7 +118,7 @@ public class Utilities {
             }
             br.close();
         } catch (IOException e) {
-            printMessageln("The file '" + config.getSearchTermsFile() + "' is missing.\nPlace a correct file in classpath and re-run the project");
+            PrintUtilities.printErrorMessageln("The file '" + config.getSearchTermsFile() + "' is missing.\nPlace a correct file in classpath and re-run the project");
             Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
             System.exit(1);
         }
@@ -174,7 +135,7 @@ public class Utilities {
             DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
             return format.parse(date);
         } catch (ParseException e) {
-            printMessageln("Input String was malformed.");
+            PrintUtilities.printErrorMessageln("Input String was malformed.");
             Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
             return null;
         }
@@ -198,7 +159,7 @@ public class Utilities {
                             list.add(line);
                         }
                     } catch (IOException e) {
-                        printMessageln("No filed found in '" + config.getDatasetPath() 
+                        PrintUtilities.printErrorMessageln("No filed found in '" + config.getDatasetPath() 
                                 + filename + "\\'Place the appropriate files in "
                                 + "classpath and re-run the project");
                         Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
@@ -207,7 +168,7 @@ public class Utilities {
                 }
             });
         } catch (IOException e) {
-            printMessageln("Folder '" + config.getDatasetPath() + filename + "\\' is missing.\nPlace a correct folder in classpath and re-run the project");
+            PrintUtilities.printErrorMessageln("Folder '" + config.getDatasetPath() + filename + "\\' is missing.\nPlace a correct folder in classpath and re-run the project");
             Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);
             System.exit(1);
         }
@@ -259,7 +220,7 @@ public class Utilities {
             br.close();
             return tweets;
         } catch (IOException e) {
-            printMessageln("The file '" + config.getTweetDataFile() + "' is missing."
+            PrintUtilities.printErrorMessageln("The file '" + config.getTweetDataFile() + "' is missing."
                     + "\nPlace a correct file in '" + config.getDatasetPath() + 
                     "' and re-run the project");
             Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, e);

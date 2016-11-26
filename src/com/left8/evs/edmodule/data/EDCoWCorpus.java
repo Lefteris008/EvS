@@ -36,17 +36,17 @@ import com.left8.evs.preprocessingmodule.nlp.Tokenizer;
 import com.left8.evs.preprocessingmodule.nlp.stemming.StemUtils;
 import com.left8.evs.utilities.dsretriever.Tweet;
 import com.left8.evs.utilities.Config;
-import com.left8.evs.utilities.Utilities;
+import com.left8.evs.utilities.PrintUtilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.30_1826
+ * @version 2016.11.26_1252
  */
 public class EDCoWCorpus {
     
     private final Config config;
-    private List<Tweet> tweets;
+    private final List<Tweet> tweets;
     private final int refreshWindow;
     private final StopWordsHandlers swH;
     private Integer[] numberOfDocuments;
@@ -162,7 +162,7 @@ public class EDCoWCorpus {
         setNumberOfDocuments(messageDistribution);
         
         long endTime = System.currentTimeMillis();
-        Utilities.printExecutionTime(startTime, endTime, EDCoWCorpus.class.getName(), 
+        PrintUtilities.printExecutionTime(startTime, endTime, EDCoWCorpus.class.getName(), 
                 Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
@@ -383,9 +383,9 @@ public class EDCoWCorpus {
         for (; cal.getTimeInMillis() <= endMillis; cal.add(Calendar.MINUTE, refreshWindow)) {
             
             String currentKey = StringDateUtils.getDateKey(cal, cal.getTime(), refreshWindow);
-            for(String id : idsDocs.get(currentKey)) {
+            idsDocs.get(currentKey).forEach((id) -> {
                 tweetsInWindow.add(tweetMap.get(id));
-            }
+            });
         }
         return tweetsInWindow;
     }

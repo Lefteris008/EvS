@@ -32,12 +32,12 @@ import com.left8.evs.evs.edcow.event.SentimentEDCoWEvent;
 import com.left8.evs.evs.edcow.event.SentimentEDCoWEvents;
 import com.left8.evs.preprocessingmodule.nlp.stemming.StemUtils;
 import com.left8.evs.utilities.Config;
-import com.left8.evs.utilities.Utilities;
+import com.left8.evs.utilities.PrintUtilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.30_1828
+ * @version 2016.11.26_1304
  */
 public class SentimentEDCoWEvaluator implements AbstractSentimentEvaluator {
     private int delta;
@@ -98,7 +98,7 @@ public class SentimentEDCoWEvaluator implements AbstractSentimentEvaluator {
      * and a HashSet of the terms of a specific event, as values.
      */
     @Override
-    public void loadGroundTruthDataset() {
+    public final void loadGroundTruthDataset() {
         try (BufferedReader br = new BufferedReader(new FileReader(
                 config.getResourcesPath() + config.getGroundTruthDataFile()))) {
             String line;
@@ -130,6 +130,8 @@ public class SentimentEDCoWEvaluator implements AbstractSentimentEvaluator {
      * More formally, it calculates the recall and precision of a EDCoW dataset
      * that is calculated after the application of the algorithm and exports this
      * data into a file, along with other useful metrics.
+     * @param showInlineInfo A switch to determine whether inline information 
+     * should be printed
      */
     @Override
     public void evaluate(boolean showInlineInfo) {
@@ -176,16 +178,16 @@ public class SentimentEDCoWEvaluator implements AbstractSentimentEvaluator {
                 recall = (double) matchedItems / (double) groundTruthKeywordSize;
                 precision = (double) matchedItems / (double) calculatedKeywords.size();
                 if(showInlineInfo) {
-                    Utilities.printMessageln("Event found: " + eventKey);
-                    Utilities.printMessageln("Out of " + calculatedKeywords.size() + " items:");
-                    Utilities.printMessageln("Matched " + matchedItems + " out of " 
+                    PrintUtilities.printInfoMessageln("Event found: " + eventKey);
+                    PrintUtilities.printInfoMessageln("Out of " + calculatedKeywords.size() + " items:");
+                    PrintUtilities.printInfoMessageln("Matched " + matchedItems + " out of " 
                             + groundTruthKeywordSize + " ground truth terms.");
-                    Utilities.printMessageln("Recall: " + recall);
-                    Utilities.printMessageln("Precision: " + precision);
+                    PrintUtilities.printInfoMessageln("Recall: " + recall);
+                    PrintUtilities.printInfoMessageln("Precision: " + precision);
                 }
             } else {
                 if(showInlineInfo) {
-                    Utilities.printMessageln("Event not found.");
+                    PrintUtilities.printInfoMessageln("Event not found.");
                 }
                 recall = 0;
                 precision = 0;

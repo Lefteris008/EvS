@@ -30,7 +30,7 @@ import com.left8.evs.edmodule.edcow.event.EDCoWEvents;
 import com.left8.evs.edmodule.AbstractEDMethod;
 import com.left8.evs.edmodule.data.EDCoWCorpus;
 import com.left8.evs.edmodule.edcow.event.EDCoWEvent;
-import com.left8.evs.utilities.Utilities;
+import com.left8.evs.utilities.PrintUtilities;
 
 
 /**
@@ -39,7 +39,7 @@ import com.left8.evs.utilities.Utilities;
  * email    adrien.guille@univ-lyon2.fr
  * 
  * @author  Lefteris Paraskevas (configurations in EDCoW to omit missing components)
- * @version 2016.04.30_1826 (For EvS project version alignment) 
+ * @version 2016.11.26_1241 (For EvS project version alignment) 
  */
 public class EDCoW implements AbstractEDMethod {
     private final int delta; //6
@@ -154,7 +154,7 @@ public class EDCoW implements AbstractEDMethod {
         termDocMap = new HashMap<>();
         eventList = new LinkedList<>();
         
-        Utilities.printMessageln("Calculating term frequencies...");
+        PrintUtilities.printInfoMessageln("Calculating term frequencies...");
         List<String> terms = corpus.getTerms();
         for(int i = 0; i < terms.size(); i++){
             String term = terms.get(i);
@@ -169,9 +169,9 @@ public class EDCoW implements AbstractEDMethod {
                 }
             }
         }
-        Utilities.printMessageln("Calculating windows...");
+        PrintUtilities.printInfoMessageln("Calculating windows...");
         for(int i = 0; i < windows; i++) {
-            Utilities.printMessageln("Calculating window " + (i + 1) + "\n");
+            PrintUtilities.printInfoMessageln("Calculating window " + (i + 1) + "\n");
             try {
                 processWindow(i);
             } catch (Exception ex) {
@@ -197,7 +197,7 @@ public class EDCoW implements AbstractEDMethod {
         
         long endTime = System.currentTimeMillis();
         executionTime = (endTime - startTime) / 1000;
-        Utilities.printExecutionTime(startTime, endTime, EDCoW.class.getName(), 
+        PrintUtilities.printExecutionTime(startTime, endTime, EDCoW.class.getName(), 
                 Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     

@@ -34,8 +34,7 @@ import ch.epfl.lis.networks.NetworkException;
 import ch.epfl.lis.networks.Node;
 import ch.epfl.lis.networks.NodeFactory;
 import ch.epfl.lis.networks.Structure;
-
-import com.left8.evs.utilities.Utilities;
+import com.left8.evs.utilities.PrintUtilities;
 
 ////////////////////////////////////////////////////////////////////////////////
 //  This file is part of SONDY.                                               //
@@ -89,7 +88,9 @@ public class SentimentEDCoWModularityDetection {
             }
         }
         nodeList = structure.getNodesOrderedByNames();
-        Utilities.printMessageln("Structure between slices "+startSlice+" and "+endSlice+": "+structure.getSize()+" nodes and " + structure.getNumEdges()+" edges");
+        PrintUtilities.printInfoMessageln("Structure between slices " 
+                + startSlice + " and " + endSlice + ": " + structure.getSize() 
+                + " nodes and " + structure.getNumEdges() + " edges");
 
         if(structure.getNumEdges()>0){
             // instantiate JmodNetwork

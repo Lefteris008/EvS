@@ -27,12 +27,12 @@ import com.left8.evs.evs.data.PeakFindingSentimentCorpus;
 import com.left8.evs.evs.peakfinding.event.SentimentPeakFindingEvent;
 import com.left8.evs.evs.peakfinding.event.SentimentPeakFindingEvents;
 import com.left8.evs.preprocessingmodule.nlp.stemming.StemUtils;
-import com.left8.evs.utilities.Utilities;
+import com.left8.evs.utilities.PrintUtilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.30_1829
+ * @version 2016.11.26_1306
  * 
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing 
  * Microblogs for Event Exploration", CHI 2011.
@@ -146,7 +146,7 @@ public class SentimentPeakFinding implements AbstractEDMethod {
         sEventList = new ArrayList<>(pfe.getEvents());
         long endTime = System.currentTimeMillis();
         executionTime = (endTime - startTime) / 1000;
-        Utilities.printExecutionTime(startTime, endTime, SentimentPeakFinding.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        PrintUtilities.printExecutionTime(startTime, endTime, SentimentPeakFinding.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
     /**

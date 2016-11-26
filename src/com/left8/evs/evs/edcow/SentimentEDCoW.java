@@ -29,7 +29,7 @@ import ch.epfl.lis.jmod.modularity.community.Community;
 import com.left8.evs.evs.data.SentimentEDCoWCorpus;
 import com.left8.evs.evs.edcow.event.SentimentEDCoWEvents;
 import com.left8.evs.evs.edcow.event.SentimentEDCoWEvent;
-import com.left8.evs.utilities.Utilities;
+import com.left8.evs.utilities.PrintUtilities;
 
 /**
  *
@@ -37,7 +37,7 @@ import com.left8.evs.utilities.Utilities;
  * email   adrien.guille@univ-lyon2.fr
  * 
  * @author  Lefteris Paraskevas (configurations in SentimentEDCoW to omit missing components)
- * @version 2016.04.30_1828 (For EDviaSA project version alignment) 
+ * @version 2016.11.26_1301 (For EDviaSA project version alignment) 
  */
 public class SentimentEDCoW {
     private final int delta; //6
@@ -51,7 +51,7 @@ public class SentimentEDCoW {
     private final int timeSliceB;
     private int countCorpus = 0; //Total number of tweets
     private final SentimentEDCoWCorpus corpus;
-    private int sentimentSource;
+    private final int sentimentSource;
     private long executionTime;
     public SentimentEDCoWEvents events;
     
@@ -154,7 +154,7 @@ public class SentimentEDCoW {
         termDocMap = new HashMap<>();
         eventList = new LinkedList<>();
         
-        Utilities.printMessageln("Calculating term frequencies...");
+        PrintUtilities.printInfoMessageln("Calculating term frequencies...");
         List<String> terms = corpus.getEDCoWCorpus().getTerms();
         for(int i = 0; i < terms.size(); i++){
             String term = terms.get(i);
@@ -169,9 +169,9 @@ public class SentimentEDCoW {
                 }
             }
         }
-        Utilities.printMessageln("Calculating windows...");
+        PrintUtilities.printInfoMessageln("Calculating windows...");
         for(int i = 0; i < windows; i++) {
-            Utilities.printMessageln("Calculating window " + (i + 1) + "\n");
+            PrintUtilities.printInfoMessageln("Calculating window " + (i + 1) + "\n");
             try {
                 processWindow(i);
             } catch (Exception ex) {
@@ -182,7 +182,6 @@ public class SentimentEDCoW {
         events = new SentimentEDCoWEvents();
         
         eventList.stream().forEach((event) -> {
-            //try {
                 events.list.add(new SentimentEDCoWEvent(
                         event.getKeywordsIDsAsString(), 
                         corpus.getEDCoWCorpus().getDateFromTimeSlice(
@@ -195,16 +194,13 @@ public class SentimentEDCoW {
                                 corpus.getEDCoWCorpus().getDateFromTimeSlice((int)event.startSlice), 
                                 corpus.getEDCoWCorpus().getDateFromTimeSlice((int)event.endSlice - 1)),
                         sentimentSource));
-//            } catch(ArrayIndexOutOfBoundsException e) {
-//                System.out.println("");
-//            }
         });
         
         events.setFullList();
         
         long endTime = System.currentTimeMillis();
         executionTime = (endTime - startTime) / 1000;
-        Utilities.printExecutionTime(startTime, endTime, SentimentEDCoW.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        PrintUtilities.printExecutionTime(startTime, endTime, SentimentEDCoW.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     
     /**

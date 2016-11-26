@@ -21,14 +21,14 @@ import java.util.List;
 import com.left8.evs.edmodule.utils.Stemmers;
 import com.left8.evs.edmodule.utils.StopWordsHandlers;
 import com.left8.evs.utilities.Config;
+import com.left8.evs.utilities.PrintUtilities;
 import com.left8.evs.utilities.dsretriever.MongoHandler;
 import com.left8.evs.utilities.dsretriever.Tweet;
-import com.left8.evs.utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.09_1957
+ * @version 2016.11.26_1251
  */
 public final class Dataset {
     
@@ -54,7 +54,7 @@ public final class Dataset {
         mongo.closeMongoConnection();
  
         long endTime = System.currentTimeMillis();
-        Utilities.printExecutionTime(startTime, endTime, Dataset.class.getName(), 
+        PrintUtilities.printExecutionTime(startTime, endTime, Dataset.class.getName(), 
                 Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     

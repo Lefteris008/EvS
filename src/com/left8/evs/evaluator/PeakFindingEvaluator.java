@@ -30,19 +30,19 @@ import java.util.logging.Logger;
 
 import com.left8.evs.edmodule.peakfinding.event.PeakFindingEvent;
 import com.left8.evs.utilities.Config;
-import com.left8.evs.utilities.Utilities;
+import com.left8.evs.utilities.PrintUtilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.30_1827
+ * @version 2016.11.26_1258
  */
 public class PeakFindingEvaluator implements AbstractEvaluator {
     private final double alpha;
     private final int taph;
     private final int pi;
     private final Config config;
-    private List<PeakFindingEvent> eventList;
+    private final List<PeakFindingEvent> eventList;
     private final HashMap<Integer, HashSet<String>> groundTruthTermsPerEvent = new HashMap<>();
     private final HashMap<Integer, HashSet<String>> groundTruthTweetIDsPerEvent = new HashMap<>();
     private final HashMap<Integer, Integer> matchedGroundTruthEventIDs = new HashMap<>();
@@ -74,7 +74,7 @@ public class PeakFindingEvaluator implements AbstractEvaluator {
      * and a HashSet of the terms of a specific event, as values.
      */
     @Override
-    public void loadGroundTruthDataset() {
+    public final void loadGroundTruthDataset() {
         try (BufferedReader br = new BufferedReader(new FileReader(
                 config.getResourcesPath() + config.getGroundTruthDataFile()))) {
             String line;
@@ -147,18 +147,18 @@ public class PeakFindingEvaluator implements AbstractEvaluator {
                 
                 //Show inline info during execution if the user chose so
                 if(showInlineInfo) {
-                    Utilities.printMessageln("Event found: " + eventKey);
-                    Utilities.printMessageln("Out of " + calculatedKeywords.size() + " items:");
-                    Utilities.printMessageln("Matched " + matchedItems + " out of " 
+                    PrintUtilities.printInfoMessageln("Event found: " + eventKey);
+                    PrintUtilities.printInfoMessageln("Out of " + calculatedKeywords.size() + " items:");
+                    PrintUtilities.printInfoMessageln("Matched " + matchedItems + " out of " 
                             + groundTruthKeywordSize + " ground truth terms.");
-                    Utilities.printMessageln("Recall: " + recall);
-                    Utilities.printMessageln("Precision: " + precision);
+                    PrintUtilities.printInfoMessageln("Recall: " + recall);
+                    PrintUtilities.printInfoMessageln("Precision: " + precision);
                 }
             } else {
                 recall = 0;
                 precision = 0;
                 if(showInlineInfo) {
-                    Utilities.printMessageln("Event not found");
+                    PrintUtilities.printInfoMessageln("Event not found");
                 }
             }
             recallByEvent.add(recall);
@@ -206,18 +206,18 @@ public class PeakFindingEvaluator implements AbstractEvaluator {
                 precision = (double) matchedItems / (double) calculatedKeywords.size();
                 //Show inline info during execution if the user chose so
                 if(showInlineInfo) {
-                    Utilities.printMessageln("Event found: " + eventKey);
-                    Utilities.printMessageln("Out of " + calculatedKeywords.size() + " items:");
-                    Utilities.printMessageln("Matched " + matchedItems + " out of " 
+                    PrintUtilities.printInfoMessageln("Event found: " + eventKey);
+                    PrintUtilities.printInfoMessageln("Out of " + calculatedKeywords.size() + " items:");
+                    PrintUtilities.printInfoMessageln("Matched " + matchedItems + " out of " 
                             + groundTruthKeywordSize + " ground truth terms.");
-                    Utilities.printMessageln("Recall: " + recall);
-                    Utilities.printMessageln("Precision: " + precision);
+                    PrintUtilities.printInfoMessageln("Recall: " + recall);
+                    PrintUtilities.printInfoMessageln("Precision: " + precision);
                 }
             } else {
                 recall = 0;
                 precision = 0;
                 if(showInlineInfo) {
-                    Utilities.printMessageln("Event not found");
+                    PrintUtilities.printInfoMessageln("Event not found");
                 }
             }
             recallByEvent.add(recall);

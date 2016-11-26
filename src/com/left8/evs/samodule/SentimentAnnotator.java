@@ -30,12 +30,12 @@ import java.util.logging.Logger;
 import com.left8.evs.utilities.dsretriever.MongoHandler;
 import com.left8.evs.utilities.dsretriever.Tweet;
 import com.left8.evs.utilities.Config;
-import com.left8.evs.utilities.Utilities;
+import com.left8.evs.utilities.PrintUtilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.03.28_0010  
+ * @version 2016.11.26_1308  
  */
 public class SentimentAnnotator {
     
@@ -60,7 +60,7 @@ public class SentimentAnnotator {
             Files.walk(Paths.get(config.getResourcesPath() 
                     + config.getSentimentFilesPath())).forEach(filePath -> {
                 if(Files.isRegularFile(filePath)) {
-                    Utilities.printMessageln("Reading " + filePath.getFileName() + " file...");
+                    PrintUtilities.printInfoMessageln("Reading " + filePath.getFileName() + " file...");
                     String line;
                     String[] temp;
                     try {

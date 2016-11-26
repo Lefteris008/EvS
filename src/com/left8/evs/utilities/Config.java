@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.29_1430
+ * @version 2016.11.26_1311
  */
 public class Config {
     private static String consumerKey;
@@ -208,13 +208,13 @@ public class Config {
      * Returns the filename of the positive emoticons file.
      * @return A String containing the positive emoticons filename.
      */
-    public static String getPositiveEmoticonsFile() { return positiveEmoticonsFile; }
+    public String getPositiveEmoticonsFile() { return positiveEmoticonsFile; }
 
     /**
      * Returns the filename of the negative emoticons file.
      * @return A String containing the negative emoticons filename.
      */
-    public static String getNegativeEmoticonsFile() { return negativeEmoticonsFile; }
+    public String getNegativeEmoticonsFile() { return negativeEmoticonsFile; }
     
     /**
      * Returns the name of the server the MongoDB instance is running.
@@ -222,15 +222,15 @@ public class Config {
      */
     public String getServerName() { return serverName; }
 
-    public static String getOutputPath() {
+    public String getOutputPath() {
         return outputPath;
     }
 
-    public static String getEdcowOutputPath() {
+    public String getEdcowOutputPath() {
         return edcowOutputPath;
     }
 
-    public static String getPeakFindingOutputPath() {
+    public String getPeakFindingOutputPath() {
         return peakFindingOutputPath;
     }
     
@@ -292,13 +292,13 @@ public class Config {
      * Returns the directory in which the emoticons file are stored.
      * @return A String containing the path of the emoticons files location.
      */
-    public static String getEmoticonsPath() { return emoticonsPath; }
+    public String getEmoticonsPath() { return emoticonsPath; }
     
     /**
      * Returns the directory in which the sentiment files are stored.
      * @return A String containing the path of the sentiment files location.
      */
-    public static String getSentimentFilesPath() { return sentimentFilesPath; }
+    public String getSentimentFilesPath() { return sentimentFilesPath; }
     
     /**
      * Returns the name of file that contains tweet information.
@@ -366,125 +366,125 @@ public class Config {
      * Returns the ID field name of a retrieved tweet.
      * @return a String containing the ID field name of the tweet.
      */
-    public static String getTweetIdFieldName() { return iD; }
+    public String getTweetIdFieldName() { return iD; }
 
     /**
      * Returns the user document field name.
      * @return a String containing the user document field name.
      */
-    public static String getUserDocumentFieldName() { return user;}
+    public String getUserDocumentFieldName() { return user;}
 
     /**
      * Returns the language code field name of the tweet.
      * @return a String representing the language field name of the tweet.
      */
-    public static String getLanguageFieldName() { return language;}
+    public String getLanguageFieldName() { return language;}
 
     /**
      * Returns the display name field name of the creator of the tweet.
      * @return a String containing the display name field name of the tweet's creator.
      */
-    public static String getUsernameFieldName() { return username;}
+    public String getUsernameFieldName() { return username;}
 
     /**
      * Returns the user ID field name of the tweet's creator.
      * @return a String containing the user ID field name of the tweet's creator.
      */
-    public static String getUserIdFieldName() { return userId;}
+    public String getUserIdFieldName() { return userId;}
 
     /**
      * Returns the text field name of the tweet.
      * @return a String containing the text field name of the tweet.
      */
-    public static String getTextFieldName() { return text; }
+    public String getTextFieldName() { return text; }
 
     /**
      * Returns the date field name of the tweet.
      * @return a String containing the date field name of the tweet.
      */
-    public static String getDateFieldName() { return date; }
+    public String getDateFieldName() { return date; }
 
     /**
      * Returns the coordinates document field name.
      * @return a String containing the coordinates document field name.
      */
-    public static String getCoordinatesDocumentFieldName() { return coordinates; }
+    public String getCoordinatesDocumentFieldName() { return coordinates; }
 
     /**
      * Returns the retweet count field name.
      * @return a String containing the retweet field name.
      */
-    public static String getRetweetsCountFieldName() { return retweetsCount; }
+    public String getRetweetsCountFieldName() { return retweetsCount; }
 
     /**
      * Returns the favorite count field name.
      * @return a String containing the favorite field name.
      */
-    public static String getFavoritesCountFieldName() { return favoritesCount; }
+    public String getFavoritesCountFieldName() { return favoritesCount; }
 
     /**
      * Returns the retweeted flag field name.
      * @return a String containing the retweeted flag field name.
      */
-    public static String getRetweetedFieldName() { return retweeted; }
+    public String getRetweetedFieldName() { return retweeted; }
 
     /**
      * Returns the favorited flag field name.
      * @return a String containing the favorited flag field name.
      */
-    public static String getFavoritedFieldName() { return favorited; }
+    public String getFavoritedFieldName() { return favorited; }
 
     /**
      * Returns the retweeted status document field name.
      * @return a String containing the retweeted status document field name.
      */
-    public static String getRetweetedStatusDocumentFieldName() { return retweetedStatus; }
+    public String getRetweetedStatusDocumentFieldName() { return retweetedStatus; }
 
     /**
      * Returns the retweet ID field name (the id of the original tweet).
      * @return a String containing the retweet ID filed name.
      */
-    public static String getRetweetIdFieldName() { return retweetId; }
+    public String getRetweetIdFieldName() { return retweetId; }
 
     /**
      * Returns the positive emoticon field name.
      * @return a String containing the positive emoticon field name.
      */
-    public static String getPositiveEmoticonFieldName() { return positiveEmoticon; }
+    public String getPositiveEmoticonFieldName() { return positiveEmoticon; }
 
     /**
      * Returns the negative emoticon field name.
      * @return a String containing the negative emoticon field name.
      */
-    public static String getNegativeEmoticonFieldName() { return negativeEmoticon; }
+    public String getNegativeEmoticonFieldName() { return negativeEmoticon; }
     
     /**
      * Returns the argument name of MongoLogging flag.
      * @return the argument name of MongoLogging flag.
      */
-    public static String getMongoLoggingArgName() { return showMongoLogging; }
+    public String getMongoLoggingArgName() { return showMongoLogging; }
     
     /**
      * Returns the argument name of InlineInfo flag.
      * @return the argument name of InlineInfo flag.
      */
-    public static String getInlineInfoArgName() { return showInlineInfo; }
+    public String getInlineInfoArgName() { return showInlineInfo; }
     
     /**
      * Returns the argument name of EDCoW flag.
      * @return the argument name of EDCoW flag.
      */
-    public static String getEdcowArgName() { return edcow; }
+    public String getEdcowArgName() { return edcow; }
     
     /**
      * Returns the argument name of Offline Peak Finding flag.
      * @return the argument name of Offline Peak Finding flag.
      */
-    public static String getOpfArgName() { return opf; }
+    public String getOpfArgName() { return opf; }
     
     /**
      * Returns the argument name of NoSentiment flag.
      * @return the argument name of NoSentiment flag.
      */
-    public static String getNoSentimentArgName() { return noSentiment; }
+    public String getNoSentimentArgName() { return noSentiment; }
 }

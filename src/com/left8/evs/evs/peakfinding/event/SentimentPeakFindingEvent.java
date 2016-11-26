@@ -30,12 +30,12 @@ import com.left8.evs.preprocessingmodule.language.LangUtils;
 import com.left8.evs.preprocessingmodule.nlp.Tokenizer;
 import com.left8.evs.preprocessingmodule.nlp.stemming.StemUtils;
 import com.left8.evs.evs.data.PeakFindingSentimentCorpus;
-import com.left8.evs.utilities.Utilities;
+import com.left8.evs.utilities.PrintUtilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.30_1829
+ * @version 2016.11.26_1306
  */
 public class SentimentPeakFindingEvent {
     
@@ -45,7 +45,7 @@ public class SentimentPeakFindingEvent {
     private final List<String> commonTerms = new ArrayList<>();
     private HashSet<String> allTerms;
     private final PeakFindingSentimentCorpus corpus;
-    private StemUtils stemsHandler;
+    private final StemUtils stemsHandler;
     private int mainSentiment;
     private double positiveSentimentPerc;
     private double negativeSentimentPerc;
@@ -118,14 +118,20 @@ public class SentimentPeakFindingEvent {
                 } else {
                     returnedSentiment = tweet.getBayesianNetSentiment();
                 }
-                if(returnedSentiment == 0) {
-                    negativeCounter++;
-                } else if(returnedSentiment == 1) {
-                    neutralCounter++;
-                } else if(returnedSentiment == 2) {
-                    positiveCounter++;
-                } else { //-2
-                    irrelevantCounter++;
+                switch (returnedSentiment) {
+                    case 0:
+                        negativeCounter++;
+                        break;
+                    case 1:
+                        neutralCounter++;
+                        break;
+                    case 2:
+                        positiveCounter++;
+                        break;
+                    default:
+                        //-2
+                        irrelevantCounter++;
+                        break;
                 }
             }   
         }
@@ -191,9 +197,9 @@ public class SentimentPeakFindingEvent {
      */
     private void calculateUniqueUsersOfEvent() {
         Set<Long> users = new HashSet<>();
-        for(Tweet tweet : tweetsOfEvent) {
+        tweetsOfEvent.forEach((tweet) -> {
             users.add(tweet.getUserId());
-        }
+        });
         uniqueUsers = users.size();
     }
     
@@ -206,8 +212,8 @@ public class SentimentPeakFindingEvent {
         if(!commonTerms.isEmpty()) {
             return commonTerms;
         } else {
-            Utilities.printMessageln("No common terms have been calculated yet!");
-            Utilities.printMessageln("Run " + SentimentPeakFindingEvent.class + "." + "generateCommonTerms() method first.");
+            PrintUtilities.printWarningMessageln("No common terms have been calculated yet!");
+            PrintUtilities.printWarningMessageln("Run " + SentimentPeakFindingEvent.class + "." + "generateCommonTerms() method first.");
             return null;
         }
     }
@@ -224,9 +230,9 @@ public class SentimentPeakFindingEvent {
      */
     public final List<String> getTweetIDs() {
         List<String> ids = new ArrayList<>();
-        for(Tweet tweet : tweetsOfEvent) {
+        tweetsOfEvent.forEach((tweet) -> {
             ids.add(String.valueOf(tweet.getID()));
-        }
+        });
         return ids;
     }
     /**
@@ -236,8 +242,8 @@ public class SentimentPeakFindingEvent {
      */
     public final String getCommonTermsAsString() {
         if(commonTerms.isEmpty()) {
-            Utilities.printMessageln("No common terms have been calculated yet!");
-            Utilities.printMessageln("Run " + SentimentPeakFindingEvent.class + "." + "generateCommonTerms() method first.");
+            PrintUtilities.printWarningMessageln("No common terms have been calculated yet!");
+            PrintUtilities.printWarningMessageln("Run " + SentimentPeakFindingEvent.class + "." + "generateCommonTerms() method first.");
             return null;
         }
         String commonTermsString = "";
@@ -280,8 +286,8 @@ public class SentimentPeakFindingEvent {
      * Prints a specific event along with its tweetsOfEvent.
      */
     public final void printEvent() {
-        Utilities.printMessageln("Event '" + getID() + "' contains the following common terms:");
-        Utilities.printMessageln(getCommonTermsAsString());
+        PrintUtilities.printWarningMessageln("Event '" + getID() + "' contains the following common terms:");
+        PrintUtilities.printWarningMessageln(getCommonTermsAsString());
     }
     
     /**
@@ -316,14 +322,15 @@ public class SentimentPeakFindingEvent {
      * @return The description of the main sentiment of the event.
      */
     public final String getMainSentimentOfEventDescription() {
-        if(mainSentiment == 0) {
-            return "Positive";
-        } else if(mainSentiment == 1) {
-            return "Neutral";
-        } else if(mainSentiment == 2) {
-            return "Negative";
-        } else {
-            return "Irrelevant";
+        switch (mainSentiment) {
+            case 0:
+                return "Positive";
+            case 1:
+                return "Neutral";
+            case 2:
+                return "Negative";
+            default:
+                return "Irrelevant";
         }
     }
     
@@ -357,19 +364,19 @@ public class SentimentPeakFindingEvent {
     
     public final void printEventStatistics() {
         
-        Utilities.printMessageln("Event " + id);
-        Utilities.printMessageln("-------------");
-        Utilities.printMessageln("Total tweets contained: " + tweetsOfEvent.size());
-        Utilities.printMessageln("Total terms contained: " + allTerms.size());
-        Utilities.printMessageln("Most common terms of event: " + getCommonTermsAsString());
-        Utilities.printMessageln("Number of unique users in this event: " + uniqueUsers);
-        Utilities.printMessageln("---Sentiment statistics---");
-        Utilities.printMessageln("Main sentiment of event: " + getMainSentimentOfEventDescription());
-        Utilities.printMessageln("Positive sentiment percentage: " + positiveSentimentPerc);
-        Utilities.printMessageln("Negative sentiment percentage: " + negativeSentimentPerc);
-        Utilities.printMessageln("Neutral sentiment percentage: " + neutralSentimentPerc);
-        Utilities.printMessageln("Irrelevant sentiment percentage: " + irrelevantSentimentPerc);
-        Utilities.printMessageln("The event is more " + 
+        PrintUtilities.printInfoMessageln("Event " + id);
+        PrintUtilities.printInfoMessageln("-------------");
+        PrintUtilities.printInfoMessageln("Total tweets contained: " + tweetsOfEvent.size());
+        PrintUtilities.printInfoMessageln("Total terms contained: " + allTerms.size());
+        PrintUtilities.printInfoMessageln("Most common terms of event: " + getCommonTermsAsString());
+        PrintUtilities.printInfoMessageln("Number of unique users in this event: " + uniqueUsers);
+        PrintUtilities.printInfoMessageln("---Sentiment statistics---");
+        PrintUtilities.printInfoMessageln("Main sentiment of event: " + getMainSentimentOfEventDescription());
+        PrintUtilities.printInfoMessageln("Positive sentiment percentage: " + positiveSentimentPerc);
+        PrintUtilities.printInfoMessageln("Negative sentiment percentage: " + negativeSentimentPerc);
+        PrintUtilities.printInfoMessageln("Neutral sentiment percentage: " + neutralSentimentPerc);
+        PrintUtilities.printInfoMessageln("Irrelevant sentiment percentage: " + irrelevantSentimentPerc);
+        PrintUtilities.printInfoMessageln("The event is more " + 
                 (positiveSentimentPerc > negativeSentimentPerc ? "positively oriented.\n" 
                         : "negatively oriented.\n"));
     }

@@ -25,12 +25,12 @@ import com.left8.evs.edmodule.utils.BinPair;
 import com.left8.evs.edmodule.AbstractEDMethod;
 import com.left8.evs.edmodule.data.PeakFindingCorpus;
 import com.left8.evs.preprocessingmodule.nlp.stemming.StemUtils;
-import com.left8.evs.utilities.Utilities;
+import com.left8.evs.utilities.PrintUtilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.30_1826
+ * @version 2016.11.26_1253
  * 
  * Based on [1] Marcus A. et al., "TwitInfo: Aggregating and Visualizing Microblogs 
  * for PeakFindingEvent Exploration", CHI 2011.
@@ -141,7 +141,7 @@ public class OfflinePeakFinding implements AbstractEDMethod {
         eventList = new ArrayList<>(pfe.getEvents());
         long endTime = System.currentTimeMillis();
         executionTime = (endTime - startTime) / 1000;
-        Utilities.printExecutionTime(startTime, endTime, OfflinePeakFinding.class.getName(), 
+        PrintUtilities.printExecutionTime(startTime, endTime, OfflinePeakFinding.class.getName(), 
                 Thread.currentThread().getStackTrace()[1].getMethodName());
     }
     

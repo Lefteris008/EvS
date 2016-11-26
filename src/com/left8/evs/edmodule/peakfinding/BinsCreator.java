@@ -25,12 +25,12 @@ import com.left8.evs.edmodule.utils.StringDateUtils;
 import com.left8.evs.edmodule.utils.BinPair;
 import com.left8.evs.edmodule.data.PeakFindingCorpus;
 import com.left8.evs.utilities.Config;
-import com.left8.evs.utilities.Utilities;
+import com.left8.evs.utilities.PrintUtilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.30_1826
+ * @version 2016.11.26_1253
  */
 public class BinsCreator {
     
@@ -80,7 +80,7 @@ public class BinsCreator {
         }
         
         long endTime = System.currentTimeMillis();
-        Utilities.printExecutionTime(startTime, endTime, BinsCreator.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        PrintUtilities.printExecutionTime(startTime, endTime, BinsCreator.class.getName(), Thread.currentThread().getStackTrace()[1].getMethodName());
         return bins;
     }
 }

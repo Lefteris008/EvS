@@ -35,12 +35,12 @@ import com.left8.evs.experimenter.SentimentEDCoWExperimenter;
 import com.left8.evs.experimenter.SentimentPeakFindingExperimenter;
 import com.left8.evs.utilities.Config;
 import com.left8.evs.utilities.Console;
-import com.left8.evs.utilities.Utilities;
+import com.left8.evs.utilities.PrintUtilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.30_1828
+ * @version 2016.11.26_1300
  */
 public class EvS {
     
@@ -71,7 +71,7 @@ public class EvS {
         try {
             config = new Config();
         } catch (IOException ex) {
-            Utilities.printMessageln("Configuration file 'config.properties' "
+            PrintUtilities.printErrorMessageln("Configuration file 'config.properties' "
                     + "not in classpath!");
             Logger.getLogger(EvS.class.getName()).log(Level.SEVERE, null, ex);
             System.exit(1);

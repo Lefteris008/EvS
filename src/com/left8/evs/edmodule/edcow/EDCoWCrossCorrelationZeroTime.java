@@ -18,7 +18,7 @@ package com.left8.evs.edmodule.edcow;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-import com.left8.evs.utilities.Utilities;
+import com.left8.evs.utilities.PrintUtilities;
 
 //  This file is part of SONDY.                                               //
 //                                                                            //
@@ -43,7 +43,7 @@ import com.left8.evs.utilities.Utilities;
  *      @author siniwitt
  * 
  * @author  Lefteris Paraskevas
- * @version 2016.01.31_1921
+ * @version 2016.11.26_1250
  */
 public class EDCoWCrossCorrelationZeroTime {       	
 	
@@ -61,7 +61,7 @@ public class EDCoWCrossCorrelationZeroTime {
             }
         }
         else {
-            Utilities.printMessageln("The length of sign1 and sign2 is not the same.");
+            PrintUtilities.printWarningMessageln("The length of sign1 and sign2 is not the same.");
         }
         return (sum<0.00001)?0:sum;
     }

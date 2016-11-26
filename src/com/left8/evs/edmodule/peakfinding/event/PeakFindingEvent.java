@@ -28,13 +28,13 @@ import com.left8.evs.edmodule.utils.Stemmers;
 import com.left8.evs.preprocessingmodule.language.LangUtils;
 import com.left8.evs.preprocessingmodule.nlp.Tokenizer;
 import com.left8.evs.preprocessingmodule.nlp.stemming.StemUtils;
+import com.left8.evs.utilities.PrintUtilities;
 import com.left8.evs.utilities.dsretriever.Tweet;
-import com.left8.evs.utilities.Utilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.30_1827
+ * @version 2016.11.26_1255
  */
 public class PeakFindingEvent {
     
@@ -44,7 +44,7 @@ public class PeakFindingEvent {
     private final List<String> commonTerms = new ArrayList<>();
     private HashSet<String> allTerms;
     private final PeakFindingCorpus corpus;
-    private StemUtils stemsHandler;
+    private final StemUtils stemsHandler;
     
     /**
      * Public constructor. It creates an event.
@@ -121,8 +121,8 @@ public class PeakFindingEvent {
         if(!commonTerms.isEmpty()) {
             return commonTerms;
         } else {
-            Utilities.printMessageln("No common terms have been calculated yet!");
-            Utilities.printMessageln("Run " + PeakFindingEvent.class + "." +
+            PrintUtilities.printWarningMessageln("No common terms have been calculated yet!");
+            PrintUtilities.printInfoMessageln("Run " + PeakFindingEvent.class + "." +
                     "generateCommonTerms() method first.");
             return null;
         }
@@ -140,9 +140,9 @@ public class PeakFindingEvent {
      */
     public final List<String> getTweetIDs() {
         List<String> ids = new ArrayList<>();
-        for(Tweet tweet : tweetsOfEvent) {
+        tweetsOfEvent.forEach((tweet) -> {
             ids.add(String.valueOf(tweet.getID()));
-        }
+        });
         return ids;
     }
     
@@ -153,8 +153,8 @@ public class PeakFindingEvent {
      */
     public final String getCommonTermsAsString() {
         if(commonTerms.isEmpty()) {
-            Utilities.printMessageln("No common terms have been calculated yet!");
-            Utilities.printMessageln("Run " + PeakFindingEvent.class + "." + 
+            PrintUtilities.printWarningMessageln("No common terms have been calculated yet!");
+            PrintUtilities.printInfoMessageln("Run " + PeakFindingEvent.class + "." + 
                     "generateCommonTerms() method first.");
             return null;
         }

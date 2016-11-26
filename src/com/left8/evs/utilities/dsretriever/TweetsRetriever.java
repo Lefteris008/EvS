@@ -34,12 +34,12 @@ import twitter4j.TwitterStreamFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
 import com.left8.evs.utilities.Config;
-import com.left8.evs.utilities.Utilities;
+import com.left8.evs.utilities.PrintUtilities;
 
 /**
  * 
  * @author  Lefteris Paraskevas
- * @version 2016.05.21_2131
+ * @version 2016.11.26_1315
  */
 public class TweetsRetriever {
 
@@ -88,7 +88,7 @@ public class TweetsRetriever {
                 Status status = twitter.showStatus(Long.parseLong(item)); 
                 mongoDB.insertSingleTweetIntoMongoDB(status, event);
             } catch(TwitterException e) {
-                Utilities.printMessageln("Failed to retrieve tweet with ID: " + item);
+                PrintUtilities.printErrorMessageln("Failed to retrieve tweet with ID: " + item);
                 Logger.getLogger(TweetsRetriever.class.getName()).log(Level.SEVERE, null, e);
             }
         });
@@ -119,25 +119,25 @@ public class TweetsRetriever {
 
             @Override
             public final void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
-               Utilities.printMessageln("Got a status deletion notice id:" 
+               PrintUtilities.printInfoMessageln("Got a status deletion notice id:" 
                        + statusDeletionNotice.getStatusId());
             }
 
             @Override
             public final void onTrackLimitationNotice(int numberOfLimitedStatuses) {
-                Utilities.printMessageln("Got track limitation notice:" 
+                PrintUtilities.printInfoMessageln("Got track limitation notice:" 
                         + numberOfLimitedStatuses);
             }
 
             @Override
             public final void onScrubGeo(long userId, long upToStatusId) {
-                Utilities.printMessageln("Got scrub_geo event userId:" 
+                PrintUtilities.printInfoMessageln("Got scrub_geo event userId:" 
                         + userId + " upToStatusId:" + upToStatusId);
             }
 
             @Override
             public final void onStallWarning(StallWarning warning) {
-                Utilities.printMessageln("Got stall warning:" + warning);
+                PrintUtilities.printInfoMessageln("Got stall warning:" + warning);
             }
             
             @Override

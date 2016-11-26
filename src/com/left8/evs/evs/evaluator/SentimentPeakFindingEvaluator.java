@@ -30,19 +30,19 @@ import java.util.logging.Logger;
 
 import com.left8.evs.evs.peakfinding.event.SentimentPeakFindingEvent;
 import com.left8.evs.utilities.Config;
-import com.left8.evs.utilities.Utilities;
+import com.left8.evs.utilities.PrintUtilities;
 
 /**
  *
  * @author  Lefteris Paraskevas
- * @version 2016.04.30_1829
+ * @version 2016.11.26_1304
  */
 public class SentimentPeakFindingEvaluator implements AbstractSentimentEvaluator {
     private final double alpha;
     private final int taph;
     private final int pi;
     private final Config config;
-    private List<SentimentPeakFindingEvent> eventList;
+    private final List<SentimentPeakFindingEvent> eventList;
     private final HashMap<Integer, HashSet<String>> groundTruthTermsPerEvent = new HashMap<>();
     private final HashMap<Integer, HashSet<String>> groundTruthTweetIDsPerEvent = new HashMap<>();
     private final HashMap<Integer, Integer> matchedGroundTruthEventIDs = new HashMap<>();
@@ -74,7 +74,7 @@ public class SentimentPeakFindingEvaluator implements AbstractSentimentEvaluator
      * and a HashSet of the terms of a specific event, as values.
      */
     @Override
-    public void loadGroundTruthDataset() {
+    public final void loadGroundTruthDataset() {
         try (BufferedReader br = new BufferedReader(new FileReader(
                 config.getResourcesPath() + config.getGroundTruthDataFile()))) {
             String line;
@@ -147,18 +147,18 @@ public class SentimentPeakFindingEvaluator implements AbstractSentimentEvaluator
                 
                 //Show inline info during execution if the user chose so
                 if(showInlineInfo) {
-                    Utilities.printMessageln("Event found: " + eventKey);
-                    Utilities.printMessageln("Out of " + calculatedKeywords.size() + " items:");
-                    Utilities.printMessageln("Matched " + matchedItems + " out of " 
+                    PrintUtilities.printInfoMessageln("Event found: " + eventKey);
+                    PrintUtilities.printInfoMessageln("Out of " + calculatedKeywords.size() + " items:");
+                    PrintUtilities.printInfoMessageln("Matched " + matchedItems + " out of " 
                             + groundTruthKeywordSize + " ground truth terms.");
-                    Utilities.printMessageln("Recall: " + recall);
-                    Utilities.printMessageln("Precision: " + precision);
+                    PrintUtilities.printInfoMessageln("Recall: " + recall);
+                    PrintUtilities.printInfoMessageln("Precision: " + precision);
                 }
             } else {
                 recall = 0;
                 precision = 0;
                 if(showInlineInfo) {
-                    Utilities.printMessageln("Event not found");
+                    PrintUtilities.printInfoMessageln("Event not found");
                 }
             }
             recallByEvent.add(recall);
@@ -169,7 +169,7 @@ public class SentimentPeakFindingEvaluator implements AbstractSentimentEvaluator
     /**
      * Run the evaluation method using all the generated terms in a specific event.
      * @param showInlineInfo Boolean flag that indicates whether to show or hide
-     * inline information during execution.
+     * @inline information during execution.
      */
     public void evaluateWithAllTerms(boolean showInlineInfo) {
         HashSet<String> groundTruthKeywords;
@@ -206,18 +206,18 @@ public class SentimentPeakFindingEvaluator implements AbstractSentimentEvaluator
                 precision = (double) matchedItems / (double) calculatedKeywords.size();
                 //Show inline info during execution if the user chose so
                 if(showInlineInfo) {
-                    Utilities.printMessageln("Event found: " + eventKey);
-                    Utilities.printMessageln("Out of " + calculatedKeywords.size() + " items:");
-                    Utilities.printMessageln("Matched " + matchedItems + " out of " 
+                    PrintUtilities.printInfoMessageln("Event found: " + eventKey);
+                    PrintUtilities.printInfoMessageln("Out of " + calculatedKeywords.size() + " items:");
+                    PrintUtilities.printInfoMessageln("Matched " + matchedItems + " out of " 
                             + groundTruthKeywordSize + " ground truth terms.");
-                    Utilities.printMessageln("Recall: " + recall);
-                    Utilities.printMessageln("Precision: " + precision);
+                    PrintUtilities.printInfoMessageln("Recall: " + recall);
+                    PrintUtilities.printInfoMessageln("Precision: " + precision);
                 }
             } else {
                 recall = 0;
                 precision = 0;
                 if(showInlineInfo) {
-                    Utilities.printMessageln("Event not found");
+                    PrintUtilities.printInfoMessageln("Event not found");
                 }
             }
             recallByEvent.add(recall);
