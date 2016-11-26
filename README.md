@@ -1,11 +1,12 @@
 # EvS (Event detection Via Sentiment analysis)
 MSc Thesis Project
 
-**Latest version: 1.5.1** ([Details](https://github.com/Lefteris008/EvS/releases/tag/1.5.1))
+**Latest version: 1.7** ([Details](https://github.com/Lefteris008/EvS/releases/tag/1.7))
 ---
 Version highlights:
-* Structural changes in packaging.
-* Reverted old methods to use the built in printing message utility instead of Java's own method.
+* Various fixes and improvements, including the transitioning to Java 8 (where available).
+* Printing methods where separated into their own class.
+* Provided trace levels to better illustrate the nature of the message (Info, Warning or Error).
  
 
 ___
